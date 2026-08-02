@@ -1,0 +1,152 @@
+[
+  {
+    "name": "Accounting",
+    "zh": "會計",
+    "slug": "accounting"
+  },
+  {
+    "name": "Administration & Office Support",
+    "zh": "行政及辦公室支援",
+    "slug": "administration-office-support"
+  },
+  {
+    "name": "Advertising, Arts & Media",
+    "zh": "廣告、藝術及媒體",
+    "slug": "advertising-arts-media"
+  },
+  {
+    "name": "Banking & Financial Services",
+    "zh": "銀行及金融服務",
+    "slug": "banking-financial-services"
+  },
+  {
+    "name": "Call Centre & Customer Service",
+    "zh": "客戶服務中心及客戶服務",
+    "slug": "call-centre-customer-service"
+  },
+  {
+    "name": "CEO & General Management",
+    "zh": "行政總裁及一般管理",
+    "slug": "ceo-general-management"
+  },
+  {
+    "name": "Community Services & Development",
+    "zh": "社區服務及發展",
+    "slug": "community-services-development"
+  },
+  {
+    "name": "Construction",
+    "zh": "建造業",
+    "slug": "construction"
+  },
+  {
+    "name": "Consulting & Strategy",
+    "zh": "顧問及策略",
+    "slug": "consulting-strategy"
+  },
+  {
+    "name": "Design & Architecture",
+    "zh": "設計及建築",
+    "slug": "design-architecture"
+  },
+  {
+    "name": "Education & Training",
+    "zh": "教育及培訓",
+    "slug": "education-training"
+  },
+  {
+    "name": "Engineering",
+    "zh": "工程",
+    "slug": "engineering"
+  },
+  {
+    "name": "Farming, Animals & Conservation",
+    "zh": "農務、動物及保育",
+    "slug": "farming-animals-conservation"
+  },
+  {
+    "name": "Government & Defence",
+    "zh": "政府及國防",
+    "slug": "government-defence"
+  },
+  {
+    "name": "Healthcare & Medical",
+    "zh": "醫療及保健",
+    "slug": "healthcare-medical"
+  },
+  {
+    "name": "Hospitality & Tourism",
+    "zh": "酒店及旅遊",
+    "slug": "hospitality-tourism"
+  },
+  {
+    "name": "Human Resources & Recruitment",
+    "zh": "人力資源及招聘",
+    "slug": "human-resources-recruitment"
+  },
+  {
+    "name": "Information & Communication Technology",
+    "zh": "資訊及通訊科技",
+    "slug": "information-communication-technology"
+  },
+  {
+    "name": "Insurance & Superannuation",
+    "zh": "保險及退休金",
+    "slug": "insurance-superannuation"
+  },
+  {
+    "name": "Legal",
+    "zh": "法律",
+    "slug": "legal"
+  },
+  {
+    "name": "Manufacturing, Transport & Logistics",
+    "zh": "製造、運輸及物流",
+    "slug": "manufacturing-transport-logistics"
+  },
+  {
+    "name": "Marketing & Communications",
+    "zh": "市場推廣及傳訊",
+    "slug": "marketing-communications"
+  },
+  {
+    "name": "Mining, Resources & Energy",
+    "zh": "採礦、資源及能源",
+    "slug": "mining-resources-energy"
+  },
+  {
+    "name": "Real Estate & Property",
+    "zh": "房地產及物業",
+    "slug": "real-estate-property"
+  },
+  {
+    "name": "Retail & Consumer Products",
+    "zh": "零售及消費品",
+    "slug": "retail-consumer-products"
+  },
+  {
+    "name": "Sales",
+    "zh": "銷售",
+    "slug": "sales"
+  },
+  {
+    "name": "Science & Technology",
+    "zh": "科學及科技",
+    "slug": "science-technology"
+  },
+  {
+    "name": "Self Employment",
+    "zh": "自僱",
+    "slug": "self-employment"
+  },
+  {
+    "name": "Sport & Recreation",
+    "zh": "體育及康樂",
+    "slug": "sport-recreation"
+  },
+  {
+    "name": "Trades & Services",
+    "zh": "技工及服務",
+    "slug": "trades-services"
+  }
+]

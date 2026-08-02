@@ -1,0 +1,162 @@
+[
+  {
+    "zh": "中環",
+    "slug": "central"
+  },
+  {
+    "zh": "銅鑼灣",
+    "slug": "causeway-bay"
+  },
+  {
+    "zh": "九龍灣",
+    "slug": "kowloon-bay"
+  },
+  {
+    "zh": "觀塘",
+    "slug": "kwun-tong"
+  },
+  {
+    "zh": "沙田",
+    "slug": "sha-tin"
+  },
+  {
+    "zh": "旺角",
+    "slug": "mong-kok"
+  },
+  {
+    "zh": "葵涌",
+    "slug": "kwai-chung"
+  },
+  {
+    "zh": "荃灣",
+    "slug": "tsuen-wan"
+  },
+  {
+    "zh": "大埔",
+    "slug": "tai-po"
+  },
+  {
+    "zh": "將軍澳",
+    "slug": "tseung-kwan-o"
+  },
+  {
+    "zh": "屯門",
+    "slug": "tuen-mun"
+  },
+  {
+    "zh": "元朗",
+    "slug": "yuen-long"
+  },
+  {
+    "zh": "灣仔",
+    "slug": "wan-chai"
+  },
+  {
+    "zh": "北角",
+    "slug": "north-point"
+  },
+  {
+    "zh": "西營盤",
+    "slug": "sai-ying-pun"
+  },
+  {
+    "zh": "上環",
+    "slug": "sheung-wan"
+  },
+  {
+    "zh": "尖沙咀",
+    "slug": "tsim-sha-tsui"
+  },
+  {
+    "zh": "油麻地",
+    "slug": "yau-ma-tei"
+  },
+  {
+    "zh": "太子",
+    "slug": "prince-edward"
+  },
+  {
+    "zh": "深水埗",
+    "slug": "sham-shui-po"
+  },
+  {
+    "zh": "黃大仙",
+    "slug": "wong-tai-sin"
+  },
+  {
+    "zh": "紅磡",
+    "slug": "hung-hom"
+  },
+  {
+    "zh": "青衣",
+    "slug": "tsing-yi"
+  },
+  {
+    "zh": "天水圍",
+    "slug": "tin-shui-wai"
+  },
+  {
+    "zh": "粉嶺",
+    "slug": "fan-ling"
+  },
+  {
+    "zh": "上水",
+    "slug": "sheung-shui"
+  },
+  {
+    "zh": "馬鞍山",
+    "slug": "ma-on-shan"
+  },
+  {
+    "zh": "西貢",
+    "slug": "sai-kung"
+  },
+  {
+    "zh": "大圍",
+    "slug": "tai-wai"
+  },
+  {
+    "zh": "火炭",
+    "slug": "fo-tan"
+  },
+  {
+    "zh": "長沙灣",
+    "slug": "cheung-sha-wan"
+  },
+  {
+    "zh": "荔枝角",
+    "slug": "lai-chi-kok"
+  },
+  {
+    "zh": "土瓜灣",
+    "slug": "to-kwa-wan"
+  },
+  {
+    "zh": "何文田",
+    "slug": "ho-man-tin"
+  },
+  {
+    "zh": "九龍城",
+    "slug": "kowloon-city"
+  },
+  {
+    "zh": "鑽石山",
+    "slug": "diamond-hill"
+  },
+  {
+    "zh": "調景嶺",
+    "slug": "tiu-keng-leng"
+  },
+  {
+    "zh": "坑口",
+    "slug": "hang-hau"
+  },
+  {
+    "zh": "東涌",
+    "slug": "tung-chung"
+  },
+  {
+    "zh": "太古",
+    "slug": "taikoo"
+  }
+]

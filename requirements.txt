@@ -1,0 +1,9 @@
+# 香港求職網站自動搜尋程式 — 依賴
+# 基礎爬蟲（requests / BeautifulSoup）
+requests>=2.31
+beautifulsoup4>=4.12
+lxml>=5.0
+# Moovup 等動態網站需要 Playwright 真實瀏覽器（繞過 Cloudflare Turnstile）
+playwright>=1.40
+# 排程（可選，後續階段使用）
+# apscheduler>=3.10

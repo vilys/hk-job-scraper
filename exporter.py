@@ -1,0 +1,122 @@
+"""
+輸出模組 (Phase 1.2)
+
+提供兩種匯出格式：
+  - export_json(jobs, filepath)   輸出為 JSON 陣列
+  - export_csv(jobs, filepath)    輸出為 CSV（UTF-8 with BOM，Excel 相容）
+
+並支援「增量寫入」：新資料附加到現有檔案，依 job_id 自動去重。
+"""
+from __future__ import annotations
+
+import csv
+import json
+import logging
+import os
+from typing import Iterable
+
+from job_model import JobRecord
+
+logger = logging.getLogger(__name__)
+
+
+def _ensure_dir(filepath: str) -> None:
+    d = os.path.dirname(os.path.abspath(filepath))
+    if d:
+        os.makedirs(d, exist_ok=True)
+
+
+def _dedupe(jobs: Iterable[JobRecord]) -> list[JobRecord]:
+    seen: dict[str, JobRecord] = {}
+    for j in jobs:
+        seen[j.dedupe_key()] = j  # 後到的覆蓋，保留最新抓取
+    return list(seen.values())
+
+
+def _load_existing_json(filepath: str) -> list[JobRecord]:
+    if not os.path.exists(filepath):
+        return []
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return [JobRecord.from_dict(d) for d in data]
+    except Exception as e:  # noqa: BLE001
+        logger.warning("讀取既有 JSON 失敗，將覆寫：%s", e)
+        return []
+
+
+def _load_existing_csv(filepath: str) -> list[JobRecord]:
+    if not os.path.exists(filepath):
+        return []
+    try:
+        with open(filepath, "r", encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            return [JobRecord.from_dict(row) for row in reader]
+    except Exception as e:  # noqa: BLE001
+        logger.warning("讀取既有 CSV 失敗，將覆寫：%s", e)
+        return []
+
+
+def export_json(
+    jobs: Iterable[JobRecord],
+    filepath: str,
+    *,
+    incremental: bool = True,
+) -> int:
+    """匯出 JSON。incremental=True 時與既有檔案合併去重。
+
+    Returns: 寫入的職位總數（去重後）。
+    """
+    _ensure_dir(filepath)
+    if incremental:
+        jobs = _dedupe(list(_load_existing_json(filepath)) + list(jobs))
+    else:
+        jobs = _dedupe(jobs)
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump([j.to_dict() for j in jobs], f, ensure_ascii=False, indent=2)
+    logger.info("已匯出 %d 筆職位 -> %s", len(jobs), filepath)
+    return len(jobs)
+
+
+def export_csv(
+    jobs: Iterable[JobRecord],
+    filepath: str,
+    *,
+    incremental: bool = True,
+) -> int:
+    """匯出 CSV（UTF-8 with BOM）。incremental=True 時合併去重。"""
+    _ensure_dir(filepath)
+    if incremental:
+        jobs = _dedupe(list(_load_existing_csv(filepath)) + list(jobs))
+    else:
+        jobs = _dedupe(jobs)
+
+    fields = list(JobRecord.FIELDS)
+    # BOM 讓 Excel 正確辨識 UTF-8 繁體中文
+    with open(filepath, "w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        for j in jobs:
+            writer.writerow(j.to_dict())
+    logger.info("已匯出 %d 筆職位 -> %s", len(jobs), filepath)
+    return len(jobs)
+
+
+def export(
+    jobs: Iterable[JobRecord],
+    filepath: str,
+    *,
+    fmt: str = "json",
+    incremental: bool = True,
+) -> int:
+    """統一入口：fmt ∈ {json, csv, both}。"""
+    fmt = (fmt or "json").lower()
+    total = 0
+    if fmt in ("json", "both"):
+        total = export_json(jobs, filepath, incremental=incremental)
+    if fmt in ("csv", "both"):
+        base, _ = os.path.splitext(filepath)
+        csv_path = base + ".csv"
+        total = export_csv(jobs, csv_path, incremental=incremental)
+    return total

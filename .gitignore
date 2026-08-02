@@ -1,0 +1,18 @@
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+envs/
+
+# ---- 爬蟲產物（可重生，不進版本庫）----
+output/
+
+# ---- 工具 / AI 暫存 ----
+.workbuddy/
+
+# ---- OS / 編輯器 ----
+.DS_Store
+Thumbs.db
+*.log

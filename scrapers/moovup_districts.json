@@ -1,0 +1,226 @@
+[
+  {
+    "zh": "香港仔",
+    "en": "Aberdeen",
+    "region": "h",
+    "_id": "69e07902-e089-4d3a-9b90-37d8f0e942f3",
+    "shortCode": "000011"
+  },
+  {
+    "zh": "中區",
+    "en": "Central",
+    "region": "h",
+    "_id": "1d09ae94-3797-4166-9a4f-e3c9932d8f00",
+    "shortCode": "000006"
+  },
+  {
+    "zh": "愉景灣 & 迪士尼",
+    "en": "DBay & Disney",
+    "region": "Lantau",
+    "_id": "db063c1b-6688-421a-9986-5f75ccb9e9b7",
+    "shortCode": "000037"
+  },
+  {
+    "zh": "粉嶺 & 上水",
+    "en": "Fanling & Sheung Shui",
+    "region": "New Territories East",
+    "_id": "c555aebf-0ee6-4789-8dca-d1dce37d2b73",
+    "shortCode": "000029"
+  },
+  {
+    "zh": "紅磡",
+    "en": "Hunghom",
+    "region": "",
+    "_id": "0b70e127-865d-45e3-9c42-8eb3a98eb5b7",
+    "shortCode": "000015"
+  },
+  {
+    "zh": "港島東",
+    "en": "Island East",
+    "region": "h",
+    "_id": "f27f4613-077b-4c13-bc13-b75848887a57",
+    "shortCode": "000012"
+  },
+  {
+    "zh": "港島南",
+    "en": "Island South",
+    "region": "h",
+    "_id": "dc7bc95e-182e-4594-909d-18e3c6f9a610",
+    "shortCode": "000013"
+  },
+  {
+    "zh": "港島西",
+    "en": "Island West",
+    "region": "h",
+    "_id": "d9eefd02-1d1d-4456-89e4-8bff7cfa62cb",
+    "shortCode": "000009"
+  },
+  {
+    "zh": "九龍灣",
+    "en": "Kowloon Bay",
+    "region": "",
+    "_id": "d274c0d9-1648-4cd6-84f3-a33676cc192b",
+    "shortCode": "000022"
+  },
+  {
+    "zh": "九龍城",
+    "en": "Kowloon City",
+    "region": "",
+    "_id": "0976e47c-9855-4e6e-8a27-f245c16f2e82",
+    "shortCode": "000020"
+  },
+  {
+    "zh": "九龍塘",
+    "en": "Kowloon Tong",
+    "region": "",
+    "_id": "fd7091fc-08e4-4a9e-a248-2f940444021b",
+    "shortCode": "000019"
+  },
+  {
+    "zh": "葵涌",
+    "en": "Kwai Chung",
+    "region": "New Territories West",
+    "_id": "8baa7f7b-9d2c-4347-be15-af812c11088e",
+    "shortCode": "000030"
+  },
+  {
+    "zh": "觀塘",
+    "en": "Kwun Tong",
+    "region": "",
+    "_id": "3f2347a5-f705-4c3d-9969-1bd368efc9ff",
+    "shortCode": "000023"
+  },
+  {
+    "zh": "馬鞍山",
+    "en": "Ma On Shan",
+    "region": "New Territories East",
+    "_id": "a795fc5d-1fa0-4898-8cbd-d65e09a3a7ed",
+    "shortCode": "000027"
+  },
+  {
+    "zh": "美孚",
+    "en": "Mei Foo",
+    "region": "",
+    "_id": "9dd9e458-5d4a-4221-b570-e8a99187d83f",
+    "shortCode": "000018"
+  },
+  {
+    "zh": "半山 / 山頂",
+    "en": "Mid-Levels & Peak",
+    "region": "h",
+    "_id": "23ae6d02-e7ab-4ea4-a5f9-98a7c01ce06d",
+    "shortCode": "000008"
+  },
+  {
+    "zh": "薄扶林",
+    "en": "Pok Fu Lam",
+    "region": "h",
+    "_id": "879d7821-b180-4852-8d55-b62d288c89a9",
+    "shortCode": "000010"
+  },
+  {
+    "zh": "西貢",
+    "en": "Sai Kung",
+    "region": "New Territories East",
+    "_id": "f83df9d5-6655-46f4-887f-3b30fe1c62ad",
+    "shortCode": "000025"
+  },
+  {
+    "zh": "深水埗",
+    "en": "Sham Shui Po",
+    "region": "",
+    "_id": "37ddc1e5-f7c0-4121-84af-84a7f602adf6",
+    "shortCode": "000017"
+  },
+  {
+    "zh": "沙田",
+    "en": "Shatin",
+    "region": "New Territories East",
+    "_id": "f17ee2fa-e153-4e9c-bdb5-ea9dc3534cb9",
+    "shortCode": "000026"
+  },
+  {
+    "zh": "大埔",
+    "en": "Tai Po",
+    "region": "New Territories East",
+    "_id": "63eb31bc-fc1d-4436-8b50-18bb90bf3be9",
+    "shortCode": "000028"
+  },
+  {
+    "zh": "天水圍",
+    "en": "Tin Shui Wai",
+    "region": "New Territories West",
+    "_id": "0e165f23-94c3-450f-82c7-a8d1429b0391",
+    "shortCode": "000034"
+  },
+  {
+    "zh": "將軍澳",
+    "en": "Tseung Kwan O",
+    "region": "New Territories East",
+    "_id": "cef000e4-0307-4324-b6cf-fb2af0c8887f",
+    "shortCode": "000024"
+  },
+  {
+    "zh": "青衣",
+    "en": "Tsing Yi",
+    "region": "New Territories West",
+    "_id": "19d69cc1-1c6d-4b78-905d-0c326a95eba1",
+    "shortCode": "000031"
+  },
+  {
+    "zh": "荃灣",
+    "en": "Tsuen Wan",
+    "region": "New Territories West",
+    "_id": "4c2aac41-a5ba-43d2-a9a0-7b3cf2ca94d9",
+    "shortCode": "000032"
+  },
+  {
+    "zh": "屯門",
+    "en": "Tuen Mun",
+    "region": "New Territories West",
+    "_id": "def5f7ab-0526-40d4-b9d5-8facc88dd355",
+    "shortCode": "000033"
+  },
+  {
+    "zh": "東涌 & 機場",
+    "en": "Tung Chung and Airport",
+    "region": "Lantau",
+    "_id": "9d22456e-9bef-4f23-bb79-c843b984d1f2",
+    "shortCode": "000036"
+  },
+  {
+    "zh": "灣仔 / 銅鑼灣",
+    "en": "Wan Chai / Causeway Bay",
+    "region": "h",
+    "_id": "c4522f49-d6f4-4a85-a65f-0c9ecfd15279",
+    "shortCode": "000007"
+  },
+  {
+    "zh": "西九龍",
+    "en": "West Kowloon",
+    "region": "",
+    "_id": "b225f834-fda0-4e64-aeee-a6893108b4f1",
+    "shortCode": "000016"
+  },
+  {
+    "zh": "黃大仙",
+    "en": "Wong Tai Sin",
+    "region": "",
+    "_id": "fc3849e7-0b87-4fc1-bbee-450458735389",
+    "shortCode": "000021"
+  },
+  {
+    "zh": "油尖旺",
+    "en": "Yau Tsim Mong",
+    "region": "",
+    "_id": "25e38c34-43eb-40eb-852f-2ccc1b438087",
+    "shortCode": "000014"
+  },
+  {
+    "zh": "元朗",
+    "en": "Yuen Long",
+    "region": "New Territories West",
+    "_id": "2aa8d2db-f267-47f4-beec-97b731a4c984",
+    "shortCode": "000035"
+  }
+]
