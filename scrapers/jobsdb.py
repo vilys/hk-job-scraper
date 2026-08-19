@@ -45,8 +45,14 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def _load_dict(name: str) -> list:
-    with open(os.path.join(_HERE, name), encoding="utf-8") as f:
-        return json.load(f)
+    """讀取 slug 字典。讀取失敗時警告並回空清單（與 gov_hk / moovup / linkedin
+    的守護一致），避免字典檔缺損令整個 scrapers 套件 import 失敗、五站全滅。"""
+    try:
+        with open(os.path.join(_HERE, name), encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("[jobsdb] 讀取字典 %s 失敗（--category/--district 將不可用）：%s", name, e)
+        return []
 
 
 # 職能（分類）字典：list of {name(英), zh(中), slug}

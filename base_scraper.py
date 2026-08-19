@@ -195,3 +195,16 @@ class BaseScraper(ABC):
 
     def report(self) -> dict:
         return dict(self._stats)
+
+    # ---------- 資源釋放 ----------
+    def close(self) -> None:
+        """釋放資源。預設無資源可釋；持有 requests.Session / Playwright 的子類覆寫此方法。
+
+        （main.py 以 finally: scraper.close() 收尾；此基礎實作確保任何子類
+        未覆寫時也不會 AttributeError。）"""
+
+    def __enter__(self) -> "BaseScraper":
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        self.close()

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 import sys
 from pathlib import Path
 
@@ -95,7 +96,8 @@ def main() -> None:
         logger.error("未知來源：%s（可選：%s）", args.source, ", ".join(SCRAPERS))
         sys.exit(1)
 
-    kw_safe = args.keyword.replace(" ", "_") or "all"
+    # 關鍵字轉檔名：先剔除 Windows 路徑非法字元（\ / : * ? " < > |），空白轉底線
+    kw_safe = re.sub(r'[\\/:*?"<>|]+', "", args.keyword).replace(" ", "_") or "all"
     total_written = 0
 
     for src in sources:

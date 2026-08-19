@@ -21,7 +21,7 @@ class JobRecord:
     location: str = ""          # 工作地點
     salary: str = ""            # 薪資範圍（原始文字）
     job_type: str = ""
-    industry: str = ""           # 所屬行業（勞工處 detail 頁「行業 :」標籤）          # 全職 / 兼職 / 合約 / 臨時工
+    industry: str = ""           # 所屬行業（勞工處 detail 頁「行業 :」標籤）
     description: str = ""       # 職位描述
     requirements: str = ""      # 要求條件
     url: str = ""               # 職位詳情連結

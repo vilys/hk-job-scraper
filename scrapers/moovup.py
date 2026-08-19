@@ -77,8 +77,10 @@ def resolve_districts(district_input: Optional[str]) -> list[str]:
 
 try:
     from playwright.sync_api import sync_playwright
+    from playwright.sync_api import TimeoutError as PWTimeout
 except ImportError:  # pragma: no cover
     sync_playwright = None
+    PWTimeout = Exception  # 未裝 Playwright 時 _ensure_browser 會先擋下，此別名僅保語法可用
 
 logger = logging.getLogger(__name__)
 
@@ -312,6 +314,19 @@ class MoovupScraper(BaseScraper):
         )
 
     # ---------------- 公開介面 ----------------
+    def scrape_all(self, *args, **kwargs):
+        """--days 不支援 Moovup（詳情頁日期為中文相對文字，未穩定解析）。
+
+        依 main.py 對 --days 的說明（「moovup 不支援，傳入會警告並忽略」），
+        在此攔下 days 參數：警告後忽略，不觸發 base 的「強制抓詳情 + 逐筆過濾」
+        （否則 days_since_posted 回 None 會靜默丟光所有職位）。
+        僅影響本站（跨站隔離），其餘參數原樣透傳。"""
+        if kwargs.get("days") is not None:
+            logger.warning(
+                "[moovup] --days 不支援 Moovup（詳情日期為相對文字），已忽略此篩選")
+            kwargs["days"] = None
+        return super().scrape_all(*args, **kwargs)
+
     def search(
         self,
         keyword: str,
@@ -349,7 +364,13 @@ class MoovupScraper(BaseScraper):
 
     def get_detail(self, job_url: str) -> Optional[JobRecord]:
         self._ensure_browser()
-        self._page.goto(job_url, wait_until="networkidle", timeout=60000)
+        # networkidle 在 Nuxt SPA（常駐連線）下可能永不觸發；逾時不視為失敗——
+        # 頁面導航通常已完成（SSR 內容已在 DOM），帶著已載入內容繼續解析即可，
+        # 避免動輒乾等 60 秒再觸發整輪重試。
+        try:
+            self._page.goto(job_url, wait_until="networkidle", timeout=60000)
+        except PWTimeout:
+            logger.warning("[moovup] networkidle 等待逾時（SPA 常見），以已載入內容繼續")
         self._page.wait_for_timeout(2000)
         # 從 URL 取出職位 UUID，還原與列表一致的 job_id
         m = re.search(

@@ -33,6 +33,15 @@ def _dedupe(jobs: Iterable[JobRecord]) -> list[JobRecord]:
     return list(seen.values())
 
 
+def _backup_corrupt(filepath: str) -> None:
+    """既有檔讀取失敗時，把它搬到 <path>.corrupt.bak 保存，避免增量覆寫令舊資料靜默消失。"""
+    try:
+        os.replace(filepath, filepath + ".corrupt.bak")
+        logger.warning("原檔已備份至 %s.corrupt.bak（將以本輪新資料重建）", filepath)
+    except OSError as be:  # 連備份都失敗才退回舊行為（直接覆寫）
+        logger.warning("備份失敗（%s），將直接覆寫：%s", be, filepath)
+
+
 def _load_existing_json(filepath: str) -> list[JobRecord]:
     if not os.path.exists(filepath):
         return []
@@ -41,7 +50,8 @@ def _load_existing_json(filepath: str) -> list[JobRecord]:
             data = json.load(f)
         return [JobRecord.from_dict(d) for d in data]
     except Exception as e:  # noqa: BLE001
-        logger.warning("讀取既有 JSON 失敗，將覆寫：%s", e)
+        logger.warning("讀取既有 JSON 失敗：%s", e)
+        _backup_corrupt(filepath)
         return []
 
 
@@ -53,7 +63,8 @@ def _load_existing_csv(filepath: str) -> list[JobRecord]:
             reader = csv.DictReader(f)
             return [JobRecord.from_dict(row) for row in reader]
     except Exception as e:  # noqa: BLE001
-        logger.warning("讀取既有 CSV 失敗，將覆寫：%s", e)
+        logger.warning("讀取既有 CSV 失敗：%s", e)
+        _backup_corrupt(filepath)
         return []
 
 

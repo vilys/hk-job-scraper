@@ -343,7 +343,9 @@ class GovHkScraper(BaseScraper):
             d = datetime.strptime(s, "%d/%m/%Y").date()
         except ValueError:
             return None
-        return (date.today() - d).days
+        # max(0, ...) 鉗制未來日期（站方時區差可能出現明天刊登）：
+        # 對 --days 過濾結果零影響（負數與 0 對任何 days>=0 的判斷同真），僅防禦性收邊
+        return max(0, (date.today() - d).days)
 
     def close(self) -> None:
         if self.session:

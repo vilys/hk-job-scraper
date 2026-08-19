@@ -250,9 +250,10 @@ class LinkedInScraper(BaseScraper):
         title = self._txt(soup, SELECT.get("detail_title", ".top-card-layout__title"))
         company = self._txt(soup, SELECT.get("detail_company", ".topcard__flavor"))
         location = self._txt(soup, SELECT.get("detail_location", ".topcard__flavor--bullet"))
-        desc_parts = [self._txt(soup, s) for s in
-                      SELECT.get("detail_description",
-                                 ".description__text, .show-more-less-html__markup").split(", ")]
+        # 選擇器清單：容忍 "," 與 ", " 兩種分隔（避免 config 字串微調令解析整串失效）
+        _desc_sel = SELECT.get("detail_description",
+                               ".description__text, .show-more-less-html__markup")
+        desc_parts = [self._txt(soup, s) for s in (p.strip() for p in _desc_sel.split(",")) if s]
         description = "\n".join(p for p in desc_parts if p)
         # 刊登日：從詳情頂部文字抓相對時間
         posted = ""
