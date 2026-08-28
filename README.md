@@ -81,6 +81,7 @@ hk-job-scraper/
 ├── job_model.py            # JobRecord 統一資料模型
 ├── exporter.py             # JSON / CSV 匯出（增量 + 去重）
 ├── base_scraper.py         # 爬蟲抽象基類（search / get_detail / scrape_all）
+├── build_dashboard.py      # 聚合 output/ 所有產出 → 單檔離線 HTML 儀表板
 ├── scrapers/
 │   ├── __init__.py         # 爬蟲註冊表（SCRAPERS）
 │   ├── moovup.py           # Moovup 爬蟲（已實作 + 實測）
@@ -449,6 +450,43 @@ JobsDB 使用**完全自有的 slug / 查詢體系**，與 Moovup 的 shortCode�
 `job_id, source, title, company, location, salary, job_type, industry, description, requirements, url, posted_date, scraped_at`
 
 > **增量與去重**：重跑同一關鍵字會自動與舊檔合併，以 `job_id` 去重（後抓到的覆蓋舊值）。
+
+---
+
+## 📊 聚合儀表板（`build_dashboard.py`）
+
+把 `output/` 裡**所有**爬蟲產出（五站、任意多次任務的 JSON/CSV）聚合成一個**單檔離線網頁**，
+直接雙擊就能開，不必起伺服器。
+
+```bash
+# 基本：掃 output/*.json + output/*.csv → 產生 output/dashboard.html
+python build_dashboard.py
+
+# 自訂輸出檔名
+python build_dashboard.py --out 科技職缺總覽.html
+
+# 只吃 JSON（不吃 CSV，避開舊檔編碼問題）
+python build_dashboard.py --glob "output/*.json"
+```
+
+### 頁面功能
+- **搜尋**：關鍵字比對職稱 / 公司 / 地區 / 描述 / 行業 / 要求
+- **篩選**：據點（多選晶片）、地區下拉、刊登時間（3/7/14/30/90 天內）、只看有薪資
+- **排序**：最新 / 最舊 / 薪資高→低 / 依來源 / 依職稱
+- **圖表**：據點分佈長條圖、熱門地區 TOP 10
+- **其他**：深淺主題切換、描述展開全文、職位標題直接連回原始網頁、分頁載入
+
+### 資料處理（為什麼能混著吃五站的檔）
+| 議題 | 處理方式 |
+|------|----------|
+| 五站日期格式各異 | 統一折算 `age_days`（距今天數）：`23h ago` / `3d ago` / `30d+ ago` / `2 days ago` / `7日前` / `2個月前` / `10/07/2026` 全數支援 |
+| 列表層抓取無刊登日 | 另計 `scraped_days`（抓取距今），卡片顯示「未知刊登日（抓取於 N 天前）」；套用時間篩選時這類會被排除 |
+| 同一職位重複出現在多檔 | 以 `job_id` 去重，保留描述較完整 / 抓取較新的一筆 |
+| CSV 編碼不一（UTF-8 / BOM / Big5 / GB18030） | 逐個編碼嘗試；`ict_density_leaderboard.*` 等非職位檔自動略過 |
+| 薪資文字五花八門 | 解析出數值 + 單位（月/小時/年）供排序與「只看有薪資」；**不做跨單位換算**（時薪與月薪不可比） |
+
+> 網頁是**快照**：爬完新資料後重跑一次 `python build_dashboard.py` 就會更新（資料內嵌進 HTML，
+> 刻意不用 `fetch`，因為 `file://` 下瀏覽器會擋外部 JSON 讀取）。
 
 ---
 
