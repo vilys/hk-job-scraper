@@ -1,0 +1,4533 @@
+[
+ {
+  "id": "11000",
+  "name": "Accounting / Auditing",
+  "type": "jobCat",
+  "cat_id": "11000",
+  "zh": "會計-審計-accounting-auditing",
+  "aliases": [
+   "Accounting / Auditing",
+   "accounting / auditing",
+   "審計",
+   "審計-accounting-auditing",
+   "會計",
+   "會計-審計-accounting-auditing"
+  ]
+ },
+ {
+  "id": "12000",
+  "name": "Administration / Secretary",
+  "type": "jobCat",
+  "cat_id": "12000",
+  "zh": "行政-秘書-administration-secretary",
+  "aliases": [
+   "Administration / Secretary",
+   "administration / secretary",
+   "秘書",
+   "秘書-administration-secretary",
+   "行政",
+   "行政-秘書-administration-secretary"
+  ]
+ },
+ {
+  "id": "47000",
+  "name": "Aviation / Airline / Travel / Tourism",
+  "type": "jobCat",
+  "cat_id": "47000",
+  "zh": "航空-旅遊-觀光-airline-travel-tourism",
+  "aliases": [
+   "Aviation / Airline / Travel / Tourism",
+   "aviation / airline / travel / tourism",
+   "旅遊",
+   "旅遊-觀光-airline-travel-tourism",
+   "航空",
+   "航空-旅遊-觀光-airline-travel-tourism",
+   "觀光"
+  ]
+ },
+ {
+  "id": "13000",
+  "name": "Banking / Finance / Securities",
+  "type": "jobCat",
+  "cat_id": "13000",
+  "zh": "銀行-金融-證券-banking-finance-securities",
+  "aliases": [
+   "Banking / Finance / Securities",
+   "banking / finance / securities",
+   "證券",
+   "金融",
+   "金融-證券-banking-finance-securities",
+   "銀行",
+   "銀行-金融-證券-banking-finance-securities"
+  ]
+ },
+ {
+  "id": "14000",
+  "name": "Building / Architectural",
+  "type": "jobCat",
+  "cat_id": "14000",
+  "zh": "樓宇-建築-building-architectural",
+  "aliases": [
+   "Building / Architectural",
+   "building / architectural",
+   "建築",
+   "建築-building-architectural",
+   "樓宇",
+   "樓宇-建築-building-architectural"
+  ]
+ },
+ {
+  "id": "23000",
+  "name": "Catering",
+  "type": "jobCat",
+  "cat_id": "23000",
+  "zh": "餐飲-catering",
+  "aliases": [
+   "Catering",
+   "catering",
+   "餐飲",
+   "餐飲-catering"
+  ]
+ },
+ {
+  "id": "17000",
+  "name": "Customer Service",
+  "type": "jobCat",
+  "cat_id": "17000",
+  "zh": "",
+  "aliases": [
+   "Customer Service",
+   "customer service"
+  ]
+ },
+ {
+  "id": "18000",
+  "name": "Design",
+  "type": "jobCat",
+  "cat_id": "18000",
+  "zh": "設計-design",
+  "aliases": [
+   "Design",
+   "design",
+   "設計",
+   "設計-design"
+  ]
+ },
+ {
+  "id": "19000",
+  "name": "Education",
+  "type": "jobCat",
+  "cat_id": "19000",
+  "zh": "教育-education",
+  "aliases": [
+   "Education",
+   "education",
+   "教育",
+   "教育-education"
+  ]
+ },
+ {
+  "id": "20000",
+  "name": "Engineering",
+  "type": "jobCat",
+  "cat_id": "20000",
+  "zh": "工程-engineering",
+  "aliases": [
+   "Engineering",
+   "engineering",
+   "工程",
+   "工程-engineering"
+  ]
+ },
+ {
+  "id": "53450",
+  "name": "Fresh Graduate",
+  "type": "jobCat",
+  "cat_id": "53450",
+  "zh": "",
+  "aliases": [
+   "Fresh Graduate",
+   "fresh graduate"
+  ]
+ },
+ {
+  "id": "53700",
+  "name": "Government",
+  "type": "jobCat",
+  "cat_id": "53700",
+  "zh": "",
+  "aliases": [
+   "Government",
+   "government"
+  ]
+ },
+ {
+  "id": "22000",
+  "name": "Health / Beauty",
+  "type": "jobCat",
+  "cat_id": "22000",
+  "zh": "保健-美容-health-beauty",
+  "aliases": [
+   "Health / Beauty",
+   "health / beauty",
+   "保健",
+   "保健-美容-health-beauty",
+   "美容",
+   "美容-health-beauty"
+  ]
+ },
+ {
+  "id": "30000",
+  "name": "Hospital / Medical / Pharmaceutical",
+  "type": "jobCat",
+  "cat_id": "30000",
+  "zh": "醫院-醫療-醫藥-hospital-medical-pharmaceutical",
+  "aliases": [
+   "Hospital / Medical / Pharmaceutical",
+   "hospital / medical / pharmaceutical",
+   "醫療",
+   "醫療-醫藥-hospital-medical-pharmaceutical",
+   "醫藥",
+   "醫院",
+   "醫院-醫療-醫藥-hospital-medical-pharmaceutical"
+  ]
+ },
+ {
+  "id": "53460",
+  "name": "Hospitality / Hotel",
+  "type": "jobCat",
+  "cat_id": "53460",
+  "zh": "款待-酒店-hospitality-hotel",
+  "aliases": [
+   "Hospitality / Hotel",
+   "hospitality / hotel",
+   "款待",
+   "款待-酒店-hospitality-hotel",
+   "酒店",
+   "酒店-hospitality-hotel"
+  ]
+ },
+ {
+  "id": "24000",
+  "name": "Human Resources",
+  "type": "jobCat",
+  "cat_id": "24000",
+  "zh": "人力資源-human-resources",
+  "aliases": [
+   "Human Resources",
+   "human resources",
+   "human-resources",
+   "人力資源",
+   "人力資源-human-resources"
+  ]
+ },
+ {
+  "id": "25000",
+  "name": "Insurance",
+  "type": "jobCat",
+  "cat_id": "25000",
+  "zh": "保險-insurance",
+  "aliases": [
+   "Insurance",
+   "insurance",
+   "保險",
+   "保險-insurance"
+  ]
+ },
+ {
+  "id": "26000",
+  "name": "IT",
+  "type": "jobCat",
+  "cat_id": "26000",
+  "zh": "資訊科技-it",
+  "aliases": [
+   "IT",
+   "it",
+   "資訊科技",
+   "資訊科技-it"
+  ]
+ },
+ {
+  "id": "28000",
+  "name": "Logistics / Transportation / Shipping",
+  "type": "jobCat",
+  "cat_id": "28000",
+  "zh": "物流-運輸-船務-logistics-transportation-shipping",
+  "aliases": [
+   "Logistics / Transportation / Shipping",
+   "logistics / transportation / shipping",
+   "物流",
+   "物流-運輸-船務-logistics-transportation-shipping",
+   "船務",
+   "運輸",
+   "運輸-船務-logistics-transportation-shipping"
+  ]
+ },
+ {
+  "id": "21000",
+  "name": "Management",
+  "type": "jobCat",
+  "cat_id": "21000",
+  "zh": "管理-management",
+  "aliases": [
+   "Management",
+   "management",
+   "管理",
+   "管理-management"
+  ]
+ },
+ {
+  "id": "29000",
+  "name": "Manufacturing",
+  "type": "jobCat",
+  "cat_id": "29000",
+  "zh": "製造-manufacturing",
+  "aliases": [
+   "Manufacturing",
+   "manufacturing",
+   "製造",
+   "製造-manufacturing"
+  ]
+ },
+ {
+  "id": "41000",
+  "name": "Marketing / Public Relations",
+  "type": "jobCat",
+  "cat_id": "41000",
+  "zh": "市場營銷-公共關係-marketing-public-relations",
+  "aliases": [
+   "Marketing / Public Relations",
+   "marketing / public relations",
+   "公共關係",
+   "公共關係-marketing-public-relations",
+   "市場營銷",
+   "市場營銷-公共關係-marketing-public-relations"
+  ]
+ },
+ {
+  "id": "15000",
+  "name": "Media",
+  "type": "jobCat",
+  "cat_id": "15000",
+  "zh": "媒體-media",
+  "aliases": [
+   "Media",
+   "media",
+   "媒體",
+   "媒體-media"
+  ]
+ },
+ {
+  "id": "31000",
+  "name": "Merchandising / Purchasing",
+  "type": "jobCat",
+  "cat_id": "31000",
+  "zh": "採購-merchandising-purchasing",
+  "aliases": [
+   "Merchandising / Purchasing",
+   "merchandising / purchasing",
+   "merchandising-purchasing",
+   "採購",
+   "採購-merchandising-purchasing"
+  ]
+ },
+ {
+  "id": "53600",
+  "name": "NGO / Social Services",
+  "type": "jobCat",
+  "cat_id": "53600",
+  "zh": "非政府組織-社會服務-ngo-social-services",
+  "aliases": [
+   "NGO / Social Services",
+   "ngo / social services",
+   "社會服務",
+   "社會服務-ngo-social-services",
+   "非政府組織",
+   "非政府組織-社會服務-ngo-social-services"
+  ]
+ },
+ {
+  "id": "48000",
+  "name": "Others",
+  "type": "jobCat",
+  "cat_id": "48000",
+  "zh": "",
+  "aliases": [
+   "Others",
+   "others"
+  ]
+ },
+ {
+  "id": "53480",
+  "name": "Part Time / Temporary Job / Contract",
+  "type": "jobCat",
+  "cat_id": "53480",
+  "zh": "",
+  "aliases": [
+   "Part Time / Temporary Job / Contract",
+   "part time / temporary job / contract"
+  ]
+ },
+ {
+  "id": "27000",
+  "name": "Professional Services",
+  "type": "jobCat",
+  "cat_id": "27000",
+  "zh": "專業服務-professional-services",
+  "aliases": [
+   "Professional Services",
+   "professional services",
+   "professional-services",
+   "專業服務",
+   "專業服務-professional-services"
+  ]
+ },
+ {
+  "id": "32000",
+  "name": "Property / Estate Management / Security",
+  "type": "jobCat",
+  "cat_id": "32000",
+  "zh": "物業-物業管理-保安-property-estate-management-security",
+  "aliases": [
+   "Property / Estate Management / Security",
+   "property / estate management / security",
+   "保安",
+   "物業",
+   "物業-物業管理-保安-property-estate-management-security",
+   "物業管理",
+   "物業管理-保安-property-estate-management-security"
+  ]
+ },
+ {
+  "id": "33000",
+  "name": "Publishing / Printing",
+  "type": "jobCat",
+  "cat_id": "33000",
+  "zh": "出版-印刷-publishing-printing",
+  "aliases": [
+   "Publishing / Printing",
+   "publishing / printing",
+   "出版",
+   "出版-印刷-publishing-printing",
+   "印刷",
+   "印刷-publishing-printing"
+  ]
+ },
+ {
+  "id": "34000",
+  "name": "Quality Assurance / Control & Testing",
+  "type": "jobCat",
+  "cat_id": "34000",
+  "zh": "質量保證-控制及測試-quality-assurance-control-testing",
+  "aliases": [
+   "Quality Assurance / Control & Testing",
+   "quality assurance / control & testing",
+   "控制及測試",
+   "控制及測試-quality-assurance-control-testing",
+   "質量保證",
+   "質量保證-控制及測試-quality-assurance-control-testing"
+  ]
+ },
+ {
+  "id": "43000",
+  "name": "Retail",
+  "type": "jobCat",
+  "cat_id": "43000",
+  "zh": "零售-retail",
+  "aliases": [
+   "Retail",
+   "retail",
+   "零售",
+   "零售-retail"
+  ]
+ },
+ {
+  "id": "44000",
+  "name": "Sales",
+  "type": "jobCat",
+  "cat_id": "44000",
+  "zh": "銷售-sales",
+  "aliases": [
+   "Sales",
+   "sales",
+   "銷售",
+   "銷售-sales"
+  ]
+ },
+ {
+  "id": "54000",
+  "name": "Sciences, Lab, R&D",
+  "type": "jobCat",
+  "cat_id": "54000",
+  "zh": "科學-實驗室-研究及開發-sciences-lab-r-d",
+  "aliases": [
+   "Sciences, Lab, R&D",
+   "sciences, lab, r&d",
+   "實驗室",
+   "實驗室-研究及開發-sciences-lab-r-d",
+   "研究及開發",
+   "科學",
+   "科學-實驗室-研究及開發-sciences-lab-r-d"
+  ]
+ },
+ {
+  "id": "56146",
+  "name": "Accountant",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "會計-accountant",
+  "aliases": [
+   "Accountant",
+   "accountant",
+   "會計",
+   "會計-accountant"
+  ]
+ },
+ {
+  "id": "56000",
+  "name": "Accounting / Financial Management",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "會計-財務管理-accounting-financial-management",
+  "aliases": [
+   "Accounting / Financial Management",
+   "accounting / financial management",
+   "會計",
+   "會計-財務管理-accounting-financial-management",
+   "財務管理",
+   "財務管理-accounting-financial-management"
+  ]
+ },
+ {
+  "id": "56147",
+  "name": "Accounting Clerk / Officer / Supervisor",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "會計文員-accounting-clerk-officer-supervisor",
+  "aliases": [
+   "Accounting Clerk / Officer / Supervisor",
+   "accounting clerk / officer / supervisor",
+   "accounting-clerk-officer-supervisor",
+   "會計文員",
+   "會計文員-accounting-clerk-officer-supervisor"
+  ]
+ },
+ {
+  "id": "56001",
+  "name": "Audit",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "審計-audit",
+  "aliases": [
+   "Audit",
+   "audit",
+   "審計",
+   "審計-audit"
+  ]
+ },
+ {
+  "id": "56148",
+  "name": "Compliance",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "合規-compliance",
+  "aliases": [
+   "Compliance",
+   "compliance",
+   "合規",
+   "合規-compliance"
+  ]
+ },
+ {
+  "id": "56149",
+  "name": "Corporate Finance",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "企業金融-corporate-finance",
+  "aliases": [
+   "Corporate Finance",
+   "corporate finance",
+   "corporate-finance",
+   "企業金融",
+   "企業金融-corporate-finance"
+  ]
+ },
+ {
+  "id": "6560",
+  "name": "Credit Control",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "信貸控制-credit-control",
+  "aliases": [
+   "Credit Control",
+   "credit control",
+   "credit-control",
+   "信貸控制",
+   "信貸控制-credit-control"
+  ]
+ },
+ {
+  "id": "56150",
+  "name": "Finance / Accounting Manager",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "金融-會計經理-finance-accounting-manager",
+  "aliases": [
+   "Finance / Accounting Manager",
+   "finance / accounting manager",
+   "會計經理",
+   "會計經理-finance-accounting-manager",
+   "金融",
+   "金融-會計經理-finance-accounting-manager"
+  ]
+ },
+ {
+  "id": "56151",
+  "name": "Financial Analyst",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "財務分析師-financial-analyst",
+  "aliases": [
+   "Financial Analyst",
+   "financial analyst",
+   "financial-analyst",
+   "財務分析師",
+   "財務分析師-financial-analyst"
+  ]
+ },
+ {
+  "id": "56152",
+  "name": "Financial Controller",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "財務總監-financial-controller",
+  "aliases": [
+   "Financial Controller",
+   "financial controller",
+   "financial-controller",
+   "財務總監",
+   "財務總監-financial-controller"
+  ]
+ },
+ {
+  "id": "3542",
+  "name": "General Accounting",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "通用會計-general-accounting",
+  "aliases": [
+   "General Accounting",
+   "general accounting",
+   "general-accounting",
+   "通用會計",
+   "通用會計-general-accounting"
+  ]
+ },
+ {
+  "id": "3544",
+  "name": "Taxation",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "稅務-taxation",
+  "aliases": [
+   "Taxation",
+   "taxation",
+   "稅務",
+   "稅務-taxation"
+  ]
+ },
+ {
+  "id": "56153",
+  "name": "Treasurer",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "司庫-treasurer",
+  "aliases": [
+   "Treasurer",
+   "treasurer",
+   "司庫",
+   "司庫-treasurer"
+  ]
+ },
+ {
+  "id": "56060",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "11000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56003",
+  "name": "Administration / Operation Manager",
+  "type": "jobFunc",
+  "cat_id": "12000",
+  "zh": "行政-運營經理-administration-operation-manager",
+  "aliases": [
+   "Administration / Operation Manager",
+   "administration / operation manager",
+   "行政",
+   "行政-運營經理-administration-operation-manager",
+   "運營經理",
+   "運營經理-administration-operation-manager"
+  ]
+ },
+ {
+  "id": "3546",
+  "name": "Clerical / Admin Staff",
+  "type": "jobFunc",
+  "cat_id": "12000",
+  "zh": "文書-文職人員-clerical-admin-staff",
+  "aliases": [
+   "Clerical / Admin Staff",
+   "clerical / admin staff",
+   "文書",
+   "文書-文職人員-clerical-admin-staff",
+   "文職人員",
+   "文職人員-clerical-admin-staff"
+  ]
+ },
+ {
+  "id": "56154",
+  "name": "Personal / Executive Assistant",
+  "type": "jobFunc",
+  "cat_id": "12000",
+  "zh": "私人-執行助理-personal-executive-assistant",
+  "aliases": [
+   "Personal / Executive Assistant",
+   "personal / executive assistant",
+   "執行助理",
+   "執行助理-personal-executive-assistant",
+   "私人",
+   "私人-執行助理-personal-executive-assistant"
+  ]
+ },
+ {
+  "id": "56155",
+  "name": "Receptionist",
+  "type": "jobFunc",
+  "cat_id": "12000",
+  "zh": "接待員-receptionist",
+  "aliases": [
+   "Receptionist",
+   "receptionist",
+   "接待員",
+   "接待員-receptionist"
+  ]
+ },
+ {
+  "id": "56002",
+  "name": "Secretary",
+  "type": "jobFunc",
+  "cat_id": "12000",
+  "zh": "秘書-secretary",
+  "aliases": [
+   "Secretary",
+   "secretary",
+   "秘書",
+   "秘書-secretary"
+  ]
+ },
+ {
+  "id": "56024",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "12000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56156",
+  "name": "Cabin Crew",
+  "type": "jobFunc",
+  "cat_id": "47000",
+  "zh": "機艙人員-cabin-crew",
+  "aliases": [
+   "Cabin Crew",
+   "cabin crew",
+   "cabin-crew",
+   "機艙人員",
+   "機艙人員-cabin-crew"
+  ]
+ },
+ {
+  "id": "56061",
+  "name": "Customer Service",
+  "type": "jobFunc",
+  "cat_id": "47000",
+  "zh": "客戶服務-customer-service",
+  "aliases": [
+   "Customer Service",
+   "customer service",
+   "customer-service",
+   "客戶服務",
+   "客戶服務-customer-service"
+  ]
+ },
+ {
+  "id": "3638",
+  "name": "Flight Service / Ground Service / Passenger",
+  "type": "jobFunc",
+  "cat_id": "47000",
+  "zh": "機艙-地勤-旅客服務-flight-service-ground-service-passenger",
+  "aliases": [
+   "Flight Service / Ground Service / Passenger",
+   "flight service / ground service / passenger",
+   "地勤",
+   "地勤-旅客服務-flight-service-ground-service-passenger",
+   "旅客服務",
+   "機艙",
+   "機艙-地勤-旅客服務-flight-service-ground-service-passenger"
+  ]
+ },
+ {
+  "id": "56034",
+  "name": "Ticketing / Reservation",
+  "type": "jobFunc",
+  "cat_id": "47000",
+  "zh": "票務-酒店-其他預訂-ticketing-reservation",
+  "aliases": [
+   "Ticketing / Reservation",
+   "ticketing / reservation",
+   "其他預訂",
+   "票務",
+   "票務-酒店-其他預訂-ticketing-reservation",
+   "酒店",
+   "酒店-其他預訂-ticketing-reservation"
+  ]
+ },
+ {
+  "id": "56035",
+  "name": "Tour Guide",
+  "type": "jobFunc",
+  "cat_id": "47000",
+  "zh": "導遊-tour-guide",
+  "aliases": [
+   "Tour Guide",
+   "tour guide",
+   "tour-guide",
+   "導遊",
+   "導遊-tour-guide"
+  ]
+ },
+ {
+  "id": "56036",
+  "name": "Travel Agency / Consultant",
+  "type": "jobFunc",
+  "cat_id": "47000",
+  "zh": "旅行社-旅遊顧問-travel-agency-consultant",
+  "aliases": [
+   "Travel Agency / Consultant",
+   "travel agency / consultant",
+   "旅行社",
+   "旅行社-旅遊顧問-travel-agency-consultant",
+   "旅遊顧問",
+   "旅遊顧問-travel-agency-consultant"
+  ]
+ },
+ {
+  "id": "56062",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "47000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56157",
+  "name": "Account / Relationship Management",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "戶口-關係管理-account-relationship-management",
+  "aliases": [
+   "Account / Relationship Management",
+   "account / relationship management",
+   "戶口",
+   "戶口-關係管理-account-relationship-management",
+   "關係管理",
+   "關係管理-account-relationship-management"
+  ]
+ },
+ {
+  "id": "3550",
+  "name": "Analysis",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "分析-analysis",
+  "aliases": [
+   "Analysis",
+   "analysis",
+   "分析",
+   "分析-analysis"
+  ]
+ },
+ {
+  "id": "3552",
+  "name": "Compliance / Regulatory",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "法規-監管-compliance-regulatory",
+  "aliases": [
+   "Compliance / Regulatory",
+   "compliance / regulatory",
+   "法規",
+   "法規-監管-compliance-regulatory",
+   "監管",
+   "監管-compliance-regulatory"
+  ]
+ },
+ {
+  "id": "56099",
+  "name": "Corporate Banking",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "企業銀行-corporate-banking",
+  "aliases": [
+   "Corporate Banking",
+   "corporate banking",
+   "corporate-banking",
+   "企業銀行",
+   "企業銀行-corporate-banking"
+  ]
+ },
+ {
+  "id": "3557",
+  "name": "Corporate Finance",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "企業融資-corporate-finance",
+  "aliases": [
+   "Corporate Finance",
+   "corporate finance",
+   "corporate-finance",
+   "企業融資",
+   "企業融資-corporate-finance"
+  ]
+ },
+ {
+  "id": "3558",
+  "name": "Credit Analysis / Approval",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "信貸分析-批核-credit-analysis-approval",
+  "aliases": [
+   "Credit Analysis / Approval",
+   "credit analysis / approval",
+   "信貸分析",
+   "信貸分析-批核-credit-analysis-approval",
+   "批核",
+   "批核-credit-analysis-approval"
+  ]
+ },
+ {
+  "id": "56100",
+  "name": "Credit Collection",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "信用徵收-credit-collection",
+  "aliases": [
+   "Credit Collection",
+   "credit collection",
+   "credit-collection",
+   "信用徵收",
+   "信用徵收-credit-collection"
+  ]
+ },
+ {
+  "id": "3559",
+  "name": "Dealing & Trading",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "交易及貿易-dealing-trading",
+  "aliases": [
+   "Dealing & Trading",
+   "dealing & trading",
+   "dealing-trading",
+   "交易及貿易",
+   "交易及貿易-dealing-trading"
+  ]
+ },
+ {
+  "id": "3545",
+  "name": "Equities / Capital Market / Treasury",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "股票-資本市場-財務-equities-capital-market-treasury",
+  "aliases": [
+   "Equities / Capital Market / Treasury",
+   "equities / capital market / treasury",
+   "股票",
+   "股票-資本市場-財務-equities-capital-market-treasury",
+   "財務",
+   "資本市場",
+   "資本市場-財務-equities-capital-market-treasury"
+  ]
+ },
+ {
+  "id": "56063",
+  "name": "Financial Services",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "金融服務-financial-services",
+  "aliases": [
+   "Financial Services",
+   "financial services",
+   "financial-services",
+   "金融服務",
+   "金融服務-financial-services"
+  ]
+ },
+ {
+  "id": "3548",
+  "name": "Fund Management",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "基金管理-fund-management",
+  "aliases": [
+   "Fund Management",
+   "fund management",
+   "fund-management",
+   "基金管理",
+   "基金管理-fund-management"
+  ]
+ },
+ {
+  "id": "56004",
+  "name": "Investment",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "投資-investment",
+  "aliases": [
+   "Investment",
+   "investment",
+   "投資",
+   "投資-investment"
+  ]
+ },
+ {
+  "id": "56064",
+  "name": "Legal",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "法律-legal",
+  "aliases": [
+   "Legal",
+   "legal",
+   "法律",
+   "法律-legal"
+  ]
+ },
+ {
+  "id": "56065",
+  "name": "Loan",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "貸款-loan",
+  "aliases": [
+   "Loan",
+   "loan",
+   "貸款",
+   "貸款-loan"
+  ]
+ },
+ {
+  "id": "56066",
+  "name": "Mortgage",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "抵押-mortgage",
+  "aliases": [
+   "Mortgage",
+   "mortgage",
+   "抵押",
+   "抵押-mortgage"
+  ]
+ },
+ {
+  "id": "56145",
+  "name": "Order Processing & Operation / Settlement",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "訂單處理及營運-結算-order-processing-operation-settlement",
+  "aliases": [
+   "Order Processing & Operation / Settlement",
+   "order processing & operation / settlement",
+   "結算",
+   "結算-order-processing-operation-settlement",
+   "訂單處理及營運",
+   "訂單處理及營運-結算-order-processing-operation-settlement"
+  ]
+ },
+ {
+  "id": "3560",
+  "name": "Private Banking",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "私人銀行-private-banking",
+  "aliases": [
+   "Private Banking",
+   "private banking",
+   "private-banking",
+   "私人銀行",
+   "私人銀行-private-banking"
+  ]
+ },
+ {
+  "id": "56101",
+  "name": "Project Finance",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "項目融資-project-finance",
+  "aliases": [
+   "Project Finance",
+   "project finance",
+   "project-finance",
+   "項目融資",
+   "項目融資-project-finance"
+  ]
+ },
+ {
+  "id": "56158",
+  "name": "Research / Analysis",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "研究-分析-research-analysis",
+  "aliases": [
+   "Research / Analysis",
+   "research / analysis",
+   "分析",
+   "分析-research-analysis",
+   "研究",
+   "研究-分析-research-analysis"
+  ]
+ },
+ {
+  "id": "3554",
+  "name": "Retail Banking",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "零售銀行-retail-banking",
+  "aliases": [
+   "Retail Banking",
+   "retail banking",
+   "retail-banking",
+   "零售銀行",
+   "零售銀行-retail-banking"
+  ]
+ },
+ {
+  "id": "56159",
+  "name": "Risk Management",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "風險管理-risk-management",
+  "aliases": [
+   "Risk Management",
+   "risk management",
+   "risk-management",
+   "風險管理",
+   "風險管理-risk-management"
+  ]
+ },
+ {
+  "id": "56102",
+  "name": "Treasury",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "財務-treasury",
+  "aliases": [
+   "Treasury",
+   "treasury",
+   "財務",
+   "財務-treasury"
+  ]
+ },
+ {
+  "id": "56067",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "13000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "3561",
+  "name": "Architectural",
+  "type": "jobFunc",
+  "cat_id": "14000",
+  "zh": "建築設計-architectural",
+  "aliases": [
+   "Architectural",
+   "architectural",
+   "建築設計",
+   "建築設計-architectural"
+  ]
+ },
+ {
+  "id": "3562",
+  "name": "Building / Construction / QS",
+  "type": "jobFunc",
+  "cat_id": "14000",
+  "zh": "建築-施工-工料測量-building-construction-qs",
+  "aliases": [
+   "Building / Construction / QS",
+   "building / construction / qs",
+   "工料測量",
+   "建築",
+   "建築-施工-工料測量-building-construction-qs",
+   "施工",
+   "施工-工料測量-building-construction-qs"
+  ]
+ },
+ {
+  "id": "56103",
+  "name": "Civil / Structural",
+  "type": "jobFunc",
+  "cat_id": "14000",
+  "zh": "土木-結構-civil-structural",
+  "aliases": [
+   "Civil / Structural",
+   "civil / structural",
+   "土木",
+   "土木-結構-civil-structural",
+   "結構",
+   "結構-civil-structural"
+  ]
+ },
+ {
+  "id": "56104",
+  "name": "Draftsman",
+  "type": "jobFunc",
+  "cat_id": "14000",
+  "zh": "繪圖-draftsman",
+  "aliases": [
+   "Draftsman",
+   "draftsman",
+   "繪圖",
+   "繪圖-draftsman"
+  ]
+ },
+ {
+  "id": "56160",
+  "name": "Project Management",
+  "type": "jobFunc",
+  "cat_id": "14000",
+  "zh": "頂目管理-project-management",
+  "aliases": [
+   "Project Management",
+   "project management",
+   "project-management",
+   "頂目管理",
+   "頂目管理-project-management"
+  ]
+ },
+ {
+  "id": "56161",
+  "name": "Site Management",
+  "type": "jobFunc",
+  "cat_id": "14000",
+  "zh": "場地管理-site-management",
+  "aliases": [
+   "Site Management",
+   "site management",
+   "site-management",
+   "場地管理",
+   "場地管理-site-management"
+  ]
+ },
+ {
+  "id": "3565",
+  "name": "Surveying",
+  "type": "jobFunc",
+  "cat_id": "14000",
+  "zh": "測量-surveying",
+  "aliases": [
+   "Surveying",
+   "surveying",
+   "測量",
+   "測量-surveying"
+  ]
+ },
+ {
+  "id": "56068",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "14000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56162",
+  "name": "Bartender / Barmaid / Sommelier",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "調酒師-品酒師-bartender-barmaid-sommelier",
+  "aliases": [
+   "Bartender / Barmaid / Sommelier",
+   "bartender / barmaid / sommelier",
+   "品酒師",
+   "品酒師-bartender-barmaid-sommelier",
+   "調酒師",
+   "調酒師-品酒師-bartender-barmaid-sommelier"
+  ]
+ },
+ {
+  "id": "56163",
+  "name": "Cashier",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "收銀員-cashier",
+  "aliases": [
+   "Cashier",
+   "cashier",
+   "收銀員",
+   "收銀員-cashier"
+  ]
+ },
+ {
+  "id": "56109",
+  "name": "Chef / Cook",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "廚師-chef-cook",
+  "aliases": [
+   "Chef / Cook",
+   "chef / cook",
+   "chef-cook",
+   "廚師",
+   "廚師-chef-cook"
+  ]
+ },
+ {
+  "id": "56110",
+  "name": "Cleaner & Dishwasher",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "清潔和洗碗-cleaner-dishwasher",
+  "aliases": [
+   "Cleaner & Dishwasher",
+   "cleaner & dishwasher",
+   "cleaner-dishwasher",
+   "清潔和洗碗",
+   "清潔和洗碗-cleaner-dishwasher"
+  ]
+ },
+ {
+  "id": "56164",
+  "name": "Customer Service",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "客戶服務員-customer-service",
+  "aliases": [
+   "Customer Service",
+   "customer service",
+   "customer-service",
+   "客戶服務員",
+   "客戶服務員-customer-service"
+  ]
+ },
+ {
+  "id": "56108",
+  "name": "Dessert / Bakery",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "甜品-麵包-dessert-bakery",
+  "aliases": [
+   "Dessert / Bakery",
+   "dessert / bakery",
+   "甜品",
+   "甜品-麵包-dessert-bakery",
+   "麵包",
+   "麵包-dessert-bakery"
+  ]
+ },
+ {
+  "id": "56009",
+  "name": "Food & Beverage",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "餐飲服務部-food-beverage",
+  "aliases": [
+   "Food & Beverage",
+   "food & beverage",
+   "food-beverage",
+   "餐飲服務部",
+   "餐飲服務部-food-beverage"
+  ]
+ },
+ {
+  "id": "56165",
+  "name": "Guest Relations",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "客務-guest-relations",
+  "aliases": [
+   "Guest Relations",
+   "guest relations",
+   "guest-relations",
+   "客務",
+   "客務-guest-relations"
+  ]
+ },
+ {
+  "id": "56166",
+  "name": "Restaurant Manager / Supervisor / Captain",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "餐廳經理-餐廳主任-餐廳部長-restaurant-manager-supervisor-captain",
+  "aliases": [
+   "Restaurant Manager / Supervisor / Captain",
+   "restaurant manager / supervisor / captain",
+   "餐廳主任",
+   "餐廳主任-餐廳部長-restaurant-manager-supervisor-captain",
+   "餐廳經理",
+   "餐廳經理-餐廳主任-餐廳部長-restaurant-manager-supervisor-captain",
+   "餐廳部長"
+  ]
+ },
+ {
+  "id": "56113",
+  "name": "Waiter / Waitress",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "侍應-waiter-waitress",
+  "aliases": [
+   "Waiter / Waitress",
+   "waiter / waitress",
+   "waiter-waitress",
+   "侍應",
+   "侍應-waiter-waitress"
+  ]
+ },
+ {
+  "id": "56070",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "23000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "3626",
+  "name": "Customer Service",
+  "type": "jobFunc",
+  "cat_id": "",
+  "zh": "",
+  "aliases": [
+   "Customer Service",
+   "customer service"
+  ]
+ },
+ {
+  "id": "3576",
+  "name": "Draftsman",
+  "type": "jobFunc",
+  "cat_id": "18000",
+  "zh": "繪圖員-draftsman",
+  "aliases": [
+   "Draftsman",
+   "draftsman",
+   "繪圖員",
+   "繪圖員-draftsman"
+  ]
+ },
+ {
+  "id": "3573",
+  "name": "Fashion",
+  "type": "jobFunc",
+  "cat_id": "18000",
+  "zh": "時裝設計-fashion",
+  "aliases": [
+   "Fashion",
+   "fashion",
+   "時裝設計",
+   "時裝設計-fashion"
+  ]
+ },
+ {
+  "id": "3574",
+  "name": "Graphic",
+  "type": "jobFunc",
+  "cat_id": "18000",
+  "zh": "平面設計-graphic",
+  "aliases": [
+   "Graphic",
+   "graphic",
+   "平面設計",
+   "平面設計-graphic"
+  ]
+ },
+ {
+  "id": "3575",
+  "name": "Industrial / Product",
+  "type": "jobFunc",
+  "cat_id": "18000",
+  "zh": "工業-產品-industrial-product",
+  "aliases": [
+   "Industrial / Product",
+   "industrial / product",
+   "工業",
+   "工業-產品-industrial-product",
+   "產品",
+   "產品-industrial-product"
+  ]
+ },
+ {
+  "id": "3563",
+  "name": "Interior",
+  "type": "jobFunc",
+  "cat_id": "18000",
+  "zh": "室內設計-interior",
+  "aliases": [
+   "Interior",
+   "interior",
+   "室內設計",
+   "室內設計-interior"
+  ]
+ },
+ {
+  "id": "56071",
+  "name": "Multi-Media",
+  "type": "jobFunc",
+  "cat_id": "18000",
+  "zh": "多媒體-multi-media",
+  "aliases": [
+   "Multi-Media",
+   "multi-media",
+   "多媒體",
+   "多媒體-multi-media"
+  ]
+ },
+ {
+  "id": "56167",
+  "name": "Visual Merchandising",
+  "type": "jobFunc",
+  "cat_id": "18000",
+  "zh": "櫥窗設計-visual-merchandising",
+  "aliases": [
+   "Visual Merchandising",
+   "visual merchandising",
+   "visual-merchandising",
+   "櫥窗設計",
+   "櫥窗設計-visual-merchandising"
+  ]
+ },
+ {
+  "id": "56168",
+  "name": "Web Designer",
+  "type": "jobFunc",
+  "cat_id": "18000",
+  "zh": "網頁設計師-web-designer",
+  "aliases": [
+   "Web Designer",
+   "web designer",
+   "web-designer",
+   "網頁設計師",
+   "網頁設計師-web-designer"
+  ]
+ },
+ {
+  "id": "56072",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "18000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56007",
+  "name": "Lecturer / Professor",
+  "type": "jobFunc",
+  "cat_id": "19000",
+  "zh": "講師-教授-lecturer-professor",
+  "aliases": [
+   "Lecturer / Professor",
+   "lecturer / professor",
+   "教授",
+   "教授-lecturer-professor",
+   "講師",
+   "講師-教授-lecturer-professor"
+  ]
+ },
+ {
+  "id": "3609",
+  "name": "Librarian",
+  "type": "jobFunc",
+  "cat_id": "19000",
+  "zh": "圖書管理員-librarian",
+  "aliases": [
+   "Librarian",
+   "librarian",
+   "圖書管理員",
+   "圖書管理員-librarian"
+  ]
+ },
+ {
+  "id": "56169",
+  "name": "Research",
+  "type": "jobFunc",
+  "cat_id": "19000",
+  "zh": "研究-research",
+  "aliases": [
+   "Research",
+   "research",
+   "研究",
+   "研究-research"
+  ]
+ },
+ {
+  "id": "56006",
+  "name": "Teacher",
+  "type": "jobFunc",
+  "cat_id": "19000",
+  "zh": "教師-teacher",
+  "aliases": [
+   "Teacher",
+   "teacher",
+   "教師",
+   "教師-teacher"
+  ]
+ },
+ {
+  "id": "3577",
+  "name": "Tutor / Instructor",
+  "type": "jobFunc",
+  "cat_id": "19000",
+  "zh": "助教-家庭教師-指導員-tutor-instructor",
+  "aliases": [
+   "Tutor / Instructor",
+   "tutor / instructor",
+   "助教",
+   "助教-家庭教師-指導員-tutor-instructor",
+   "家庭教師",
+   "家庭教師-指導員-tutor-instructor",
+   "指導員"
+  ]
+ },
+ {
+  "id": "56005",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "19000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "3580",
+  "name": "Building / E&M",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "建造-電機工程-building-e-m",
+  "aliases": [
+   "Building / E&M",
+   "building / e&m",
+   "建造",
+   "建造-電機工程-building-e-m",
+   "電機工程",
+   "電機工程-building-e-m"
+  ]
+ },
+ {
+  "id": "3578",
+  "name": "Chemical / Environmental Protection / Laboratory",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "化學-環境保護-實驗室-chemical-environmental-protection-laboratory",
+  "aliases": [
+   "Chemical / Environmental Protection / Laboratory",
+   "chemical / environmental protection / laboratory",
+   "化學",
+   "化學-環境保護-實驗室-chemical-environmental-protection-laboratory",
+   "實驗室",
+   "環境保護",
+   "環境保護-實驗室-chemical-environmental-protection-laboratory"
+  ]
+ },
+ {
+  "id": "3579",
+  "name": "Civil / Structural",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "土木-結構-civil-structural",
+  "aliases": [
+   "Civil / Structural",
+   "civil / structural",
+   "土木",
+   "土木-結構-civil-structural",
+   "結構",
+   "結構-civil-structural"
+  ]
+ },
+ {
+  "id": "56170",
+  "name": "Draftsman / CAD",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "草擬人員-draftsman-cad",
+  "aliases": [
+   "Draftsman / CAD",
+   "draftsman / cad",
+   "draftsman-cad",
+   "草擬人員",
+   "草擬人員-draftsman-cad"
+  ]
+ },
+ {
+  "id": "3581",
+  "name": "Electrical / Electronic",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "電器-電子-electrical-electronic",
+  "aliases": [
+   "Electrical / Electronic",
+   "electrical / electronic",
+   "電器",
+   "電器-電子-electrical-electronic",
+   "電子",
+   "電子-electrical-electronic"
+  ]
+ },
+ {
+  "id": "56008",
+  "name": "Engineering Project Management",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "工程項目管理-engineering-project-management",
+  "aliases": [
+   "Engineering Project Management",
+   "engineering project management",
+   "engineering-project-management",
+   "工程項目管理",
+   "工程項目管理-engineering-project-management"
+  ]
+ },
+ {
+  "id": "3583",
+  "name": "Industry / Manufacturing / Production",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "工業-製造-生產-industry-manufacturing-production",
+  "aliases": [
+   "Industry / Manufacturing / Production",
+   "industry / manufacturing / production",
+   "工業",
+   "工業-製造-生產-industry-manufacturing-production",
+   "生產",
+   "製造",
+   "製造-生產-industry-manufacturing-production"
+  ]
+ },
+ {
+  "id": "3585",
+  "name": "Mechanical",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "機械-mechanical",
+  "aliases": [
+   "Mechanical",
+   "mechanical",
+   "機械",
+   "機械-mechanical"
+  ]
+ },
+ {
+  "id": "56171",
+  "name": "Quality Assurance",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "品質保證-quality-assurance",
+  "aliases": [
+   "Quality Assurance",
+   "quality assurance",
+   "quality-assurance",
+   "品質保證",
+   "品質保證-quality-assurance"
+  ]
+ },
+ {
+  "id": "3587",
+  "name": "Telecommunication / Wireless / Radio",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "電信-無線電-telecommunication-wireless-radio",
+  "aliases": [
+   "Telecommunication / Wireless / Radio",
+   "telecommunication / wireless / radio",
+   "無線電",
+   "無線電-telecommunication-wireless-radio",
+   "電信",
+   "電信-無線電-telecommunication-wireless-radio"
+  ]
+ },
+ {
+  "id": "56073",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "20000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56014",
+  "name": "Fresh Graduate",
+  "type": "jobFunc",
+  "cat_id": "",
+  "zh": "",
+  "aliases": [
+   "Fresh Graduate",
+   "fresh graduate"
+  ]
+ },
+ {
+  "id": "56098",
+  "name": "Government",
+  "type": "jobFunc",
+  "cat_id": "",
+  "zh": "",
+  "aliases": [
+   "Government",
+   "government"
+  ]
+ },
+ {
+  "id": "56144",
+  "name": "Athletics / Fitness / Sports & Recreation",
+  "type": "jobFunc",
+  "cat_id": "22000",
+  "zh": "體育-健身-運動休閒-athletics-fitness-sports-recreation",
+  "aliases": [
+   "Athletics / Fitness / Sports & Recreation",
+   "athletics / fitness / sports & recreation",
+   "健身",
+   "健身-運動休閒-athletics-fitness-sports-recreation",
+   "運動休閒",
+   "體育",
+   "體育-健身-運動休閒-athletics-fitness-sports-recreation"
+  ]
+ },
+ {
+  "id": "56114",
+  "name": "Beautician",
+  "type": "jobFunc",
+  "cat_id": "22000",
+  "zh": "美容師-beautician",
+  "aliases": [
+   "Beautician",
+   "beautician",
+   "美容師",
+   "美容師-beautician"
+  ]
+ },
+ {
+  "id": "3590",
+  "name": "Health / Beauty Care",
+  "type": "jobFunc",
+  "cat_id": "22000",
+  "zh": "健康-美容保健-health-beauty-care",
+  "aliases": [
+   "Health / Beauty Care",
+   "health / beauty care",
+   "健康",
+   "健康-美容保健-health-beauty-care",
+   "美容保健",
+   "美容保健-health-beauty-care"
+  ]
+ },
+ {
+  "id": "56115",
+  "name": "Nutritionist",
+  "type": "jobFunc",
+  "cat_id": "22000",
+  "zh": "營養師-nutritionist",
+  "aliases": [
+   "Nutritionist",
+   "nutritionist",
+   "營養師",
+   "營養師-nutritionist"
+  ]
+ },
+ {
+  "id": "56172",
+  "name": "Spa / Massage",
+  "type": "jobFunc",
+  "cat_id": "22000",
+  "zh": "水療-按摩-spa-massage",
+  "aliases": [
+   "Spa / Massage",
+   "spa / massage",
+   "按摩",
+   "按摩-spa-massage",
+   "水療",
+   "水療-按摩-spa-massage"
+  ]
+ },
+ {
+  "id": "56173",
+  "name": "Sports / Fitness / Recreation",
+  "type": "jobFunc",
+  "cat_id": "22000",
+  "zh": "體育-健身-休閑娛樂-sports-fitness-recreation",
+  "aliases": [
+   "Sports / Fitness / Recreation",
+   "sports / fitness / recreation",
+   "休閑娛樂",
+   "健身",
+   "健身-休閑娛樂-sports-fitness-recreation",
+   "體育",
+   "體育-健身-休閑娛樂-sports-fitness-recreation"
+  ]
+ },
+ {
+  "id": "56116",
+  "name": "Therapist",
+  "type": "jobFunc",
+  "cat_id": "22000",
+  "zh": "治療師-therapist",
+  "aliases": [
+   "Therapist",
+   "therapist",
+   "治療師",
+   "治療師-therapist"
+  ]
+ },
+ {
+  "id": "56074",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "22000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56174",
+  "name": "Doctor / Practitioner / Surgeon",
+  "type": "jobFunc",
+  "cat_id": "30000",
+  "zh": "醫生-執業醫生-外科醫生-doctor-practitioner-surgeon",
+  "aliases": [
+   "Doctor / Practitioner / Surgeon",
+   "doctor / practitioner / surgeon",
+   "執業醫生",
+   "執業醫生-外科醫生-doctor-practitioner-surgeon",
+   "外科醫生",
+   "醫生",
+   "醫生-執業醫生-外科醫生-doctor-practitioner-surgeon"
+  ]
+ },
+ {
+  "id": "56075",
+  "name": "General Support",
+  "type": "jobFunc",
+  "cat_id": "30000",
+  "zh": "一般支援-general-support",
+  "aliases": [
+   "General Support",
+   "general support",
+   "general-support",
+   "一般支援",
+   "一般支援-general-support"
+  ]
+ },
+ {
+  "id": "56016",
+  "name": "Medical Services",
+  "type": "jobFunc",
+  "cat_id": "30000",
+  "zh": "醫療服務-medical-services",
+  "aliases": [
+   "Medical Services",
+   "medical services",
+   "medical-services",
+   "醫療服務",
+   "醫療服務-medical-services"
+  ]
+ },
+ {
+  "id": "56017",
+  "name": "Nursing",
+  "type": "jobFunc",
+  "cat_id": "30000",
+  "zh": "護理-nursing",
+  "aliases": [
+   "Nursing",
+   "nursing",
+   "護理",
+   "護理-nursing"
+  ]
+ },
+ {
+  "id": "56175",
+  "name": "Pharmaceutical",
+  "type": "jobFunc",
+  "cat_id": "30000",
+  "zh": "藥劑師-pharmaceutical",
+  "aliases": [
+   "Pharmaceutical",
+   "pharmaceutical",
+   "藥劑師",
+   "藥劑師-pharmaceutical"
+  ]
+ },
+ {
+  "id": "56018",
+  "name": "Professional / Specialist",
+  "type": "jobFunc",
+  "cat_id": "30000",
+  "zh": "專員-professional-specialist",
+  "aliases": [
+   "Professional / Specialist",
+   "professional / specialist",
+   "professional-specialist",
+   "專員",
+   "專員-professional-specialist"
+  ]
+ },
+ {
+  "id": "56176",
+  "name": "Therapist",
+  "type": "jobFunc",
+  "cat_id": "30000",
+  "zh": "療法技師-therapist",
+  "aliases": [
+   "Therapist",
+   "therapist",
+   "療法技師",
+   "療法技師-therapist"
+  ]
+ },
+ {
+  "id": "3615",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "30000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56012",
+  "name": "Customer Service",
+  "type": "jobFunc",
+  "cat_id": "53460",
+  "zh": "客戶服務-customer-service",
+  "aliases": [
+   "Customer Service",
+   "customer service",
+   "customer-service",
+   "客戶服務",
+   "客戶服務-customer-service"
+  ]
+ },
+ {
+  "id": "56178",
+  "name": "Duty Engineer / Technician",
+  "type": "jobFunc",
+  "cat_id": "53460",
+  "zh": "技術員-工程師-duty-engineer-technician",
+  "aliases": [
+   "Duty Engineer / Technician",
+   "duty engineer / technician",
+   "工程師",
+   "工程師-duty-engineer-technician",
+   "技術員",
+   "技術員-工程師-duty-engineer-technician"
+  ]
+ },
+ {
+  "id": "56177",
+  "name": "Entertainment",
+  "type": "jobFunc",
+  "cat_id": "53460",
+  "zh": "娛樂-entertainment",
+  "aliases": [
+   "Entertainment",
+   "entertainment",
+   "娛樂",
+   "娛樂-entertainment"
+  ]
+ },
+ {
+  "id": "56179",
+  "name": "Food & Beverage",
+  "type": "jobFunc",
+  "cat_id": "53460",
+  "zh": "餐飲服務部-food-beverage",
+  "aliases": [
+   "Food & Beverage",
+   "food & beverage",
+   "food-beverage",
+   "餐飲服務部",
+   "餐飲服務部-food-beverage"
+  ]
+ },
+ {
+  "id": "56010",
+  "name": "Front Desk / Office",
+  "type": "jobFunc",
+  "cat_id": "53460",
+  "zh": "前線接待-front-desk-office",
+  "aliases": [
+   "Front Desk / Office",
+   "front desk / office",
+   "front-desk-office",
+   "前線接待",
+   "前線接待-front-desk-office"
+  ]
+ },
+ {
+  "id": "56117",
+  "name": "Guest Relations",
+  "type": "jobFunc",
+  "cat_id": "53460",
+  "zh": "客戶關係-guest-relations",
+  "aliases": [
+   "Guest Relations",
+   "guest relations",
+   "guest-relations",
+   "客戶關係",
+   "客戶關係-guest-relations"
+  ]
+ },
+ {
+  "id": "56118",
+  "name": "Housekeeping / Room Attendent",
+  "type": "jobFunc",
+  "cat_id": "53460",
+  "zh": "管家部-房務員-housekeeping-room-attendent",
+  "aliases": [
+   "Housekeeping / Room Attendent",
+   "housekeeping / room attendent",
+   "房務員",
+   "房務員-housekeeping-room-attendent",
+   "管家部",
+   "管家部-房務員-housekeeping-room-attendent"
+  ]
+ },
+ {
+  "id": "56011",
+  "name": "Reservation",
+  "type": "jobFunc",
+  "cat_id": "53460",
+  "zh": "預約服務-reservation",
+  "aliases": [
+   "Reservation",
+   "reservation",
+   "預約服務",
+   "預約服務-reservation"
+  ]
+ },
+ {
+  "id": "3592",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "53460",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56181",
+  "name": "Compensation & Benefits",
+  "type": "jobFunc",
+  "cat_id": "24000",
+  "zh": "薪資及福利-compensation-benefits",
+  "aliases": [
+   "Compensation & Benefits",
+   "compensation & benefits",
+   "compensation-benefits",
+   "薪資及福利",
+   "薪資及福利-compensation-benefits"
+  ]
+ },
+ {
+  "id": "56182",
+  "name": "HR / Personnel",
+  "type": "jobFunc",
+  "cat_id": "24000",
+  "zh": "人力資源-hr-personnel",
+  "aliases": [
+   "HR / Personnel",
+   "hr / personnel",
+   "hr-personnel",
+   "人力資源",
+   "人力資源-hr-personnel"
+  ]
+ },
+ {
+  "id": "56183",
+  "name": "HR Director / Manager",
+  "type": "jobFunc",
+  "cat_id": "24000",
+  "zh": "人力資源總監-經理-hr-director-manager",
+  "aliases": [
+   "HR Director / Manager",
+   "hr director / manager",
+   "人力資源總監",
+   "人力資源總監-經理-hr-director-manager",
+   "經理",
+   "經理-hr-director-manager"
+  ]
+ },
+ {
+  "id": "3594",
+  "name": "HR Officer / Assistant",
+  "type": "jobFunc",
+  "cat_id": "24000",
+  "zh": "人力資源專員-助理-hr-officer-assistant",
+  "aliases": [
+   "HR Officer / Assistant",
+   "hr officer / assistant",
+   "人力資源專員",
+   "人力資源專員-助理-hr-officer-assistant",
+   "助理",
+   "助理-hr-officer-assistant"
+  ]
+ },
+ {
+  "id": "56184",
+  "name": "Recruitment / Executive Search",
+  "type": "jobFunc",
+  "cat_id": "24000",
+  "zh": "招聘-獵頭-recruitment-executive-search",
+  "aliases": [
+   "Recruitment / Executive Search",
+   "recruitment / executive search",
+   "招聘",
+   "招聘-獵頭-recruitment-executive-search",
+   "獵頭",
+   "獵頭-recruitment-executive-search"
+  ]
+ },
+ {
+  "id": "3595",
+  "name": "Training & Development",
+  "type": "jobFunc",
+  "cat_id": "24000",
+  "zh": "培訓與發展-training-development",
+  "aliases": [
+   "Training & Development",
+   "training & development",
+   "training-development",
+   "培訓與發展",
+   "培訓與發展-training-development"
+  ]
+ },
+ {
+  "id": "56185",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "24000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56186",
+  "name": "Actuarial",
+  "type": "jobFunc",
+  "cat_id": "25000",
+  "zh": "精算-actuarial",
+  "aliases": [
+   "Actuarial",
+   "actuarial",
+   "精算",
+   "精算-actuarial"
+  ]
+ },
+ {
+  "id": "56187",
+  "name": "Business Development",
+  "type": "jobFunc",
+  "cat_id": "25000",
+  "zh": "業務發展-business-development",
+  "aliases": [
+   "Business Development",
+   "business development",
+   "business-development",
+   "業務發展",
+   "業務發展-business-development"
+  ]
+ },
+ {
+  "id": "56188",
+  "name": "Claims Officer",
+  "type": "jobFunc",
+  "cat_id": "25000",
+  "zh": "索償員-claims-officer",
+  "aliases": [
+   "Claims Officer",
+   "claims officer",
+   "claims-officer",
+   "索償員",
+   "索償員-claims-officer"
+  ]
+ },
+ {
+  "id": "3597",
+  "name": "Insurance / Broker",
+  "type": "jobFunc",
+  "cat_id": "25000",
+  "zh": "經紀-代理-insurance-broker",
+  "aliases": [
+   "Insurance / Broker",
+   "insurance / broker",
+   "代理",
+   "代理-insurance-broker",
+   "經紀",
+   "經紀-代理-insurance-broker"
+  ]
+ },
+ {
+  "id": "56189",
+  "name": "Policy Administration",
+  "type": "jobFunc",
+  "cat_id": "25000",
+  "zh": "政策管理-policy-administration",
+  "aliases": [
+   "Policy Administration",
+   "policy administration",
+   "policy-administration",
+   "政策管理",
+   "政策管理-policy-administration"
+  ]
+ },
+ {
+  "id": "56190",
+  "name": "Underwriting",
+  "type": "jobFunc",
+  "cat_id": "25000",
+  "zh": "核保-underwriting",
+  "aliases": [
+   "Underwriting",
+   "underwriting",
+   "核保",
+   "核保-underwriting"
+  ]
+ },
+ {
+  "id": "56076",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "25000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56119",
+  "name": "Application - Network",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "應用程式-網絡-application-network",
+  "aliases": [
+   "Application - Network",
+   "application - network",
+   "應用程式",
+   "應用程式-網絡-application-network",
+   "網絡",
+   "網絡-application-network"
+  ]
+ },
+ {
+  "id": "56120",
+  "name": "Application - Software",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "應用程式-軟件-application-software",
+  "aliases": [
+   "Application - Software",
+   "application - software",
+   "應用程式",
+   "應用程式-軟件-application-software",
+   "軟件",
+   "軟件-application-software"
+  ]
+ },
+ {
+  "id": "56121",
+  "name": "DBA",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "數據庫管理員-dba",
+  "aliases": [
+   "DBA",
+   "dba",
+   "數據庫管理員",
+   "數據庫管理員-dba"
+  ]
+ },
+ {
+  "id": "56122",
+  "name": "Hardware",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "硬件-hardware",
+  "aliases": [
+   "Hardware",
+   "hardware",
+   "硬件",
+   "硬件-hardware"
+  ]
+ },
+ {
+  "id": "56124",
+  "name": "IT Auditing",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "資訊科技審計-it-auditing",
+  "aliases": [
+   "IT Auditing",
+   "it auditing",
+   "it-auditing",
+   "資訊科技審計",
+   "資訊科技審計-it-auditing"
+  ]
+ },
+ {
+  "id": "56013",
+  "name": "IT Management",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "資訊科技管理-it-management",
+  "aliases": [
+   "IT Management",
+   "it management",
+   "it-management",
+   "資訊科技管理",
+   "資訊科技管理-it-management"
+  ]
+ },
+ {
+  "id": "56125",
+  "name": "IT Project Management / Team Lead",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "資訊科技項目管理-團隊領導-it-project-management-team-lead",
+  "aliases": [
+   "IT Project Management / Team Lead",
+   "it project management / team lead",
+   "團隊領導",
+   "團隊領導-it-project-management-team-lead",
+   "資訊科技項目管理",
+   "資訊科技項目管理-團隊領導-it-project-management-team-lead"
+  ]
+ },
+ {
+  "id": "56126",
+  "name": "Mobile / Wireless Communications",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "流動-無線通信-mobile-wireless-communications",
+  "aliases": [
+   "Mobile / Wireless Communications",
+   "mobile / wireless communications",
+   "流動",
+   "流動-無線通信-mobile-wireless-communications",
+   "無線通信",
+   "無線通信-mobile-wireless-communications"
+  ]
+ },
+ {
+  "id": "56191",
+  "name": "Mobile Applications Developer",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "手機程式開發者-mobile-applications-developer",
+  "aliases": [
+   "Mobile Applications Developer",
+   "mobile applications developer",
+   "mobile-applications-developer",
+   "手機程式開發者",
+   "手機程式開發者-mobile-applications-developer"
+  ]
+ },
+ {
+  "id": "3604",
+  "name": "Network & System",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "網絡及系統-network-system",
+  "aliases": [
+   "Network & System",
+   "network & system",
+   "network-system",
+   "網絡及系統",
+   "網絡及系統-network-system"
+  ]
+ },
+ {
+  "id": "56127",
+  "name": "Product Management / Business Analyst",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "產品管理-業務分析員-product-management-business-analyst",
+  "aliases": [
+   "Product Management / Business Analyst",
+   "product management / business analyst",
+   "業務分析員",
+   "業務分析員-product-management-business-analyst",
+   "產品管理",
+   "產品管理-業務分析員-product-management-business-analyst"
+  ]
+ },
+ {
+  "id": "56192",
+  "name": "Program Specialist",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "程式員-program-specialist",
+  "aliases": [
+   "Program Specialist",
+   "program specialist",
+   "program-specialist",
+   "程式員",
+   "程式員-program-specialist"
+  ]
+ },
+ {
+  "id": "56128",
+  "name": "Security Specialist / Risk Management",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "保安專員-風險管理-security-specialist-risk-management",
+  "aliases": [
+   "Security Specialist / Risk Management",
+   "security specialist / risk management",
+   "保安專員",
+   "保安專員-風險管理-security-specialist-risk-management",
+   "風險管理",
+   "風險管理-security-specialist-risk-management"
+  ]
+ },
+ {
+  "id": "3603",
+  "name": "Software / Web Developer",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "軟件-網頁開發者-software-web-developer",
+  "aliases": [
+   "Software / Web Developer",
+   "software / web developer",
+   "網頁開發者",
+   "網頁開發者-software-web-developer",
+   "軟件",
+   "軟件-網頁開發者-software-web-developer"
+  ]
+ },
+ {
+  "id": "56193",
+  "name": "System Administrator",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "系統管理員-system-administrator",
+  "aliases": [
+   "System Administrator",
+   "system administrator",
+   "system-administrator",
+   "系統管理員",
+   "系統管理員-system-administrator"
+  ]
+ },
+ {
+  "id": "56194",
+  "name": "System Analyst",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "系統分析師-system-analyst",
+  "aliases": [
+   "System Analyst",
+   "system analyst",
+   "system-analyst",
+   "系統分析師",
+   "系統分析師-system-analyst"
+  ]
+ },
+ {
+  "id": "56195",
+  "name": "System Engineer / Network Engineer",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "系統工程師-網絡工程師-system-engineer-network-engineer",
+  "aliases": [
+   "System Engineer / Network Engineer",
+   "system engineer / network engineer",
+   "系統工程師",
+   "系統工程師-網絡工程師-system-engineer-network-engineer",
+   "網絡工程師",
+   "網絡工程師-system-engineer-network-engineer"
+  ]
+ },
+ {
+  "id": "3605",
+  "name": "Systems / Technical Support",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "系統-技術支緩-systems-technical-support",
+  "aliases": [
+   "Systems / Technical Support",
+   "systems / technical support",
+   "技術支緩",
+   "技術支緩-systems-technical-support",
+   "系統",
+   "系統-技術支緩-systems-technical-support"
+  ]
+ },
+ {
+  "id": "56129",
+  "name": "Technical / Functional Consulting",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "系統技術-功能諮詢-technical-functional-consulting",
+  "aliases": [
+   "Technical / Functional Consulting",
+   "technical / functional consulting",
+   "功能諮詢",
+   "功能諮詢-technical-functional-consulting",
+   "系統技術",
+   "系統技術-功能諮詢-technical-functional-consulting"
+  ]
+ },
+ {
+  "id": "56130",
+  "name": "Technical Writing",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "系統技術文件寫作-technical-writing",
+  "aliases": [
+   "Technical Writing",
+   "technical writing",
+   "technical-writing",
+   "系統技術文件寫作",
+   "系統技術文件寫作-technical-writing"
+  ]
+ },
+ {
+  "id": "56123",
+  "name": "Webmaster / SEO",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "網站管理員-搜索引擎優化-webmaster-seo",
+  "aliases": [
+   "Webmaster / SEO",
+   "webmaster / seo",
+   "搜索引擎優化",
+   "搜索引擎優化-webmaster-seo",
+   "網站管理員",
+   "網站管理員-搜索引擎優化-webmaster-seo"
+  ]
+ },
+ {
+  "id": "56077",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "26000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56136",
+  "name": "Aviation",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "航空-aviation",
+  "aliases": [
+   "Aviation",
+   "aviation",
+   "航空",
+   "航空-aviation"
+  ]
+ },
+ {
+  "id": "56199",
+  "name": "Couriers / Drivers",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "速遞服務-司機-couriers-drivers",
+  "aliases": [
+   "Couriers / Drivers",
+   "couriers / drivers",
+   "司機",
+   "司機-couriers-drivers",
+   "速遞服務",
+   "速遞服務-司機-couriers-drivers"
+  ]
+ },
+ {
+  "id": "56200",
+  "name": "Documentary Credit / Bills Processing",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "信貸-帳單處理-documentary-credit-bills-processing",
+  "aliases": [
+   "Documentary Credit / Bills Processing",
+   "documentary credit / bills processing",
+   "信貸",
+   "信貸-帳單處理-documentary-credit-bills-processing",
+   "帳單處理",
+   "帳單處理-documentary-credit-bills-processing"
+  ]
+ },
+ {
+  "id": "56137",
+  "name": "Freight Forwarding",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "貨運代理-freight-forwarding",
+  "aliases": [
+   "Freight Forwarding",
+   "freight forwarding",
+   "freight-forwarding",
+   "貨運代理",
+   "貨運代理-freight-forwarding"
+  ]
+ },
+ {
+  "id": "56201",
+  "name": "Fulfillment",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "履行-fulfillment",
+  "aliases": [
+   "Fulfillment",
+   "fulfillment",
+   "履行",
+   "履行-fulfillment"
+  ]
+ },
+ {
+  "id": "3610",
+  "name": "Logistics",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "物流-logistics",
+  "aliases": [
+   "Logistics",
+   "logistics",
+   "物流",
+   "物流-logistics"
+  ]
+ },
+ {
+  "id": "56033",
+  "name": "Management",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "管理-management",
+  "aliases": [
+   "Management",
+   "management",
+   "管理",
+   "管理-management"
+  ]
+ },
+ {
+  "id": "3635",
+  "name": "Shipping",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "船務-shipping",
+  "aliases": [
+   "Shipping",
+   "shipping",
+   "船務",
+   "船務-shipping"
+  ]
+ },
+ {
+  "id": "56080",
+  "name": "Supply Chain",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "供應鏈管理-supply-chain",
+  "aliases": [
+   "Supply Chain",
+   "supply chain",
+   "supply-chain",
+   "供應鏈管理",
+   "供應鏈管理-supply-chain"
+  ]
+ },
+ {
+  "id": "3636",
+  "name": "Transportation",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "運輸-transportation",
+  "aliases": [
+   "Transportation",
+   "transportation",
+   "運輸",
+   "運輸-transportation"
+  ]
+ },
+ {
+  "id": "3612",
+  "name": "Warehousing / Inventory",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "倉儲業務-庫存-warehousing-inventory",
+  "aliases": [
+   "Warehousing / Inventory",
+   "warehousing / inventory",
+   "倉儲業務",
+   "倉儲業務-庫存-warehousing-inventory",
+   "庫存",
+   "庫存-warehousing-inventory"
+  ]
+ },
+ {
+  "id": "56081",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "28000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56203",
+  "name": "General Management",
+  "type": "jobFunc",
+  "cat_id": "21000",
+  "zh": "綜合管理-general-management",
+  "aliases": [
+   "General Management",
+   "general management",
+   "general-management",
+   "綜合管理",
+   "綜合管理-general-management"
+  ]
+ },
+ {
+  "id": "3589",
+  "name": "Management",
+  "type": "jobFunc",
+  "cat_id": "21000",
+  "zh": "管理-management",
+  "aliases": [
+   "Management",
+   "management",
+   "管理",
+   "管理-management"
+  ]
+ },
+ {
+  "id": "56204",
+  "name": "Top Executives",
+  "type": "jobFunc",
+  "cat_id": "21000",
+  "zh": "高級行政人員-top-executives",
+  "aliases": [
+   "Top Executives",
+   "top executives",
+   "top-executives",
+   "高級行政人員",
+   "高級行政人員-top-executives"
+  ]
+ },
+ {
+  "id": "56205",
+  "name": "Garment / Textile",
+  "type": "jobFunc",
+  "cat_id": "29000",
+  "zh": "成衣-紡織-garment-textile",
+  "aliases": [
+   "Garment / Textile",
+   "garment / textile",
+   "成衣",
+   "成衣-紡織-garment-textile",
+   "紡織",
+   "紡織-garment-textile"
+  ]
+ },
+ {
+  "id": "3613",
+  "name": "General / Production Workers",
+  "type": "jobFunc",
+  "cat_id": "29000",
+  "zh": "一般-生產工人-general-production-workers",
+  "aliases": [
+   "General / Production Workers",
+   "general / production workers",
+   "一般",
+   "一般-生產工人-general-production-workers",
+   "生產工人",
+   "生產工人-general-production-workers"
+  ]
+ },
+ {
+  "id": "56206",
+  "name": "Jewelry",
+  "type": "jobFunc",
+  "cat_id": "29000",
+  "zh": "珠寶-jewelry",
+  "aliases": [
+   "Jewelry",
+   "jewelry",
+   "珠寶",
+   "珠寶-jewelry"
+  ]
+ },
+ {
+  "id": "56015",
+  "name": "Manufacturing Management",
+  "type": "jobFunc",
+  "cat_id": "29000",
+  "zh": "生產管理-manufacturing-management",
+  "aliases": [
+   "Manufacturing Management",
+   "manufacturing management",
+   "manufacturing-management",
+   "生產管理",
+   "生產管理-manufacturing-management"
+  ]
+ },
+ {
+  "id": "56207",
+  "name": "Printing",
+  "type": "jobFunc",
+  "cat_id": "29000",
+  "zh": "印刷-printing",
+  "aliases": [
+   "Printing",
+   "printing",
+   "印刷",
+   "印刷-printing"
+  ]
+ },
+ {
+  "id": "56083",
+  "name": "Product Development / Management",
+  "type": "jobFunc",
+  "cat_id": "29000",
+  "zh": "產品開發-管理-product-development-management",
+  "aliases": [
+   "Product Development / Management",
+   "product development / management",
+   "產品開發",
+   "產品開發-管理-product-development-management",
+   "管理",
+   "管理-product-development-management"
+  ]
+ },
+ {
+  "id": "3614",
+  "name": "Production Planning / QC",
+  "type": "jobFunc",
+  "cat_id": "29000",
+  "zh": "生產規劃-品質監控-production-planning-qc",
+  "aliases": [
+   "Production Planning / QC",
+   "production planning / qc",
+   "品質監控",
+   "品質監控-production-planning-qc",
+   "生產規劃",
+   "生產規劃-品質監控-production-planning-qc"
+  ]
+ },
+ {
+  "id": "56208",
+  "name": "Quality Assurance, Control & Testing / ISO",
+  "type": "jobFunc",
+  "cat_id": "29000",
+  "zh": "品質控制-保證及測試-iso-quality-assurance-control-testing-iso",
+  "aliases": [
+   "Quality Assurance, Control & Testing / ISO",
+   "quality assurance, control & testing / iso",
+   "保證及測試",
+   "保證及測試-iso-quality-assurance-control-testing-iso",
+   "品質控制",
+   "品質控制-保證及測試-iso-quality-assurance-control-testing-iso"
+  ]
+ },
+ {
+  "id": "56082",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "29000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "3625",
+  "name": "Advertising / Market Communication",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "廣告-市場溝通-advertising-market-communication",
+  "aliases": [
+   "Advertising / Market Communication",
+   "advertising / market communication",
+   "市場溝通",
+   "市場溝通-advertising-market-communication",
+   "廣告",
+   "廣告-市場溝通-advertising-market-communication"
+  ]
+ },
+ {
+  "id": "56087",
+  "name": "Brand / Product Management",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "品牌-產品管理-brand-product-management",
+  "aliases": [
+   "Brand / Product Management",
+   "brand / product management",
+   "品牌",
+   "品牌-產品管理-brand-product-management",
+   "產品管理",
+   "產品管理-brand-product-management"
+  ]
+ },
+ {
+  "id": "56085",
+  "name": "Customer Relationship Management",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "客戶關係管理-customer-relationship-management",
+  "aliases": [
+   "Customer Relationship Management",
+   "customer relationship management",
+   "customer-relationship-management",
+   "客戶關係管理",
+   "客戶關係管理-customer-relationship-management"
+  ]
+ },
+ {
+  "id": "56213",
+  "name": "Management",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "管理-management",
+  "aliases": [
+   "Management",
+   "management",
+   "管理",
+   "管理-management"
+  ]
+ },
+ {
+  "id": "56209",
+  "name": "Marketing - Digital Marketing",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "市場營銷-數瑪營銷-marketing-digital-marketing",
+  "aliases": [
+   "Marketing - Digital Marketing",
+   "marketing - digital marketing",
+   "市場營銷",
+   "市場營銷-數瑪營銷-marketing-digital-marketing",
+   "數瑪營銷",
+   "數瑪營銷-marketing-digital-marketing"
+  ]
+ },
+ {
+  "id": "56210",
+  "name": "Marketing - Direct Marketing",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "市場營銷-直效行銷-marketing-direct-marketing",
+  "aliases": [
+   "Marketing - Direct Marketing",
+   "marketing - direct marketing",
+   "市場營銷",
+   "市場營銷-直效行銷-marketing-direct-marketing",
+   "直效行銷",
+   "直效行銷-marketing-direct-marketing"
+  ]
+ },
+ {
+  "id": "3628",
+  "name": "Marketing - General / Support",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "市場營銷-一般-支援-marketing-general-support",
+  "aliases": [
+   "Marketing - General / Support",
+   "marketing - general / support",
+   "一般",
+   "一般-支援-marketing-general-support",
+   "市場營銷",
+   "市場營銷-一般-支援-marketing-general-support",
+   "支援"
+  ]
+ },
+ {
+  "id": "3627",
+  "name": "Marketing - Market Research",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "市場營銷-市場調查-marketing-market-research",
+  "aliases": [
+   "Marketing - Market Research",
+   "marketing - market research",
+   "市場營銷",
+   "市場營銷-市場調查-marketing-market-research",
+   "市場調查",
+   "市場調查-marketing-market-research"
+  ]
+ },
+ {
+  "id": "56211",
+  "name": "Public Relations - Copy-writing",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "公共關係-公關文案-public-relations-copy-writing",
+  "aliases": [
+   "Public Relations - Copy-writing",
+   "public relations - copy-writing",
+   "公共關係",
+   "公共關係-公關文案-public-relations-copy-writing",
+   "公關文案",
+   "公關文案-public-relations-copy-writing"
+  ]
+ },
+ {
+  "id": "56212",
+  "name": "Public Relations - Event Management",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "公共關係-活動管理-public-relations-event-management",
+  "aliases": [
+   "Public Relations - Event Management",
+   "public relations - event management",
+   "公共關係",
+   "公共關係-活動管理-public-relations-event-management",
+   "活動管理",
+   "活動管理-public-relations-event-management"
+  ]
+ },
+ {
+  "id": "56086",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "41000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56132",
+  "name": "Account Servicing",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "用戶服務-account-servicing",
+  "aliases": [
+   "Account Servicing",
+   "account servicing",
+   "account-servicing",
+   "用戶服務",
+   "用戶服務-account-servicing"
+  ]
+ },
+ {
+  "id": "56133",
+  "name": "Broadcasting - TV / Radio",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "廣播-電視-電台-broadcasting-tv-radio",
+  "aliases": [
+   "Broadcasting - TV / Radio",
+   "broadcasting - tv / radio",
+   "廣播",
+   "廣播-電視-電台-broadcasting-tv-radio",
+   "電台",
+   "電視",
+   "電視-電台-broadcasting-tv-radio"
+  ]
+ },
+ {
+  "id": "3571",
+  "name": "Creative Writing",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "文字撰寫-creative-writing",
+  "aliases": [
+   "Creative Writing",
+   "creative writing",
+   "creative-writing",
+   "文字撰寫",
+   "文字撰寫-creative-writing"
+  ]
+ },
+ {
+  "id": "3566",
+  "name": "Editorial / Journalism",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "編輯-新聞-editorial-journalism",
+  "aliases": [
+   "Editorial / Journalism",
+   "editorial / journalism",
+   "新聞",
+   "新聞-editorial-journalism",
+   "編輯",
+   "編輯-新聞-editorial-journalism"
+  ]
+ },
+ {
+  "id": "56134",
+  "name": "Media Buying",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "媒體購買-media-buying",
+  "aliases": [
+   "Media Buying",
+   "media buying",
+   "media-buying",
+   "媒體購買",
+   "媒體購買-media-buying"
+  ]
+ },
+ {
+  "id": "3570",
+  "name": "Media Production / Photography / Video",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "媒體製作-攝影-視頻-media-production-photography-video",
+  "aliases": [
+   "Media Production / Photography / Video",
+   "media production / photography / video",
+   "媒體製作",
+   "媒體製作-攝影-視頻-media-production-photography-video",
+   "攝影",
+   "攝影-視頻-media-production-photography-video",
+   "視頻"
+  ]
+ },
+ {
+  "id": "3568",
+  "name": "News Report /  Anchor",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "新聞報道-主持-news-report-anchor",
+  "aliases": [
+   "News Report /  Anchor",
+   "news report /  anchor",
+   "主持",
+   "主持-news-report-anchor",
+   "新聞報道",
+   "新聞報道-主持-news-report-anchor"
+  ]
+ },
+ {
+  "id": "56215",
+  "name": "Photography / Video",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "攝影-錄像-photography-video",
+  "aliases": [
+   "Photography / Video",
+   "photography / video",
+   "攝影",
+   "攝影-錄像-photography-video",
+   "錄像",
+   "錄像-photography-video"
+  ]
+ },
+ {
+  "id": "56214",
+  "name": "Print Media / Publishing",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "印刷媒體-print-media-publishing",
+  "aliases": [
+   "Print Media / Publishing",
+   "print media / publishing",
+   "print-media-publishing",
+   "印刷媒體",
+   "印刷媒體-print-media-publishing"
+  ]
+ },
+ {
+  "id": "56216",
+  "name": "Production / Programming",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "生產-production-programming",
+  "aliases": [
+   "Production / Programming",
+   "production / programming",
+   "production-programming",
+   "生產",
+   "生產-production-programming"
+  ]
+ },
+ {
+  "id": "56135",
+  "name": "Strategic Planning",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "策略規劃-strategic-planning",
+  "aliases": [
+   "Strategic Planning",
+   "strategic planning",
+   "strategic-planning",
+   "策略規劃",
+   "策略規劃-strategic-planning"
+  ]
+ },
+ {
+  "id": "3569",
+  "name": "Translation",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "翻譯-translation",
+  "aliases": [
+   "Translation",
+   "translation",
+   "翻譯",
+   "翻譯-translation"
+  ]
+ },
+ {
+  "id": "56078",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "15000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "36081",
+  "name": "Electrical / Electronic",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "電器-電子-electrical-electronic",
+  "aliases": [
+   "Electrical / Electronic",
+   "electrical / electronic",
+   "電器",
+   "電器-電子-electrical-electronic",
+   "電子",
+   "電子-electrical-electronic"
+  ]
+ },
+ {
+  "id": "36001",
+  "name": "Fabric / Textile",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "纖維-紡織原料-fabric-textile",
+  "aliases": [
+   "Fabric / Textile",
+   "fabric / textile",
+   "紡織原料",
+   "紡織原料-fabric-textile",
+   "纖維",
+   "纖維-紡織原料-fabric-textile"
+  ]
+ },
+ {
+  "id": "36281",
+  "name": "Fashion / Garment Accessories",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "時裝-服裝配件-fashion-garment-accessories",
+  "aliases": [
+   "Fashion / Garment Accessories",
+   "fashion / garment accessories",
+   "時裝",
+   "時裝-服裝配件-fashion-garment-accessories",
+   "服裝配件",
+   "服裝配件-fashion-garment-accessories"
+  ]
+ },
+ {
+  "id": "36261",
+  "name": "Footwear",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "鞋類-footwear",
+  "aliases": [
+   "Footwear",
+   "footwear",
+   "鞋類",
+   "鞋類-footwear"
+  ]
+ },
+ {
+  "id": "56217",
+  "name": "Furniture",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "家具-furniture",
+  "aliases": [
+   "Furniture",
+   "furniture",
+   "家具",
+   "家具-furniture"
+  ]
+ },
+ {
+  "id": "36021",
+  "name": "Garment / All",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "服裝-全部-garment-all",
+  "aliases": [
+   "Garment / All",
+   "garment / all",
+   "全部",
+   "全部-garment-all",
+   "服裝",
+   "服裝-全部-garment-all"
+  ]
+ },
+ {
+  "id": "56089",
+  "name": "Garment / Knit & Sweater",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "服裝-針織-毛衣-gaD&jobLocList=56243rment-knit-sweater",
+  "aliases": [
+   "Garment / Knit & Sweater",
+   "garment / knit & sweater",
+   "服裝",
+   "服裝-針織-毛衣-gaD&jobLocList=56243rment-knit-sweater",
+   "毛衣",
+   "針織",
+   "針織-毛衣-gaD&jobLocList=56243rment-knit-sweater"
+  ]
+ },
+ {
+  "id": "56090",
+  "name": "Garment / Woven",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "服裝-紡織-garment-woven",
+  "aliases": [
+   "Garment / Woven",
+   "garment / woven",
+   "服裝",
+   "服裝-紡織-garment-woven",
+   "紡織",
+   "紡織-garment-woven"
+  ]
+ },
+ {
+  "id": "36141",
+  "name": "Gift / Premium",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "禮品-高級禮品-gift-premium",
+  "aliases": [
+   "Gift / Premium",
+   "gift / premium",
+   "禮品",
+   "禮品-高級禮品-gift-premium",
+   "高級禮品",
+   "高級禮品-gift-premium"
+  ]
+ },
+ {
+  "id": "36221",
+  "name": "Handbag",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "手袋-handbag",
+  "aliases": [
+   "Handbag",
+   "handbag",
+   "手袋",
+   "手袋-handbag"
+  ]
+ },
+ {
+  "id": "36341",
+  "name": "Household / Kitchen Wares",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "家居-廚房用具-household-kitchen-wares",
+  "aliases": [
+   "Household / Kitchen Wares",
+   "household / kitchen wares",
+   "家居",
+   "家居-廚房用具-household-kitchen-wares",
+   "廚房用具",
+   "廚房用具-household-kitchen-wares"
+  ]
+ },
+ {
+  "id": "36241",
+  "name": "Jewellery / Watch",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "珠寶-手錶-jewellery-watch",
+  "aliases": [
+   "Jewellery / Watch",
+   "jewellery / watch",
+   "手錶",
+   "手錶-jewellery-watch",
+   "珠寶",
+   "珠寶-手錶-jewellery-watch"
+  ]
+ },
+ {
+  "id": "56019",
+  "name": "Merchandising Management",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "採購管理-merchandising-management",
+  "aliases": [
+   "Merchandising Management",
+   "merchandising management",
+   "merchandising-management",
+   "採購管理",
+   "採購管理-merchandising-management"
+  ]
+ },
+ {
+  "id": "56091",
+  "name": "Printing",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "印刷-printing",
+  "aliases": [
+   "Printing",
+   "printing",
+   "印刷",
+   "印刷-printing"
+  ]
+ },
+ {
+  "id": "56021",
+  "name": "Procurement / Purchasing / Sourcing",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "採購-procurement-purchasing-sourcing",
+  "aliases": [
+   "Procurement / Purchasing / Sourcing",
+   "procurement / purchasing / sourcing",
+   "procurement-purchasing-sourcing",
+   "採購",
+   "採購-procurement-purchasing-sourcing"
+  ]
+ },
+ {
+  "id": "36161",
+  "name": "Stationery",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "文儀用品-stationery",
+  "aliases": [
+   "Stationery",
+   "stationery",
+   "文儀用品",
+   "文儀用品-stationery"
+  ]
+ },
+ {
+  "id": "36201",
+  "name": "Sundries / Seasonal Items",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "日常用品-季節性商品-sundries-seasonal-items",
+  "aliases": [
+   "Sundries / Seasonal Items",
+   "sundries / seasonal items",
+   "季節性商品",
+   "季節性商品-sundries-seasonal-items",
+   "日常用品",
+   "日常用品-季節性商品-sundries-seasonal-items"
+  ]
+ },
+ {
+  "id": "36121",
+  "name": "Toys",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "玩具-toys",
+  "aliases": [
+   "Toys",
+   "toys",
+   "玩具",
+   "玩具-toys"
+  ]
+ },
+ {
+  "id": "56020",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "31000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56238",
+  "name": "Administration & Support Function",
+  "type": "jobFunc",
+  "cat_id": "53600",
+  "zh": "行政及支援服務-administration-support-function",
+  "aliases": [
+   "Administration & Support Function",
+   "administration & support function",
+   "administration-support-function",
+   "行政及支援服務",
+   "行政及支援服務-administration-support-function"
+  ]
+ },
+ {
+  "id": "56243",
+  "name": "Counseling",
+  "type": "jobFunc",
+  "cat_id": "53600",
+  "zh": "輔導-counseling",
+  "aliases": [
+   "Counseling",
+   "counseling",
+   "輔導",
+   "輔導-counseling"
+  ]
+ },
+ {
+  "id": "56239",
+  "name": "Fundraising",
+  "type": "jobFunc",
+  "cat_id": "53600",
+  "zh": "籌募-fundraising",
+  "aliases": [
+   "Fundraising",
+   "fundraising",
+   "籌募",
+   "籌募-fundraising"
+  ]
+ },
+ {
+  "id": "56240",
+  "name": "Medical / Para-medical Service",
+  "type": "jobFunc",
+  "cat_id": "53600",
+  "zh": "醫療-健康服務-medical-para-medical-service",
+  "aliases": [
+   "Medical / Para-medical Service",
+   "medical / para-medical service",
+   "健康服務",
+   "健康服務-medical-para-medical-service",
+   "醫療",
+   "醫療-健康服務-medical-para-medical-service"
+  ]
+ },
+ {
+  "id": "56241",
+  "name": "Organizational Development Functions",
+  "type": "jobFunc",
+  "cat_id": "53600",
+  "zh": "機構發展-organizational-development-functions",
+  "aliases": [
+   "Organizational Development Functions",
+   "organizational development functions",
+   "organizational-development-functions",
+   "機構發展",
+   "機構發展-organizational-development-functions"
+  ]
+ },
+ {
+  "id": "56242",
+  "name": "Organizational Management Functions",
+  "type": "jobFunc",
+  "cat_id": "53600",
+  "zh": "機構管理-organizational-management-functions",
+  "aliases": [
+   "Organizational Management Functions",
+   "organizational management functions",
+   "organizational-management-functions",
+   "機構管理",
+   "機構管理-organizational-management-functions"
+  ]
+ },
+ {
+  "id": "56096",
+  "name": "Social Work Service",
+  "type": "jobFunc",
+  "cat_id": "53600",
+  "zh": "社會工作服務-social-work-service",
+  "aliases": [
+   "Social Work Service",
+   "social work service",
+   "social-work-service",
+   "社會工作服務",
+   "社會工作服務-social-work-service"
+  ]
+ },
+ {
+  "id": "56097",
+  "name": "General / Others",
+  "type": "jobFunc",
+  "cat_id": "53600",
+  "zh": "一般-其他-general-others",
+  "aliases": [
+   "General / Others",
+   "general / others",
+   "一般",
+   "一般-其他-general-others",
+   "其他",
+   "其他-general-others"
+  ]
+ },
+ {
+  "id": "6561",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "",
+  "zh": "",
+  "aliases": [
+   "Others",
+   "others"
+  ]
+ },
+ {
+  "id": "56023",
+  "name": "Part Time / Temporary Job / Contract",
+  "type": "jobFunc",
+  "cat_id": "",
+  "zh": "",
+  "aliases": [
+   "Part Time / Temporary Job / Contract",
+   "part time / temporary job / contract"
+  ]
+ },
+ {
+  "id": "56196",
+  "name": "Business Analysis / Data Analysis",
+  "type": "jobFunc",
+  "cat_id": "27000",
+  "zh": "商用及數據分析師-business-analysis-data-analysis",
+  "aliases": [
+   "Business Analysis / Data Analysis",
+   "business analysis / data analysis",
+   "business-analysis-data-analysis",
+   "商用及數據分析師",
+   "商用及數據分析師-business-analysis-data-analysis"
+  ]
+ },
+ {
+  "id": "56197",
+  "name": "Business Consultancy",
+  "type": "jobFunc",
+  "cat_id": "27000",
+  "zh": "商業諮詢-business-consultancy",
+  "aliases": [
+   "Business Consultancy",
+   "business consultancy",
+   "business-consultancy",
+   "商業諮詢",
+   "商業諮詢-business-consultancy"
+  ]
+ },
+ {
+  "id": "3572",
+  "name": "Company Secretary",
+  "type": "jobFunc",
+  "cat_id": "27000",
+  "zh": "公司秘書-company-secretary",
+  "aliases": [
+   "Company Secretary",
+   "company secretary",
+   "company-secretary",
+   "公司秘書",
+   "公司秘書-company-secretary"
+  ]
+ },
+ {
+  "id": "3608",
+  "name": "Legal & Compliance",
+  "type": "jobFunc",
+  "cat_id": "27000",
+  "zh": "法律及法律顧問-legal-compliance",
+  "aliases": [
+   "Legal & Compliance",
+   "legal & compliance",
+   "legal-compliance",
+   "法律及法律顧問",
+   "法律及法律顧問-legal-compliance"
+  ]
+ },
+ {
+  "id": "56198",
+  "name": "Translation",
+  "type": "jobFunc",
+  "cat_id": "27000",
+  "zh": "翻譯-translation",
+  "aliases": [
+   "Translation",
+   "translation",
+   "翻譯",
+   "翻譯-translation"
+  ]
+ },
+ {
+  "id": "56079",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "27000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56219",
+  "name": "Gardener",
+  "type": "jobFunc",
+  "cat_id": "32000",
+  "zh": "園丁-gardener",
+  "aliases": [
+   "Gardener",
+   "gardener",
+   "園丁",
+   "園丁-gardener"
+  ]
+ },
+ {
+  "id": "56218",
+  "name": "Leasing",
+  "type": "jobFunc",
+  "cat_id": "32000",
+  "zh": "出租-leasing",
+  "aliases": [
+   "Leasing",
+   "leasing",
+   "出租",
+   "出租-leasing"
+  ]
+ },
+ {
+  "id": "3620",
+  "name": "Property / Consultancy",
+  "type": "jobFunc",
+  "cat_id": "32000",
+  "zh": "物業諮詢-property-consultancy",
+  "aliases": [
+   "Property / Consultancy",
+   "property / consultancy",
+   "property-consultancy",
+   "物業諮詢",
+   "物業諮詢-property-consultancy"
+  ]
+ },
+ {
+  "id": "56026",
+  "name": "Property / Estate Management",
+  "type": "jobFunc",
+  "cat_id": "32000",
+  "zh": "地產-物業管理-property-estate-management",
+  "aliases": [
+   "Property / Estate Management",
+   "property / estate management",
+   "地產",
+   "地產-物業管理-property-estate-management",
+   "物業管理",
+   "物業管理-property-estate-management"
+  ]
+ },
+ {
+  "id": "56025",
+  "name": "Security / Safety Control",
+  "type": "jobFunc",
+  "cat_id": "32000",
+  "zh": "保安-安全控制-security-safety-control",
+  "aliases": [
+   "Security / Safety Control",
+   "security / safety control",
+   "保安",
+   "保安-安全控制-security-safety-control",
+   "安全控制",
+   "安全控制-security-safety-control"
+  ]
+ },
+ {
+  "id": "56220",
+  "name": "Surveying",
+  "type": "jobFunc",
+  "cat_id": "32000",
+  "zh": "測量-surveying",
+  "aliases": [
+   "Surveying",
+   "surveying",
+   "測量",
+   "測量-surveying"
+  ]
+ },
+ {
+  "id": "3619",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "32000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "3622",
+  "name": "Circulation",
+  "type": "jobFunc",
+  "cat_id": "33000",
+  "zh": "發行-circulation",
+  "aliases": [
+   "Circulation",
+   "circulation",
+   "發行",
+   "發行-circulation"
+  ]
+ },
+ {
+  "id": "3623",
+  "name": "Production",
+  "type": "jobFunc",
+  "cat_id": "33000",
+  "zh": "生產-production",
+  "aliases": [
+   "Production",
+   "production",
+   "生產",
+   "生產-production"
+  ]
+ },
+ {
+  "id": "56092",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "33000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "8617",
+  "name": "Electrical / Electronic",
+  "type": "jobFunc",
+  "cat_id": "34000",
+  "zh": "電器-電子-electrical-electronic",
+  "aliases": [
+   "Electrical / Electronic",
+   "electrical / electronic",
+   "電器",
+   "電器-電子-electrical-electronic",
+   "電子",
+   "電子-electrical-electronic"
+  ]
+ },
+ {
+  "id": "8618",
+  "name": "Fashion / Garment Accessories",
+  "type": "jobFunc",
+  "cat_id": "34000",
+  "zh": "時裝-服裝配料-fashion-garment-accessories",
+  "aliases": [
+   "Fashion / Garment Accessories",
+   "fashion / garment accessories",
+   "時裝",
+   "時裝-服裝配料-fashion-garment-accessories",
+   "服裝配料",
+   "服裝配料-fashion-garment-accessories"
+  ]
+ },
+ {
+  "id": "8619",
+  "name": "Garment & Textile",
+  "type": "jobFunc",
+  "cat_id": "34000",
+  "zh": "服裝及紡織品-garment-textile",
+  "aliases": [
+   "Garment & Textile",
+   "garment & textile",
+   "garment-textile",
+   "服裝及紡織品",
+   "服裝及紡織品-garment-textile"
+  ]
+ },
+ {
+  "id": "3624",
+  "name": "QA",
+  "type": "jobFunc",
+  "cat_id": "34000",
+  "zh": "品質保證-qa",
+  "aliases": [
+   "QA",
+   "qa",
+   "品質保證",
+   "品質保證-qa"
+  ]
+ },
+ {
+  "id": "8620",
+  "name": "Toys & Sundries",
+  "type": "jobFunc",
+  "cat_id": "34000",
+  "zh": "玩具-日常用品-toys-sundries",
+  "aliases": [
+   "Toys & Sundries",
+   "toys & sundries",
+   "日常用品",
+   "日常用品-toys-sundries",
+   "玩具",
+   "玩具-日常用品-toys-sundries"
+  ]
+ },
+ {
+  "id": "8621",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "34000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56141",
+  "name": "Cashier",
+  "type": "jobFunc",
+  "cat_id": "43000",
+  "zh": "出納員-cashier",
+  "aliases": [
+   "Cashier",
+   "cashier",
+   "出納員",
+   "出納員-cashier"
+  ]
+ },
+ {
+  "id": "56138",
+  "name": "Fashion & Accessories",
+  "type": "jobFunc",
+  "cat_id": "43000",
+  "zh": "時裝及配飾-fashion-accessories",
+  "aliases": [
+   "Fashion & Accessories",
+   "fashion & accessories",
+   "fashion-accessories",
+   "時裝及配飾",
+   "時裝及配飾-fashion-accessories"
+  ]
+ },
+ {
+  "id": "56140",
+  "name": "Health / Beauty",
+  "type": "jobFunc",
+  "cat_id": "43000",
+  "zh": "健康-美容-health-beauty",
+  "aliases": [
+   "Health / Beauty",
+   "health / beauty",
+   "健康",
+   "健康-美容-health-beauty",
+   "美容",
+   "美容-health-beauty"
+  ]
+ },
+ {
+  "id": "56139",
+  "name": "Household Necessity & Electronics",
+  "type": "jobFunc",
+  "cat_id": "43000",
+  "zh": "家庭日用品及電子-household-necessity-electronics",
+  "aliases": [
+   "Household Necessity & Electronics",
+   "household necessity & electronics",
+   "household-necessity-electronics",
+   "家庭日用品及電子",
+   "家庭日用品及電子-household-necessity-electronics"
+  ]
+ },
+ {
+  "id": "56221",
+  "name": "Inventory",
+  "type": "jobFunc",
+  "cat_id": "43000",
+  "zh": "存貨-inventory",
+  "aliases": [
+   "Inventory",
+   "inventory",
+   "存貨",
+   "存貨-inventory"
+  ]
+ },
+ {
+  "id": "56027",
+  "name": "Retail Operations Management",
+  "type": "jobFunc",
+  "cat_id": "43000",
+  "zh": "零售業務管理-retail-operations-management",
+  "aliases": [
+   "Retail Operations Management",
+   "retail operations management",
+   "retail-operations-management",
+   "零售業務管理",
+   "零售業務管理-retail-operations-management"
+  ]
+ },
+ {
+  "id": "56142",
+  "name": "Store Supervisor / Manager",
+  "type": "jobFunc",
+  "cat_id": "43000",
+  "zh": "店務主管-經理-store-supervisor-manager",
+  "aliases": [
+   "Store Supervisor / Manager",
+   "store supervisor / manager",
+   "店務主管",
+   "店務主管-經理-store-supervisor-manager",
+   "經理",
+   "經理-store-supervisor-manager"
+  ]
+ },
+ {
+  "id": "56143",
+  "name": "Visual Merchandiser",
+  "type": "jobFunc",
+  "cat_id": "43000",
+  "zh": "營銷-visual-merchandiser",
+  "aliases": [
+   "Visual Merchandiser",
+   "visual merchandiser",
+   "visual-merchandiser",
+   "營銷",
+   "營銷-visual-merchandiser"
+  ]
+ },
+ {
+  "id": "56094",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "43000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56222",
+  "name": "Account Servicing",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "賬戶服務-account-servicing",
+  "aliases": [
+   "Account Servicing",
+   "account servicing",
+   "account-servicing",
+   "賬戶服務",
+   "賬戶服務-account-servicing"
+  ]
+ },
+ {
+  "id": "3631",
+  "name": "Business Development",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "業務發展-business-development",
+  "aliases": [
+   "Business Development",
+   "business development",
+   "business-development",
+   "業務發展",
+   "業務發展-business-development"
+  ]
+ },
+ {
+  "id": "56226",
+  "name": "Channel / Distribution",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "銷售途徑-分銷-channel-distribution",
+  "aliases": [
+   "Channel / Distribution",
+   "channel / distribution",
+   "分銷",
+   "分銷-channel-distribution",
+   "銷售途徑",
+   "銷售途徑-分銷-channel-distribution"
+  ]
+ },
+ {
+  "id": "56227",
+  "name": "Customer Service - Manager",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "顧客服務經理-customer-service-manager",
+  "aliases": [
+   "Customer Service - Manager",
+   "customer service - manager",
+   "customer-service-manager",
+   "顧客服務經理",
+   "顧客服務經理-customer-service-manager"
+  ]
+ },
+ {
+  "id": "56228",
+  "name": "Customer Service - Supervisor / Officer",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "顧客服務主任-customer-service-supervisor-officer",
+  "aliases": [
+   "Customer Service - Supervisor / Officer",
+   "customer service - supervisor / officer",
+   "customer-service-supervisor-officer",
+   "顧客服務主任",
+   "顧客服務主任-customer-service-supervisor-officer"
+  ]
+ },
+ {
+  "id": "56229",
+  "name": "Direct Sales",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "直銷-direct-sales",
+  "aliases": [
+   "Direct Sales",
+   "direct sales",
+   "direct-sales",
+   "直銷",
+   "直銷-direct-sales"
+  ]
+ },
+ {
+  "id": "56028",
+  "name": "General Sales",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "一般銷售-general-sales",
+  "aliases": [
+   "General Sales",
+   "general sales",
+   "general-sales",
+   "一般銷售",
+   "一般銷售-general-sales"
+  ]
+ },
+ {
+  "id": "56223",
+  "name": "Retail Sales",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "零售-retail-sales",
+  "aliases": [
+   "Retail Sales",
+   "retail sales",
+   "retail-sales",
+   "零售",
+   "零售-retail-sales"
+  ]
+ },
+ {
+  "id": "56224",
+  "name": "Sales - Real Estate",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "房地產-sales-real-estate",
+  "aliases": [
+   "Sales - Real Estate",
+   "sales - real estate",
+   "sales-real-estate",
+   "房地產",
+   "房地產-sales-real-estate"
+  ]
+ },
+ {
+  "id": "56031",
+  "name": "Sales Administration",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "銷售行政-sales-administration",
+  "aliases": [
+   "Sales Administration",
+   "sales administration",
+   "sales-administration",
+   "銷售行政",
+   "銷售行政-sales-administration"
+  ]
+ },
+ {
+  "id": "56029",
+  "name": "Sales Engineer / Technical Sales",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "工程-技術銷售-sales-engineer-technical-sales",
+  "aliases": [
+   "Sales Engineer / Technical Sales",
+   "sales engineer / technical sales",
+   "工程",
+   "工程-技術銷售-sales-engineer-technical-sales",
+   "技術銷售",
+   "技術銷售-sales-engineer-technical-sales"
+  ]
+ },
+ {
+  "id": "56030",
+  "name": "Sales Management",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "銷售管理-sales-management",
+  "aliases": [
+   "Sales Management",
+   "sales management",
+   "sales-management",
+   "銷售管理",
+   "銷售管理-sales-management"
+  ]
+ },
+ {
+  "id": "56032",
+  "name": "Telesales / Telemarketing / Call Centre",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "電話銷售-電話推廣-熱線中心-telesales-telemarketing-call-centre",
+  "aliases": [
+   "Telesales / Telemarketing / Call Centre",
+   "telesales / telemarketing / call centre",
+   "熱線中心",
+   "電話推廣",
+   "電話推廣-熱線中心-telesales-telemarketing-call-centre",
+   "電話銷售",
+   "電話銷售-電話推廣-熱線中心-telesales-telemarketing-call-centre"
+  ]
+ },
+ {
+  "id": "56225",
+  "name": "Wholesale",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "批發-wholesale",
+  "aliases": [
+   "Wholesale",
+   "wholesale",
+   "批發",
+   "批發-wholesale"
+  ]
+ },
+ {
+  "id": "56095",
+  "name": "Others",
+  "type": "jobFunc",
+  "cat_id": "44000",
+  "zh": "其他-others",
+  "aliases": [
+   "Others",
+   "others",
+   "其他",
+   "其他-others"
+  ]
+ },
+ {
+  "id": "56230",
+  "name": "Chemical",
+  "type": "jobFunc",
+  "cat_id": "54000",
+  "zh": "化學-chemical",
+  "aliases": [
+   "Chemical",
+   "chemical",
+   "化學",
+   "化學-chemical"
+  ]
+ },
+ {
+  "id": "56231",
+  "name": "Energy / Natural Resources / Oil & Gas",
+  "type": "jobFunc",
+  "cat_id": "54000",
+  "zh": "能源-自然資源-氣油-energy-natural-resources-oil-gas",
+  "aliases": [
+   "Energy / Natural Resources / Oil & Gas",
+   "energy / natural resources / oil & gas",
+   "氣油",
+   "能源",
+   "能源-自然資源-氣油-energy-natural-resources-oil-gas",
+   "自然資源",
+   "自然資源-氣油-energy-natural-resources-oil-gas"
+  ]
+ },
+ {
+  "id": "56232",
+  "name": "Environmental Science / Waste Management",
+  "type": "jobFunc",
+  "cat_id": "54000",
+  "zh": "環境科學-environmental-science-waste-management",
+  "aliases": [
+   "Environmental Science / Waste Management",
+   "environmental science / waste management",
+   "environmental-science-waste-management",
+   "環境科學",
+   "環境科學-environmental-science-waste-management"
+  ]
+ },
+ {
+  "id": "56233",
+  "name": "Food Science",
+  "type": "jobFunc",
+  "cat_id": "54000",
+  "zh": "食品科學-food-science",
+  "aliases": [
+   "Food Science",
+   "food science",
+   "food-science",
+   "食品科學",
+   "食品科學-food-science"
+  ]
+ },
+ {
+  "id": "56234",
+  "name": "Laboratory",
+  "type": "jobFunc",
+  "cat_id": "54000",
+  "zh": "實驗室-laboratory",
+  "aliases": [
+   "Laboratory",
+   "laboratory",
+   "實驗室",
+   "實驗室-laboratory"
+  ]
+ },
+ {
+  "id": "56235",
+  "name": "Life Science",
+  "type": "jobFunc",
+  "cat_id": "54000",
+  "zh": "生命科學-life-science",
+  "aliases": [
+   "Life Science",
+   "life science",
+   "life-science",
+   "生命科學",
+   "生命科學-life-science"
+  ]
+ },
+ {
+  "id": "56236",
+  "name": "Research & Development (R&D)",
+  "type": "jobFunc",
+  "cat_id": "54000",
+  "zh": "研究及開發-research-development-r-d",
+  "aliases": [
+   "Research & Development (R&D)",
+   "research & development (r&d)",
+   "research-development-r-d",
+   "研究及開發",
+   "研究及開發-research-development-r-d"
+  ]
+ },
+ {
+  "id": "56237",
+  "name": "Other",
+  "type": "jobFunc",
+  "cat_id": "54000",
+  "zh": "其他-other",
+  "aliases": [
+   "Other",
+   "other",
+   "其他",
+   "其他-other"
+  ]
+ }
+]

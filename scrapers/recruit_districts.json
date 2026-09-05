@@ -1,0 +1,987 @@
+[
+ {
+  "id": "69081",
+  "name": "Hong Kong Island",
+  "group": "HKI",
+  "aliases": [
+   "Hong Kong Island",
+   "hong kong island",
+   "香港島"
+  ],
+  "zh": "香港島"
+ },
+ {
+  "id": "69033",
+  "name": "Aberdeen",
+  "group": "HKI",
+  "aliases": [
+   "Aberdeen",
+   "aberdeen",
+   "香港仔"
+  ],
+  "zh": "香港仔"
+ },
+ {
+  "id": "69000",
+  "name": "Admiralty",
+  "group": "HKI",
+  "aliases": [
+   "Admiralty",
+   "admiralty",
+   "金鐘"
+  ],
+  "zh": "金鐘"
+ },
+ {
+  "id": "69077",
+  "name": "Apleichau",
+  "group": "HKI",
+  "aliases": [
+   "Apleichau",
+   "apleichau"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69038",
+  "name": "Causeway Bay",
+  "group": "HKI",
+  "aliases": [
+   "Causeway Bay",
+   "causeway bay",
+   "銅鑼灣"
+  ],
+  "zh": "銅鑼灣"
+ },
+ {
+  "id": "69001",
+  "name": "Central",
+  "group": "HKI",
+  "aliases": [
+   "Central",
+   "central",
+   "中環"
+  ],
+  "zh": "中環"
+ },
+ {
+  "id": "69006",
+  "name": "Chai Wan",
+  "group": "HKI",
+  "aliases": [
+   "Chai Wan",
+   "chai wan"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69069",
+  "name": "Eastern District",
+  "group": "HKI",
+  "aliases": [
+   "Eastern District",
+   "eastern district"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69061",
+  "name": "Fortress Hill",
+  "group": "HKI",
+  "aliases": [
+   "Fortress Hill",
+   "fortress hill"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69065",
+  "name": "Happy Valley",
+  "group": "HKI",
+  "aliases": [
+   "Happy Valley",
+   "happy valley"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69068",
+  "name": "Kennedy Town",
+  "group": "HKI",
+  "aliases": [
+   "Kennedy Town",
+   "kennedy town"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69009",
+  "name": "North Point",
+  "group": "HKI",
+  "aliases": [
+   "North Point",
+   "north point"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69034",
+  "name": "Pok Fu Lam",
+  "group": "HKI",
+  "aliases": [
+   "Pok Fu Lam",
+   "pok fu lam"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69012",
+  "name": "Quarry Bay",
+  "group": "HKI",
+  "aliases": [
+   "Quarry Bay",
+   "quarry bay",
+   "鰂魚涌"
+  ],
+  "zh": "鰂魚涌"
+ },
+ {
+  "id": "69002",
+  "name": "Sai Wan",
+  "group": "HKI",
+  "aliases": [
+   "Sai Wan",
+   "sai wan"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69007",
+  "name": "Sai Wan Ho",
+  "group": "HKI",
+  "aliases": [
+   "Sai Wan Ho",
+   "sai wan ho"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69003",
+  "name": "Sai Ying Pun",
+  "group": "HKI",
+  "aliases": [
+   "Sai Ying Pun",
+   "sai ying pun"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69010",
+  "name": "Shau Kei Wan",
+  "group": "HKI",
+  "aliases": [
+   "Shau Kei Wan",
+   "shau kei wan"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69004",
+  "name": "Sheung Wan",
+  "group": "HKI",
+  "aliases": [
+   "Sheung Wan",
+   "sheung wan"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69013",
+  "name": "Siu Sai Wan",
+  "group": "HKI",
+  "aliases": [
+   "Siu Sai Wan",
+   "siu sai wan"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69076",
+  "name": "Southern District",
+  "group": "HKI",
+  "aliases": [
+   "Southern District",
+   "southern district"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69064",
+  "name": "Stanley",
+  "group": "HKI",
+  "aliases": [
+   "Stanley",
+   "stanley",
+   "赤柱"
+  ],
+  "zh": "赤柱"
+ },
+ {
+  "id": "69008",
+  "name": "Tai Koo",
+  "group": "HKI",
+  "aliases": [
+   "Tai Koo",
+   "tai koo",
+   "太古"
+  ],
+  "zh": "太古"
+ },
+ {
+  "id": "69060",
+  "name": "The Peak",
+  "group": "HKI",
+  "aliases": [
+   "The Peak",
+   "the peak"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69011",
+  "name": "Tin Hau",
+  "group": "HKI",
+  "aliases": [
+   "Tin Hau",
+   "tin hau"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69039",
+  "name": "Wan Chai",
+  "group": "HKI",
+  "aliases": [
+   "Wan Chai",
+   "wan chai",
+   "灣仔"
+  ],
+  "zh": "灣仔"
+ },
+ {
+  "id": "69053",
+  "name": "Wong Chuk Hang",
+  "group": "HKI",
+  "aliases": [
+   "Wong Chuk Hang",
+   "wong chuk hang",
+   "黃竹坑"
+  ],
+  "zh": "黃竹坑"
+ },
+ {
+  "id": "69086",
+  "name": "Kowloon",
+  "group": "KL",
+  "aliases": [
+   "Kowloon",
+   "kowloon",
+   "九龍"
+  ],
+  "zh": "九龍"
+ },
+ {
+  "id": "69028",
+  "name": "Cheung Sha Wan",
+  "group": "KL",
+  "aliases": [
+   "Cheung Sha Wan",
+   "cheung sha wan",
+   "長沙灣"
+  ],
+  "zh": "長沙灣"
+ },
+ {
+  "id": "69049",
+  "name": "Diamond Hill",
+  "group": "KL",
+  "aliases": [
+   "Diamond Hill",
+   "diamond hill",
+   "鑽石山"
+  ],
+  "zh": "鑽石山"
+ },
+ {
+  "id": "69080",
+  "name": "Homantin",
+  "group": "KL",
+  "aliases": [
+   "Homantin",
+   "homantin"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69014",
+  "name": "Hung Hom",
+  "group": "KL",
+  "aliases": [
+   "Hung Hom",
+   "hung hom",
+   "紅磡"
+  ],
+  "zh": "紅磡"
+ },
+ {
+  "id": "69050",
+  "name": "Jordan",
+  "group": "KL",
+  "aliases": [
+   "Jordan",
+   "jordan",
+   "佐敦"
+  ],
+  "zh": "佐敦"
+ },
+ {
+  "id": "69070",
+  "name": "Kai Tak",
+  "group": "KL",
+  "aliases": [
+   "Kai Tak",
+   "kai tak"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69020",
+  "name": "Kowloon Bay",
+  "group": "KL",
+  "aliases": [
+   "Kowloon Bay",
+   "kowloon bay",
+   "九龍灣"
+  ],
+  "zh": "九龍灣"
+ },
+ {
+  "id": "69015",
+  "name": "Kowloon City",
+  "group": "KL",
+  "aliases": [
+   "Kowloon City",
+   "kowloon city",
+   "九龍城"
+  ],
+  "zh": "九龍城"
+ },
+ {
+  "id": "69054",
+  "name": "Kowloon Tong",
+  "group": "KL",
+  "aliases": [
+   "Kowloon Tong",
+   "kowloon tong",
+   "九龍塘"
+  ],
+  "zh": "九龍塘"
+ },
+ {
+  "id": "69021",
+  "name": "Kwun Tong",
+  "group": "KL",
+  "aliases": [
+   "Kwun Tong",
+   "kwun tong",
+   "觀塘"
+  ],
+  "zh": "觀塘"
+ },
+ {
+  "id": "69029",
+  "name": "Lai Chi Kok",
+  "group": "KL",
+  "aliases": [
+   "Lai Chi Kok",
+   "lai chi kok",
+   "荔枝角"
+  ],
+  "zh": "荔枝角"
+ },
+ {
+  "id": "69072",
+  "name": "Lam Tin",
+  "group": "KL",
+  "aliases": [
+   "Lam Tin",
+   "lam tin",
+   "藍田"
+  ],
+  "zh": "藍田"
+ },
+ {
+  "id": "69041",
+  "name": "Mong Kok",
+  "group": "KL",
+  "aliases": [
+   "Mong Kok",
+   "mong kok",
+   "旺角"
+  ],
+  "zh": "旺角"
+ },
+ {
+  "id": "69022",
+  "name": "Ngau Tau Kok",
+  "group": "KL",
+  "aliases": [
+   "Ngau Tau Kok",
+   "ngau tau kok"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69078",
+  "name": "Prince Edward",
+  "group": "KL",
+  "aliases": [
+   "Prince Edward",
+   "prince edward"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69048",
+  "name": "San Po Kong",
+  "group": "KL",
+  "aliases": [
+   "San Po Kong",
+   "san po kong",
+   "新蒲崗"
+  ],
+  "zh": "新蒲崗"
+ },
+ {
+  "id": "69030",
+  "name": "Sham Shui Po",
+  "group": "KL",
+  "aliases": [
+   "Sham Shui Po",
+   "sham shui po",
+   "深水埗"
+  ],
+  "zh": "深水埗"
+ },
+ {
+  "id": "69051",
+  "name": "Tai Kok Tsui",
+  "group": "KL",
+  "aliases": [
+   "Tai Kok Tsui",
+   "tai kok tsui"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69016",
+  "name": "To Kwa Wan",
+  "group": "KL",
+  "aliases": [
+   "To Kwa Wan",
+   "to kwa wan",
+   "土瓜灣"
+  ],
+  "zh": "土瓜灣"
+ },
+ {
+  "id": "69042",
+  "name": "Tsim Sha Tsui",
+  "group": "KL",
+  "aliases": [
+   "Tsim Sha Tsui",
+   "tsim sha tsui",
+   "尖沙咀"
+  ],
+  "zh": "尖沙咀"
+ },
+ {
+  "id": "69079",
+  "name": "Tsimshatsui East",
+  "group": "KL",
+  "aliases": [
+   "Tsimshatsui East",
+   "tsimshatsui east"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69071",
+  "name": "Whampoa",
+  "group": "KL",
+  "aliases": [
+   "Whampoa",
+   "whampoa"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69040",
+  "name": "Wong Tai Sin",
+  "group": "KL",
+  "aliases": [
+   "Wong Tai Sin",
+   "wong tai sin",
+   "黃大仙"
+  ],
+  "zh": "黃大仙"
+ },
+ {
+  "id": "69043",
+  "name": "Yau Ma Tei",
+  "group": "KL",
+  "aliases": [
+   "Yau Ma Tei",
+   "yau ma tei",
+   "油麻地"
+  ],
+  "zh": "油麻地"
+ },
+ {
+  "id": "69073",
+  "name": "Yau Tong",
+  "group": "KL",
+  "aliases": [
+   "Yau Tong",
+   "yau tong",
+   "油塘"
+  ],
+  "zh": "油塘"
+ },
+ {
+  "id": "69075",
+  "name": "New Territories",
+  "group": "NT",
+  "aliases": [
+   "New Territories",
+   "new territories",
+   "新界"
+  ],
+  "zh": "新界"
+ },
+ {
+  "id": "69024",
+  "name": "Fanling",
+  "group": "NT",
+  "aliases": [
+   "Fanling",
+   "fanling",
+   "粉嶺"
+  ],
+  "zh": "粉嶺"
+ },
+ {
+  "id": "69032",
+  "name": "Fo Tan",
+  "group": "NT",
+  "aliases": [
+   "Fo Tan",
+   "fo tan",
+   "火炭"
+  ],
+  "zh": "火炭"
+ },
+ {
+  "id": "69062",
+  "name": "Kwai Chung",
+  "group": "NT",
+  "aliases": [
+   "Kwai Chung",
+   "kwai chung",
+   "葵涌"
+  ],
+  "zh": "葵涌"
+ },
+ {
+  "id": "69017",
+  "name": "Kwai Fong",
+  "group": "NT",
+  "aliases": [
+   "Kwai Fong",
+   "kwai fong"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69018",
+  "name": "Kwai Hing",
+  "group": "NT",
+  "aliases": [
+   "Kwai Hing",
+   "kwai hing"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69063",
+  "name": "Ma On Shan",
+  "group": "NT",
+  "aliases": [
+   "Ma On Shan",
+   "ma on shan",
+   "馬鞍山"
+  ],
+  "zh": "馬鞍山"
+ },
+ {
+  "id": "69074",
+  "name": "Northern District",
+  "group": "NT",
+  "aliases": [
+   "Northern District",
+   "northern district"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69026",
+  "name": "Sai Kung",
+  "group": "NT",
+  "aliases": [
+   "Sai Kung",
+   "sai kung",
+   "西貢"
+  ],
+  "zh": "西貢"
+ },
+ {
+  "id": "69031",
+  "name": "Shatin",
+  "group": "NT",
+  "aliases": [
+   "Shatin",
+   "shatin"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69025",
+  "name": "Sheung Shui",
+  "group": "NT",
+  "aliases": [
+   "Sheung Shui",
+   "sheung shui",
+   "上水"
+  ],
+  "zh": "上水"
+ },
+ {
+  "id": "69035",
+  "name": "Tai Po",
+  "group": "NT",
+  "aliases": [
+   "Tai Po",
+   "tai po",
+   "大埔"
+  ],
+  "zh": "大埔"
+ },
+ {
+  "id": "69052",
+  "name": "Tai Wai",
+  "group": "NT",
+  "aliases": [
+   "Tai Wai",
+   "tai wai",
+   "大圍"
+  ],
+  "zh": "大圍"
+ },
+ {
+  "id": "69044",
+  "name": "Tin Shui Wai",
+  "group": "NT",
+  "aliases": [
+   "Tin Shui Wai",
+   "tin shui wai",
+   "天水圍"
+  ],
+  "zh": "天水圍"
+ },
+ {
+  "id": "69027",
+  "name": "Tseung Kwan O",
+  "group": "NT",
+  "aliases": [
+   "Tseung Kwan O",
+   "tseung kwan o",
+   "將軍澳"
+  ],
+  "zh": "將軍澳"
+ },
+ {
+  "id": "69019",
+  "name": "Tsing Yi",
+  "group": "NT",
+  "aliases": [
+   "Tsing Yi",
+   "tsing yi",
+   "青衣"
+  ],
+  "zh": "青衣"
+ },
+ {
+  "id": "69036",
+  "name": "Tsuen Wan",
+  "group": "NT",
+  "aliases": [
+   "Tsuen Wan",
+   "tsuen wan",
+   "荃灣"
+  ],
+  "zh": "荃灣"
+ },
+ {
+  "id": "69037",
+  "name": "Tuen Mun",
+  "group": "NT",
+  "aliases": [
+   "Tuen Mun",
+   "tuen mun",
+   "屯門"
+  ],
+  "zh": "屯門"
+ },
+ {
+  "id": "69045",
+  "name": "Yuen Long",
+  "group": "NT",
+  "aliases": [
+   "Yuen Long",
+   "yuen long",
+   "元朗"
+  ],
+  "zh": "元朗"
+ },
+ {
+  "id": "56200",
+  "name": "Chek Lap Kok",
+  "group": "56202",
+  "aliases": [
+   "Chek Lap Kok",
+   "chek lap kok"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69005",
+  "name": "Cheung Chau",
+  "group": "56202",
+  "aliases": [
+   "Cheung Chau",
+   "cheung chau"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69084",
+  "name": "Lantau Island",
+  "group": "56202",
+  "aliases": [
+   "Lantau Island",
+   "lantau island"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69085",
+  "name": "Ma Wan",
+  "group": "56202",
+  "aliases": [
+   "Ma Wan",
+   "ma wan"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "69023",
+  "name": "Tung Chung",
+  "group": "56202",
+  "aliases": [
+   "Tung Chung",
+   "tung chung",
+   "東涌"
+  ],
+  "zh": "東涌"
+ },
+ {
+  "id": "56246",
+  "name": "Beijing",
+  "group": "56101",
+  "aliases": [
+   "Beijing",
+   "beijing"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56232",
+  "name": "China",
+  "group": "56101",
+  "aliases": [
+   "China",
+   "china"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56243",
+  "name": "Guangdong-Hong Kong-Macao Bay Area",
+  "group": "56101",
+  "aliases": [
+   "Guangdong-Hong Kong-Macao Bay Area",
+   "guangdong-hong kong-macao bay area"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56230",
+  "name": "Dongguan",
+  "group": "56101",
+  "aliases": [
+   "Dongguan",
+   "dongguan"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56238",
+  "name": "Foshan",
+  "group": "56101",
+  "aliases": [
+   "Foshan",
+   "foshan"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56231",
+  "name": "Guangzhou",
+  "group": "56101",
+  "aliases": [
+   "Guangzhou",
+   "guangzhou"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56241",
+  "name": "Huizhou",
+  "group": "56101",
+  "aliases": [
+   "Huizhou",
+   "huizhou"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56242",
+  "name": "Jiangmen",
+  "group": "56101",
+  "aliases": [
+   "Jiangmen",
+   "jiangmen"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56234",
+  "name": "Shenzhen",
+  "group": "56101",
+  "aliases": [
+   "Shenzhen",
+   "shenzhen"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56240",
+  "name": "Zhaoqing",
+  "group": "56101",
+  "aliases": [
+   "Zhaoqing",
+   "zhaoqing"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56239",
+  "name": "Zhongshan",
+  "group": "56101",
+  "aliases": [
+   "Zhongshan",
+   "zhongshan"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56235",
+  "name": "Zhuhai",
+  "group": "56101",
+  "aliases": [
+   "Zhuhai",
+   "zhuhai"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56233",
+  "name": "Shanghai",
+  "group": "56101",
+  "aliases": [
+   "Shanghai",
+   "shanghai"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56244",
+  "name": "Tianjin",
+  "group": "56101",
+  "aliases": [
+   "Tianjin",
+   "tianjin"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56245",
+  "name": "Zhejiang",
+  "group": "56101",
+  "aliases": [
+   "Zhejiang",
+   "zhejiang"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56236",
+  "name": "Macau",
+  "group": "56102",
+  "aliases": [
+   "Macau",
+   "macau"
+  ],
+  "zh": ""
+ },
+ {
+  "id": "56237",
+  "name": "Overseas",
+  "group": "56103",
+  "aliases": [
+   "Overseas",
+   "overseas"
+  ],
+  "zh": ""
+ }
+]

@@ -90,6 +90,7 @@ SELECTORS = {
         "detail_description": ".description__text, .show-more-less-html__markup",
     },
     "indeed": {},
+    "recruit": {},
 }
 
 # 各網站專屬設定（如 API base、需要 Playwright 等）
@@ -109,6 +110,8 @@ SITE_CONFIG = {
     "linkedin": {"needs_browser": False, "request_delay": 3.0,
                  "supports_logged_out": True},
     "indeed": {"needs_browser": True, "request_delay": 3.0},
+    # ASP.NET WebForms：翻頁須在真瀏覽器內執行 __doPostBack，故 needs_browser
+    "recruit": {"needs_browser": True, "request_delay": 2.0},
 }
 
 
