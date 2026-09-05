@@ -8,6 +8,8 @@ from .recruit import RecruitScraper
 from .jobmarket import JobMarketScraper
 from .foundit import FounditScraper
 from .efc import EfcScraper
+from .liepin import LiepinScraper
+from .zhipin import ZhipinScraper
 
 SCRAPERS = {
     "moovup": MoovupScraper,
@@ -19,6 +21,8 @@ SCRAPERS = {
     "jobmarket": JobMarketScraper,
     "foundit": FounditScraper,
     "efc": EfcScraper,
+    "liepin": LiepinScraper,
+    "zhipin": ZhipinScraper,
 }
 
 __all__ = [
@@ -32,4 +36,6 @@ __all__ = [
     "JobMarketScraper",
     "FounditScraper",
     "EfcScraper",
+    "LiepinScraper",
+    "ZhipinScraper",
 ]

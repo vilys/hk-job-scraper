@@ -10,10 +10,14 @@
 > - **JobMarket 求職廣場（www.jobmarket.com.hk）** —— 見「🧭 技術筆記（JobMarket 逆向要點）」與「🗺️ 按地區篩選（JobMarket）」
 > - **foundit（www.foundit.hk，原 Monster HK）** —— 見「🧭 技術筆記（foundit 逆向要點）」與「🗺️ 按地區篩選（foundit）」
 > - **eFinancialCareers（www.efinancialcareers.hk）** —— 見「🧭 技術筆記（eFinancialCareers 逆向要點）」與「🗺️ 按地區篩選（eFinancialCareers）」
+> - **獵聘 Liepin（www.liepin.com）** ⚠️ 受限模組 —— 見「🧭 技術筆記（獵聘）」
+> - **BOSS直聘（www.zhipin.com）** ⚠️ 受限模組 —— 見「🧭 技術筆記（BOSS直聘）」
 >
-> 各爬蟲模組**僅針對其對應網站**，彼此的資料結構、地區編號體系互不相同（九站的地區字典各自獨立），請勿跨站混用。
+> 各爬蟲模組**僅針對其對應網站**，彼此的資料結構、地區編號體系互不相同（各站的地區字典各自獨立），請勿跨站混用。
+>
+> ⚠️ **受限模組說明**：獵聘與 BOSS直聘 的 robots.txt 明文禁止搜尋路徑抓取、且反爬極兇（IP 驗證碼 / 全站安全驗證），兩站亦無香港站。模組依用戶明確要求提供，**預期多數情況回 0 筆**（附明確警告，非程式故障）。
 
-模組化、可擴充的香港求職網站爬蟲。目前已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Indeed**、**Recruit**、**JobMarket**、**foundit**、**eFinancialCareers** 九座據點並實測通過（見文末路線圖）。
+模組化、可擴充的香港求職網站爬蟲。已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Indeed**、**Recruit**、**JobMarket**、**foundit**、**eFinancialCareers** 九座可用據點，另含 **獵聘**、**BOSS直聘** 兩座受限模組（見文末路線圖）。
 
 ---
 
@@ -102,6 +106,11 @@
   - **支援近期篩選 `--days N`**：API 每筆含 `postedDate`（ISO 時間戳），瞬時過濾。
   - **`--detail` 走詳情頁 JSON-LD**（完整描述 / baseSalary / skills）。
   - **不支援項**：`--category` / `--industry` / `--sort`（站方僅 relevance 排序，其餘值一律被忽略；傳入會警告並忽略）。
+- **獵聘 / BOSS直聘 受限模組（擴充八站 Wave 5，僅因用戶明確要求提供）**：
+  - ⚠️ 兩站 robots.txt 明文禁搜尋抓取（`Disallow: /*?*` / `Disallow: /*?query=*`）、反爬極兇（IP 驗證碼 / 全站安全驗證），且**均無香港站**（`/hk/` 404）。
+  - 模組可執行、行為可預期：首次實例化即警告 robots 與反爬風險；被攔時回 0 筆（明確警告，非靜默、非 crash）。
+  - 獵聘已驗證的資料機制：搜尋頁空殼 → 站方 JS 呼叫 `api-c.liepin.com/…/pc-search-job`（POST）；瀏覽器首次導航偶爾可攔截到回應，多次請求即觸發 IP 驗證碼。
+  - **不支援項**：`--district`（zhipin）/ `--category` / `--industry` / `--sort` / `--days` / `--detail` / `--pages > 1`（全部警告後忽略或回空）。
 - **禮貌爬取**：請求間隔 + 隨機抖動 + 失敗重試（指數退避），降低被封風險。
 
 ---
@@ -154,7 +163,7 @@ hk-job-scraper/
 
 - Python 3.10+
 - 需要 Playwright Chromium 的據點：**Moovup**（Cloudflare Turnstile）、**JobsDB**（Cloudflare）、**Indeed**（Cloudflare）、**Recruit**（WebForms 翻頁需真瀏覽器）。**JobMarket / eFinancialCareers** 不需要（全程普通 requests）。
-- ⚠️ **foundit 需要本機安裝 Google Chrome**：其 WAF 封鎖 Playwright 內建 Chromium 指紋（一律 403），模組以 `channel="chrome"`（系統 Chrome）headless 開啟；未安裝 Chrome 時會啟動失敗並提示。
+- ⚠️ **foundit / 獵聘 / BOSS直聘 需要本機安裝 Google Chrome**：foundit 的 WAF 與獵聘、BOSS直聘的反爬均以指紋區分瀏覽器，模組以 `channel="chrome"`（系統 Chrome）headless 開啟；未安裝 Chrome 時會啟動失敗並提示。
 - 只需 `requests` + `beautifulsoup4`、不需瀏覽器的據點：**勞工處 gov.hk**、**LinkedIn**（訪客模式）。
 
 ```bash
@@ -219,18 +228,18 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 > 任一站新增 / 修改某功能（如排序選項、地區解析）**不會影響其他站**。
 > 不支援的功能一律 `logger.warning` 後忽略並提示，絕不報錯中斷或改變他站輸出。
 
-| 功能 / 參數 | Moovup | 勞工處 gov.hk | JobsDB | LinkedIn | Indeed | Recruit | JobMarket | foundit | eFinancialCareers |
-|------|------|------|------|------|------|------|------|------|------|
-| 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援 | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） | ✅ 支援（可留空→地區瀏覽頁） | ✅ 支援（可留空） |
-| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選） | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） |
-| 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 |
-| 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） |
-| 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） |
-| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌 pubDate 瞬時（~9s，不點擊） | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 |
-| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ⚠️ best-effort | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） |
-| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） |
-| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（Cloudflare） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） |
-| 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） |
+| 功能 / 參數 | Moovup | 勞工處 gov.hk | JobsDB | LinkedIn | Indeed | Recruit | JobMarket | foundit | eFinancialCareers | 獵聘 ⚠️ | BOSS直聘 ⚠️ |
+|------|------|------|------|------|------|------|------|------|------|------|------|
+| 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援 | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） | ✅ 支援（可留空→地區瀏覽頁） | ✅ 支援（可留空） | ⚠️ 機制已驗證但極易觸發驗證碼 | ⚠️ 全站安全驗證攔下 |
+| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選） | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼直傳（900 是否香港未確認） | ❌ 不適用（香港不在站方城市體系） |
+| 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 |
+| 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 |
+| 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 |
+| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌 pubDate 瞬時（~9s，不點擊） | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 |
+| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ⚠️ best-effort | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） |
+| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） |
+| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（Cloudflare） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） |
+| 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 |
 
 > 圖例：✅ 完全支援　⚠️ 部分 / 有限支援　❌ 不適用（傳入會警告並忽略）
 
@@ -384,6 +393,12 @@ python main.py --source efc --keyword "risk manager" --pages 2
 # 42) eFC：地區（僅大區：Hong Kong / Hong Kong Island / Kowloon，中英文皆可）+ 近期
 python main.py --source efc --keyword "analyst" --district 九龍 --days 7
 python main.py --source efc --keyword "" --district "Hong Kong Island"   # 空關鍵字 = 純瀏覽
+
+# 43) 獵聘（⚠️ 受限模組：robots 禁抓 + IP 驗證碼；回 0 筆屬預期，警告會說明原因）
+python main.py --source liepin --keyword "engineer"
+
+# 44) BOSS直聘（⚠️ 受限模組：全站安全驗證；回 0 筆屬預期）
+python main.py --source zhipin --keyword "engineer"
 ```
 
 ---
@@ -1026,6 +1041,27 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 
 ---
 
+## 🧭 技術筆記（獵聘 liepin 逆向要點 — Wave 5 受限模組）
+
+- ⚠️ **robots 受限**：`robots.txt` 明文 `Disallow: /*?*`（所有帶查詢串路徑禁抓）。本模組標記 `_ROBOTS_RESTRICTED`，首次實例化即警告；係因用戶明確要求「8 個都做」才提供，請自行評估合規風險。
+- **香港站不存在**：`/hk/` 404；主站為內地平台，香港職缺覆蓋未證實。`city=900` 是否對應香港**未確認**（首次樣本疑未按城市過濾，回內地職位）。
+- **資料機制**：搜尋頁 `/zhaopin/?key=<kw>&city=<code>` 是空殼（secscan/security.js 前端安全掃描），資料由站方 JS 呼叫 `api-c.liepin.com/api/com.liepin.searchfront4c.pc-search-job`（POST JSON，`flag=1` 時回 `jobCardList`）。
+  - 直接 requests 調用該 API 一律 `flag=0`（43B 空回應）——需 secscan 令牌。
+  - **Playwright（本機 Chrome 指紋）首次導航可攔截到該回應**；但同 IP 短時間 2–3 次請求後即被 `safe.liepin.com/page/liepin/captchaPage_ip_PC`（IP 級驗證碼）持續攔截，Chrome 指紋也逃不掉。
+- **模組策略**：導航搜尋頁 → 監聽 `pc-search-job` 回應 → 解析 `jobCardList`（job.jobId/title/dq/salary、comp.compName）→ 命中驗證碼或無回應時**警告後回 0 筆**（行為明確，不 crash）。
+- **不支援項**：`--category` / `--industry` / `--sort`（無對應參數）、`--days` / `--detail`（詳情同受驗證碼保護）、`--pages > 1`（分頁參數未能驗證）→ 全部警告後忽略或回空。
+- **robots 有趣細節**：robots 明確禁的是 www 查詢串與 campus API；`api-c.liepin.com` 的主搜尋 API **不在禁區**（僅 `com.liepin.campus*` 被點名），但該 API 需要 secscan 令牌，實質仍須走瀏覽器流程。
+
+## 🧭 技術筆記（BOSS直聘 zhipin 逆向要點 — Wave 5 受限模組）
+
+- ⚠️ **robots 受限**：`robots.txt` 明文 `Disallow: /*?query=*` 且**點名禁 `Jobuispider`**。本模組標記 `_ROBOTS_RESTRICTED`，首次實例化即警告；提供原因同上。
+- **香港站不存在**：`/hk/` 404；主站 home 頁無香港城市（站方城市體系不含香港）。
+- **全站安全驗證**：普通 requests 與 Playwright（本機 Chrome 指紋、zh-CN locale）開**任何路徑**一律落在「安全验证 - BOSS直聘」頁（無 title、需人機互動滑塊），無法取得任何職位資料——比獵聘更徹底的封鎖。
+- **模組策略**：導航 `/web/geek/job?query=<kw>` → 標題/內容含「安全验证」即**警告後回 0 筆**；若某日能過驗證則解析 `.job-card-wrapper` 卡（`.job-name` 的 `/job_detail/<encryptId>.html`、`.company-name`、`.job-area`、`.salary`）。
+- **不支援項**：`--district`（香港不在城市體系）/ `--category` / `--industry` / `--sort` / `--days` / `--detail` / `--pages > 1`（分頁依賴查詢串 = robots 禁區）→ 全部警告後忽略或回空。
+
+---
+
 ## 🗺️ 路線圖（依計劃書）
 
 | 階段 | 網站 | 難度 | 狀態 |
@@ -1039,7 +1075,11 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 | 9 | JobMarket（擴充八站 Wave 1） | 低–中（JSP） | ✅ 已完成並實測（純 requests 免瀏覽器；四維篩選：關鍵字 Searchtext + 5 大區/75 子區 + 28 大類/195 細類 + 30 行業；批次 API 列表階段補地區/職缺類型；--days 列表瞬時；--sort 不適用） |
 | 10 | foundit 原 Monster HK（擴充八站 Wave 2） | 中–高（指紋 WAF） | ✅ 已完成並實測（⚠️ 需本機 Google Chrome——WAF 封鎖 Chromium 指紋；關鍵字走 SEO SSR 瀏覽頁〔站方 API 故障 404〕；路徑後綴翻頁；46 地區 slug 中英雙語；--days 列表相對日期瞬時；--detail 走 JSON-LD〔requests 直達〕；--category/--industry/--sort 不適用；sitemap 8,799 職位保底） |
 | 11 | eFinancialCareers（擴充八站 Wave 2） | 中（JSON API） | ✅ 已完成並實測（純 JSON API 免瀏覽器 `job-search-ui…/v3/efc/jobs/search`；關鍵字可空；--district 僅 3 大區〔站方細分區回 0 筆〕；--days API ISO 瞬時；--detail 走 JSON-LD；--category/--industry/--sort 不適用；香港 ~2,900 筆） |
+| — | HKGoodJobs（擴充八站 Wave 3） | 判定 | ❌ **判定不可行，止損**（裸域全面真 403——Apache 伺服器端拒絕所有路徑，HTTP/HTTPS、真 Chrome 指紋、忽略憑證錯誤皆同；TLS 憑證另錯置錯誤網域。站方配置即拒所有自動/人工存取） |
+| — | Glassdoor HK（擴充八站 Wave 4） | 高（CF + 誘餌） | ❌ **判定不可行，止損**（CF 挑戰不穩；首次可 200 但回**位置污染頁**——geoId 被無視、按資料中心 IP 定位到印度小頁鎮「Ambahta Rindān」，`Hong Kong` 僅 2 次 / `Ambahta` 37 次、0 個真職位連結。抓到也是錯資料） |
+| 12 | 獵聘 Liepin（擴充八站 Wave 5） | 🔴 高（robots 禁抓 + IP 驗證碼） | ⚠️ **受限模組落地**（robots `Disallow: /*?*`；香港站不存在、`city=900` 未確認；機制已驗證——首次導航可攔 `pc-search-job` 回應，隨即 IP 驗證碼；命中即警告回 0 筆；--days/--detail/--pages>1 等不支援） |
+| 13 | BOSS直聘 Zhipin（擴充八站 Wave 5） | 🔴 高（robots 禁抓 + 全站安全驗證） | ⚠️ **受限模組落地**（robots `Disallow: /*?query=*` + 點名禁 Jobuispider；香港站不存在；任何自動化存取皆落「安全验证」頁；模組判定後警告回 0 筆；全部篩選/詳情/分頁不支援） |
 
 > 路線圖前五站全數達標 ✅：Moovup / 勞工處 / JobsDB / LinkedIn / Indeed 五座據點皆已落地並實測。LinkedIn 現以訪客模式落地——功能可用但單次約 ~25–60 筆天花板；提供 `li_at` cookie（config.LINKEDIN_LI_AT / 環境變數）後深翻頁趨穩、可抓更深。Indeed 的 `--days` 現已由內嵌 `pubDate` 瞬時篩選（~9 秒，不再逐張點擊）；`--detail` 取描述改用 JS 點擊面板（~1 秒/張）；直連 viewjob 因 Cloudflare 不可行。
 >
-> **擴充八站計畫**（見 `docs/擴充八站開發計畫.md`）：Wave 1（Recruit、JobMarket）與 Wave 2（foundit、eFinancialCareers）**均已完成** ✅✅✅✅（第六至九座據點）；後續 Wave 3 HKGoodJobs 判定 / Wave 4 Glassdoor / Wave 5 獵聘+BOSS直聘 依五波順序推進。
+> **擴充八站計畫全數收官**（見 `docs/擴充八站開發計畫.md`）：Wave 1（Recruit、JobMarket）與 Wave 2（foundit、eFinancialCareers）**已完成** ✅✅✅✅（第六至九座可用據點）；Wave 3 HKGoodJobs ❌ 判定不可行（伺服器端全面 403）、Wave 4 Glassdoor ❌ 判定不可行（位置污染誘餌頁）；Wave 5 獵聘 + BOSS直聘 ⚠️ 受限模組依用戶要求落地（robots 禁抓 + 反爬極兇，行為可預期但不產資料）。

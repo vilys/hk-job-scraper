@@ -115,6 +115,9 @@ SITE_CONFIG = {
     "jobmarket": {"request_delay": 1.5},
     "foundit": {"needs_browser": True, "request_delay": 2.0},
     "efc": {"request_delay": 1.5},
+    # Wave 5 受限站：反爬極兇 + robots 限制，間隔拉長（行為保守）
+    "liepin": {"needs_browser": True, "request_delay": 5.0},
+    "zhipin": {"needs_browser": True, "request_delay": 5.0},
 }
 
 
