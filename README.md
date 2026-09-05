@@ -1,16 +1,17 @@
 # 香港求職網站自動搜尋程式 (HK Job Scraper)
 
-> ⚠️ **適用範圍備註**：本程式採「一網站一爬蟲模組」設計，目前已完成 **六座據點**：
+> ⚠️ **適用範圍備註**：本程式採「一網站一爬蟲模組」設計，目前已完成 **七座據點**：
 > - **Moovup 好工速遞（moovup.com）** —— 見「🗺️ 按地區篩選（Moovup）」與「🧭 技術筆記（Moovup）」
 > - **勞工處互動就業服務（jobs.gov.hk / www1.jobs.gov.hk）** —— 見「🗺️ 按地區篩選（勞工處）」與「🧭 技術筆記（勞工處）」
 > - **JobsDB（hk.jobsdb.com）** —— 見「🗺️ 按地區篩選（JobsDB）」與「🧭 技術筆記（JobsDB）」
 > - **LinkedIn（www.linkedin.com）** —— 見「🧭 技術筆記（LinkedIn）」與「🗺️ 按地區篩選（LinkedIn）」
 > - **Indeed（hk.indeed.com）** —— 見「🧭 技術筆記（Indeed）」與「🗺️ 按地區篩選（Indeed）」
 > - **Recruit（www.recruit.com.hk）** —— 見「🧭 技術筆記（Recruit 逆向要點）」與「🗺️ 按地區篩選（Recruit）」
+> - **JobMarket 求職廣場（www.jobmarket.com.hk）** —— 見「🧭 技術筆記（JobMarket 逆向要點）」與「🗺️ 按地區篩選（JobMarket）」
 >
-> 各爬蟲模組**僅針對其對應網站**，彼此的資料結構、地區編號體系互不相同（六站的地區字典各自獨立），請勿跨站混用。
+> 各爬蟲模組**僅針對其對應網站**，彼此的資料結構、地區編號體系互不相同（七站的地區字典各自獨立），請勿跨站混用。
 
-模組化、可擴充的香港求職網站爬蟲。目前已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Indeed**、**Recruit** 六座據點並實測通過（見文末路線圖）。
+模組化、可擴充的香港求職網站爬蟲。目前已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Indeed**、**Recruit**、**JobMarket** 七座據點並實測通過（見文末路線圖）。
 
 ---
 
@@ -77,6 +78,13 @@
   - **每頁 25 筆、翻頁約 1.7 秒**；`--detail` 走詳情頁的 JSON-LD（地區 / 行業 / 僱傭類型 / 描述，約 0.2 秒/筆）。
   - **不支援項**：`--industry`（該站無行業篩選維度，傳入會忽略並提示）。
   - ⚠️ **列表無地區欄**：地區只在詳情 JSON-LD 裡，故預設 `location` 為空，需加 `--detail` 才補得到。
+- **JobMarket 求職廣場據點已實戰驗證（擴充八站 Wave 1）**：
+  - **JSP 站、全程普通 requests（不需 Playwright）**：列表端點 + 批次 API + 詳情頁皆可直接 GET；無 Cloudflare 挑戰、無 CAPTCHA，robots 極寬鬆。
+  - **支援關鍵字 + 地區 + 職能 + 行業四維篩選**：`--district`（5 大區 + 75 子區，中英文皆可，如 `元朗`/`Yuen Long`）、`--category`（28 大類 + 195 細類）、`--industry`（30 行業）。實測 engineer 204 筆、資訊科技職能 21 筆、元朗 engineer 1 筆。
+  - **列表階段即自動補地區/職缺類型/行業/學歷**：呼叫站方自己的批次 API `/API/Web/GetJobDetail/<ids>`（每頁 1 次），`location` 預設就有值——與 Recruit 不同，不必 `--detail`。
+  - **支援近期篩選 `--days N`**：列表卡已含刊登日（`04 Sep 2026`），直接由列表過濾，瞬時。
+  - **每頁 20 筆、翻頁 `Page=N` 無重複**；`--detail` 走 `/Job/CurrentJob?Jobid=` 完整描述。
+  - **不支援項**：`--sort`（站方 Order 參數實測無效；列表預設已按刊登日新→舊，傳入會警告並忽略）。
 - **禮貌爬取**：請求間隔 + 隨機抖動 + 失敗重試（指數退避），降低被封風險。
 
 ---
@@ -107,7 +115,11 @@ hk-job-scraper/
 │   ├── indeed.py            # Indeed 爬蟲（Playwright 過 Cloudflare + 內嵌 pubDate 取日）
 │   ├── recruit.py           # Recruit 爬蟲（WebForms：hidden 欄位篩選 + __doPostBack 翻頁）
 │   ├── recruit_districts.json    # Recruit 地區字典（94 區：英文原名 + 45 個中文別名）
-│   └── recruit_categories.json   # Recruit 職能字典（34 大類 + 290 細類，中英雙語 + cat_id）
+│   ├── recruit_categories.json   # Recruit 職能字典（34 大類 + 290 細類，中英雙語 + cat_id）
+│   ├── jobmarket.py         # JobMarket 爬蟲（JSP：純 requests + 批次 API 補地區）
+│   ├── jobmarket_districts.json  # JobMarket 地區字典（80 項：5 AreaID + 75 AreaLocationID，中英雙語）
+│   ├── jobmarket_categories.json # JobMarket 職能字典（28 大類 + 195 細類，細類記 cat_id）
+│   └── jobmarket_industries.json # JobMarket 行業字典（30 業，中英雙語）
 ├── docs/
 │   ├── moovup_地區編號對照表.md    # 人可直讀的 Moovup 地區↔編號對照表
 │   └── 擴充八站開發計畫.md         # 擴充八站的偵察結論、五波順序與驗收標準
@@ -120,7 +132,7 @@ hk-job-scraper/
 ## ⚙️ 環境要求與安裝
 
 - Python 3.10+
-- 需要 Playwright Chromium 的據點：**Moovup**（Cloudflare Turnstile）、**JobsDB**（Cloudflare）、**Indeed**（Cloudflare）、**Recruit**（WebForms 翻頁需真瀏覽器）。
+- 需要 Playwright Chromium 的據點：**Moovup**（Cloudflare Turnstile）、**JobsDB**（Cloudflare）、**Indeed**（Cloudflare）、**Recruit**（WebForms 翻頁需真瀏覽器）。**JobMarket** 不需要（全程普通 requests）。
 - 只需 `requests` + `beautifulsoup4`、不需瀏覽器的據點：**勞工處 gov.hk**、**LinkedIn**（訪客模式）。
 
 ```bash
@@ -185,18 +197,18 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 > 任一站新增 / 修改某功能（如排序選項、地區解析）**不會影響其他站**。
 > 不支援的功能一律 `logger.warning` 後忽略並提示，絕不報錯中斷或改變他站輸出。
 
-| 功能 / 參數 | Moovup | 勞工處 gov.hk | JobsDB | LinkedIn | Indeed | Recruit |
-|------|------|------|------|------|------|------|
-| 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援 | ✅ 可留空（純分類瀏覽） |
-| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選） |
-| 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） |
-| 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） |
-| 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） |
-| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌 pubDate 瞬時（~9s，不點擊） | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） |
-| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ⚠️ best-effort | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） |
-| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 |
-| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（Cloudflare） | ✅ 需（`__doPostBack` 翻頁） |
-| 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 |
+| 功能 / 參數 | Moovup | 勞工處 gov.hk | JobsDB | LinkedIn | Indeed | Recruit | JobMarket |
+|------|------|------|------|------|------|------|------|
+| 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援 | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） |
+| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選） | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） |
+| 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） |
+| 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） |
+| 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） |
+| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌 pubDate 瞬時（~9s，不點擊） | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） |
+| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ⚠️ best-effort | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） |
+| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 | 20 |
+| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（Cloudflare） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） |
+| 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 |
 
 > 圖例：✅ 完全支援　⚠️ 部分 / 有限支援　❌ 不適用（傳入會警告並忽略）
 
@@ -317,6 +329,22 @@ python main.py --source recruit --keyword "engineer" --pages 2 --detail --outfil
 
 # 32) Recruit：排序（post_dt_desc / salary_desc / exp / edu / relevance → 結果頁 sortByDDL）
 python main.py --source recruit --keyword "engineer" --sort salary_desc --pages 2
+
+# 33) JobMarket：基本搜尋（純 requests，不需 Playwright）
+python main.py --source jobmarket --keyword "engineer" --pages 2
+
+# 34) JobMarket：地區篩選（5 大區 + 75 子區，中英文皆可，如 元朗 / Yuen Long / 新界）
+python main.py --source jobmarket --keyword "engineer" --district 元朗 --pages 2
+
+# 35) JobMarket：職能 + 行業篩選（28 大類 + 195 細類；30 行業）
+python main.py --source jobmarket --category "資訊科技" --pages 2
+python main.py --source jobmarket --industry "Banking / Finance / Investment" --days 7
+
+# 36) JobMarket：地區 + 近期三維（列表已含刊登日 → --days 瞬時；地區列表階段即自動補齊）
+python main.py --source jobmarket --district 元朗 --days 7 --outfile jobmarket_yl_7d
+
+# 37) JobMarket：要完整描述時加 --detail（走 /Job/CurrentJob?Jobid=）
+python main.py --source jobmarket --keyword "engineer" --pages 2 --detail --outfile jobmarket_eng_detail
 ```
 
 ---
@@ -834,6 +862,51 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 - 未知地區會 `logger.warning` 後忽略，不會報錯。
 - 職能篩選（`--category`）同理由 `recruit_categories.json`（34 大類 + 290 細類，中英雙語）解析成 `jobCatSearchHidden` / `jobFuncSearchHidden`；給細類時會**自動補上所屬大類**（站方要求 jobFunc 必須搭配 jobCat 才生效），如 `--category "DBA"` → 細類 56121 + 大類「資訊科技」26000。
 
+## 🧭 技術筆記（JobMarket 逆向要點）
+
+- **真實網域**：`https://www.jobmarket.com.hk`（搜尋殼頁 `/Jobs/search?...`；職位列表端點 `/Job/JobList`；詳情 `/Job/CurrentJob?Jobid=<id>`）。
+- **技術棧**：J2EE / JSP。**無 Cloudflare 挑戰**（頁面只載入 CF 腳本，內容正常回）、無 CAPTCHA；robots 極寬鬆（僅禁 `/UpFiles/`）。**全程普通 `requests` 即可，`use_browser=False`**。
+- **搜尋架構（本站關鍵）**：`/Jobs/search?...` 殼頁只是一層 iframe 容器，真正的職位列表由 **iframe 內的 `/Job/JobList` 端點伺服器渲染**。爬蟲直接打該端點：
+  `/Job/JobList?Searchtext=K&Page=N&AreaID=..&AreaLocationID=..&JobFunctionID=..&SubJobFunctionID=..&JobIndustryID=..`
+  - ⚠️ **關鍵字參數名是 `Searchtext`，不是 `keyword`**。站方殼頁 iframe 誤用 `keyword=engineer`，該參數被列表端點**無視**、回全站 ~3594 筆——這是站方殼頁與列表端點參數名不一致的坑（由提交按鈕的 JS 得知真正參數名）。
+  - 每頁 20 筆；`Page=N` 翻頁（實測 1/2/3 頁 job id 全無重複）。
+- **搜尋參數全表**（從殼頁提交按鈕的 JS 抽出）：`Searchtext`（關鍵字）、`CompanyID`、`JobFunctionID` / `SubJobFunctionID`（逗號多選；**細類可直接單送**，與 Recruit 不同）、`JobIndustryID`、`QualificationID`、`ManagerialLevelID`、`AreaID`（5 大區）/ `AreaLocationID`（75 子區）、`JobType`、`SalaryFrom` / `SalaryTo` / `SalaryTypeID`、`WorkExperienceID_From/_To`、`IsGraduate=1`、`IsDesc=1`（描述內搜尋）。
+- **職位卡（`div.job-list-con`，每頁 20 張）**：職稱 `h3`；公司 `p.company-name > a[href="/Job/?CompanyID=..."]`；**刊登日 `p.post-date`（`04 Sep 2026`）**；job id 在 `a.saved-a` 的 `save-id` 屬性（`li[data-jobid]` 同值）；`p.company-addr` 在原始 HTML 中是 "loading"。
+  - ⚠️ **列表卡沒有薪資欄**（薪資常寫在職稱或描述內）。
+- **地區補齊：站方批次 API（重要）**：列表載入後站方 JS 呼叫 **`GET /API/Web/GetJobDetail/<id1,id2,...>`**（JSON），回傳每筆的 `JobLocation` / `JobType` / `JobIndustry` / `Qualification` / `Benefit` / `JobDetails` / `JobSummary`。本爬蟲在列表階段即呼叫同一 API（**每頁 1 次**）補齊 location / job_type / industry / 學歷 / 福利——**`location` 預設就有值，不必 `--detail`**。
+- **詳情頁（僅 `--detail` 顯式要完整描述時才用）**：`GET /Job/CurrentJob?Jobid=<id>`（普通 requests）。`​.job-post-content` 完整描述、`.job-par` 行業/職能文字（正則抽 `Industry X Job Function Y`）、`.job-list-detail-date` 內含 ref 編號與 `05-Sep-2026` 刊登日、`.benefits` 福利。
+- **`--days` 行為**：`list_has_date=True`，列表卡已含刊登日（`%d %b %Y`），由列表直接過濾（瞬時）；`days_since_posted()` 另支援詳情層的 `%d-%b-%Y`。
+- **排序**：站方 UI 的 `Order` 參數實測無有效效果（`Order=PostDate` 甚至回 0 筆），而列表預設即刊登日新→舊（job id 遞減）→ **`--sort` 一律警告後忽略**。
+- **地區篩選體系**：JobMarket 專屬雙參數（`AreaID` 5 大區 + `AreaLocationID` 75 子區），與其他六站完全獨立，不可混用（見下方「🗺️ 按地區篩選（JobMarket）」）。
+- **各欄位資料來源總表（JobMarket → JobRecord）**：
+
+  | JobRecord 欄位 | 來源（JobMarket 選擇器 / 邏輯） |
+  |----------------|------------------------------|
+  | `job_id` | `jobmarket::<save-id>`（取自 `a.saved-a` 的 `save-id`；`li[data-jobid]` 同值） |
+  | `source` | 常數 `"jobmarket"` |
+  | `title` | 列表 `div.job-list-con h3` |
+  | `company` | 列表 `p.company-name > a` |
+  | `location` | **批次 API `JobLocation` 陣列**（` / ` 串接；列表階段即有） |
+  | `salary` | 列表無薪資欄，留空（薪資常在職稱/描述文字內） |
+  | `job_type` | 批次 API `JobType` 陣列 |
+  | `industry` | 批次 API `JobIndustry`；`--detail` 時詳情 `.job-par` 正則亦可 |
+  | `description` | `--detail` 時詳情 `.job-post-content` |
+  | `requirements` | 批次 API `Qualification`（學歷）+ `Benefit`（福利）+ `JobSummary`/`JobDetails` 合併；`--detail` 時 `.benefits` 亦可 |
+  | `url` | `https://www.jobmarket.com.hk/Job/CurrentJob?Jobid=<id>` |
+  | `posted_date` | 列表 `p.post-date`（`04 Sep 2026`）；`--detail` 時 `05-Sep-2026` 亦可 |
+  | `scraped_at` | 抓取當下 `datetime.now()` |
+
+## 🗺️ 按地區篩選（JobMarket）
+
+- JobMarket 的地區篩選走 **雙參數體系**：`AreaID`（5 大區：香港島 / 九龍 / 新界 / 離島 / 其他）與 `AreaLocationID`（75 子區，如元朗=68、屯門=67、沙田=59），可逗號多選。與 Moovup 的 shortCode、勞工處數字 ID、JobsDB slug、Recruit 數字 ID、LinkedIn / Indeed 自由文字**完全獨立**，不可跨站混用。
+- 本程式內建 `scrapers/jobmarket_districts.json`：**80 項**（5 AreaID + 75 AreaLocationID，中英雙語）。中英文皆可輸入：
+  - `python main.py --source jobmarket --keyword "engineer" --district 元朗`（中文 → AreaLocationID=68）
+  - `python main.py --source jobmarket --keyword "engineer" --district "Yuen Long"`（英文，效果相同）
+  - `python main.py --source jobmarket --keyword "engineer" --district 新界`（大區 → AreaID=3，涵蓋全部新界子區）
+  - `python main.py --source jobmarket --district "元朗,屯門"`（逗號多區）
+- 未知地區 `logger.warning` 後忽略，不報錯。
+- 職能（`--category`）由 `jobmarket_categories.json`（28 大類 + 195 細類）解析成 `JobFunctionID` / `SubJobFunctionID`；行業（`--industry`）由 `jobmarket_industries.json`（30 楘）解析成 `JobIndustryID`。**細類可直接單送，無需搭配大類**（與 Recruit 不同）。
+
 ---
 
 ## 🗺️ 路線圖（依計劃書）
@@ -846,7 +919,8 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 | 6 | LinkedIn | 高（強反爬） | ✅ 已完成並實測（訪客模式：關鍵字 + 地點 + --days + --sort post_dt_desc；深翻頁不穩定，填 li_at cookie 可解鎖；--category/--industry 不適用） |
 | 7 | Indeed | 高（Cloudflare） | ✅ 已完成並實測（Playwright 過 CF；關鍵字 + 地區自由文字；**--days 經內嵌 pubDate 瞬時篩選 ~9s**；--detail 用 JS 點擊面板取描述 ~1s/張；--category/--industry/--sort 不適用） |
 | 8 | Recruit（擴充八站 Wave 1） | 中（WebForms） | ✅ 已完成並實測（hidden 欄位三維篩選：關鍵字 + 94 區地區 + 34 大類/290 細類職能；--days 列表瞬時；--sort 五種；--detail 走 JSON-LD；列表無地區欄需 --detail；--industry 不適用） |
+| 9 | JobMarket（擴充八站 Wave 1） | 低–中（JSP） | ✅ 已完成並實測（純 requests 免瀏覽器；四維篩選：關鍵字 Searchtext + 5 大區/75 子區 + 28 大類/195 細類 + 30 行業；批次 API 列表階段補地區/職缺類型；--days 列表瞬時；--sort 不適用） |
 
 > 路線圖前五站全數達標 ✅：Moovup / 勞工處 / JobsDB / LinkedIn / Indeed 五座據點皆已落地並實測。LinkedIn 現以訪客模式落地——功能可用但單次約 ~25–60 筆天花板；提供 `li_at` cookie（config.LINKEDIN_LI_AT / 環境變數）後深翻頁趨穩、可抓更深。Indeed 的 `--days` 現已由內嵌 `pubDate` 瞬時篩選（~9 秒，不再逐張點擊）；`--detail` 取描述改用 JS 點擊面板（~1 秒/張）；直連 viewjob 因 Cloudflare 不可行。
 >
-> **擴充八站計畫進行中**（見 `docs/擴充八站開發計畫.md`）：Wave 1 的 **Recruit 已完成** ✅（第六座據點）；JobMarket 進行中；後續 foundit / eFinancialCareers / HKGoodJobs / Glassdoor / 獵聘 / BOSS直聘 依五波順序推進。
+> **擴充八站計畫進行中**（見 `docs/擴充八站開發計畫.md`）：Wave 1 的 **Recruit 與 JobMarket 均已完成** ✅✅（第六、七座據點）；後續 foundit / eFinancialCareers / HKGoodJobs / Glassdoor / 獵聘 / BOSS直聘 依五波順序推進（Wave 2 起）。

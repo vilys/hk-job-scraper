@@ -1,0 +1,802 @@
+[
+ {
+  "id": "1",
+  "param": "AreaID",
+  "name": "Hong Kong",
+  "zh": "香港島",
+  "aliases": [
+   "Hong Kong",
+   "香港島"
+  ]
+ },
+ {
+  "id": "2",
+  "param": "AreaID",
+  "name": "Kowloon",
+  "zh": "九龍",
+  "aliases": [
+   "Kowloon",
+   "九龍"
+  ]
+ },
+ {
+  "id": "3",
+  "param": "AreaID",
+  "name": "N.T.",
+  "zh": "新界",
+  "aliases": [
+   "N.T.",
+   "新界"
+  ]
+ },
+ {
+  "id": "4",
+  "param": "AreaID",
+  "name": "Outlying Islands",
+  "zh": "離島",
+  "aliases": [
+   "Outlying Islands",
+   "離島"
+  ]
+ },
+ {
+  "id": "5",
+  "param": "AreaID",
+  "name": "Others",
+  "zh": "其他",
+  "aliases": [
+   "Others",
+   "其他"
+  ]
+ },
+ {
+  "id": "1",
+  "param": "AreaLocationID",
+  "name": "Aberdeen",
+  "zh": "香港仔",
+  "aliases": [
+   "Aberdeen",
+   "香港仔"
+  ]
+ },
+ {
+  "id": "2",
+  "param": "AreaLocationID",
+  "name": "Admiralty",
+  "zh": "金鐘",
+  "aliases": [
+   "Admiralty",
+   "金鐘"
+  ]
+ },
+ {
+  "id": "3",
+  "param": "AreaLocationID",
+  "name": "Ap Lei Chau",
+  "zh": "鴨脷洲",
+  "aliases": [
+   "Ap Lei Chau",
+   "鴨脷洲"
+  ]
+ },
+ {
+  "id": "4",
+  "param": "AreaLocationID",
+  "name": "Causeway Bay",
+  "zh": "銅鑼灣",
+  "aliases": [
+   "Causeway Bay",
+   "銅鑼灣"
+  ]
+ },
+ {
+  "id": "5",
+  "param": "AreaLocationID",
+  "name": "Central",
+  "zh": "中環",
+  "aliases": [
+   "Central",
+   "中環"
+  ]
+ },
+ {
+  "id": "6",
+  "param": "AreaLocationID",
+  "name": "Chai Wan",
+  "zh": "柴灣",
+  "aliases": [
+   "Chai Wan",
+   "柴灣"
+  ]
+ },
+ {
+  "id": "7",
+  "param": "AreaLocationID",
+  "name": "Fortress Hill",
+  "zh": "炮台山",
+  "aliases": [
+   "Fortress Hill",
+   "炮台山"
+  ]
+ },
+ {
+  "id": "8",
+  "param": "AreaLocationID",
+  "name": "Happy Valley",
+  "zh": "跑馬地",
+  "aliases": [
+   "Happy Valley",
+   "跑馬地"
+  ]
+ },
+ {
+  "id": "9",
+  "param": "AreaLocationID",
+  "name": "Kennedy Town",
+  "zh": "堅尼地城",
+  "aliases": [
+   "Kennedy Town",
+   "堅尼地城"
+  ]
+ },
+ {
+  "id": "10",
+  "param": "AreaLocationID",
+  "name": "North Point",
+  "zh": "北角",
+  "aliases": [
+   "North Point",
+   "北角"
+  ]
+ },
+ {
+  "id": "11",
+  "param": "AreaLocationID",
+  "name": "Quarry Bay",
+  "zh": "鰂魚涌",
+  "aliases": [
+   "Quarry Bay",
+   "鰂魚涌"
+  ]
+ },
+ {
+  "id": "12",
+  "param": "AreaLocationID",
+  "name": "Sai Wan Ho",
+  "zh": "西灣河",
+  "aliases": [
+   "Sai Wan Ho",
+   "西灣河"
+  ]
+ },
+ {
+  "id": "13",
+  "param": "AreaLocationID",
+  "name": "Sai Ying Pun",
+  "zh": "西營盤",
+  "aliases": [
+   "Sai Ying Pun",
+   "西營盤"
+  ]
+ },
+ {
+  "id": "14",
+  "param": "AreaLocationID",
+  "name": "Shau Kei Wan",
+  "zh": "筲箕灣",
+  "aliases": [
+   "Shau Kei Wan",
+   "筲箕灣"
+  ]
+ },
+ {
+  "id": "15",
+  "param": "AreaLocationID",
+  "name": "Sheung Wan",
+  "zh": "上環",
+  "aliases": [
+   "Sheung Wan",
+   "上環"
+  ]
+ },
+ {
+  "id": "16",
+  "param": "AreaLocationID",
+  "name": "Siu Sai Wan",
+  "zh": "小西灣",
+  "aliases": [
+   "Siu Sai Wan",
+   "小西灣"
+  ]
+ },
+ {
+  "id": "17",
+  "param": "AreaLocationID",
+  "name": "Southern District",
+  "zh": "南區",
+  "aliases": [
+   "Southern District",
+   "南區"
+  ]
+ },
+ {
+  "id": "18",
+  "param": "AreaLocationID",
+  "name": "Taikoo Shing",
+  "zh": "太古城",
+  "aliases": [
+   "Taikoo Shing",
+   "太古城"
+  ]
+ },
+ {
+  "id": "19",
+  "param": "AreaLocationID",
+  "name": "Tin Hau",
+  "zh": "天后",
+  "aliases": [
+   "Tin Hau",
+   "天后"
+  ]
+ },
+ {
+  "id": "20",
+  "param": "AreaLocationID",
+  "name": "Wanchai",
+  "zh": "灣仔",
+  "aliases": [
+   "Wanchai",
+   "灣仔"
+  ]
+ },
+ {
+  "id": "21",
+  "param": "AreaLocationID",
+  "name": "Western District",
+  "zh": "西環",
+  "aliases": [
+   "Western District",
+   "西環"
+  ]
+ },
+ {
+  "id": "22",
+  "param": "AreaLocationID",
+  "name": "Wong Chuk Hang",
+  "zh": "黃竹坑",
+  "aliases": [
+   "Wong Chuk Hang",
+   "黃竹坑"
+  ]
+ },
+ {
+  "id": "23",
+  "param": "AreaLocationID",
+  "name": "Cheung Sha Wan",
+  "zh": "長沙灣",
+  "aliases": [
+   "Cheung Sha Wan",
+   "長沙灣"
+  ]
+ },
+ {
+  "id": "24",
+  "param": "AreaLocationID",
+  "name": "Choi Hung",
+  "zh": "彩虹",
+  "aliases": [
+   "Choi Hung",
+   "彩虹"
+  ]
+ },
+ {
+  "id": "25",
+  "param": "AreaLocationID",
+  "name": "Diamond Hill",
+  "zh": "鑽石山",
+  "aliases": [
+   "Diamond Hill",
+   "鑽石山"
+  ]
+ },
+ {
+  "id": "26",
+  "param": "AreaLocationID",
+  "name": "Ho Man Tin",
+  "zh": "何文田",
+  "aliases": [
+   "Ho Man Tin",
+   "何文田"
+  ]
+ },
+ {
+  "id": "27",
+  "param": "AreaLocationID",
+  "name": "Hung Hom",
+  "zh": "紅磡",
+  "aliases": [
+   "Hung Hom",
+   "紅磡"
+  ]
+ },
+ {
+  "id": "28",
+  "param": "AreaLocationID",
+  "name": "Jordan",
+  "zh": "佐敦",
+  "aliases": [
+   "Jordan",
+   "佐敦"
+  ]
+ },
+ {
+  "id": "29",
+  "param": "AreaLocationID",
+  "name": "Kowloon Bay",
+  "zh": "九龍灣",
+  "aliases": [
+   "Kowloon Bay",
+   "九龍灣"
+  ]
+ },
+ {
+  "id": "30",
+  "param": "AreaLocationID",
+  "name": "Kowloon City",
+  "zh": "九龍城",
+  "aliases": [
+   "Kowloon City",
+   "九龍城"
+  ]
+ },
+ {
+  "id": "31",
+  "param": "AreaLocationID",
+  "name": "Kowloon Tong",
+  "zh": "九龍塘",
+  "aliases": [
+   "Kowloon Tong",
+   "九龍塘"
+  ]
+ },
+ {
+  "id": "32",
+  "param": "AreaLocationID",
+  "name": "Kwun Tong",
+  "zh": "觀塘",
+  "aliases": [
+   "Kwun Tong",
+   "觀塘"
+  ]
+ },
+ {
+  "id": "33",
+  "param": "AreaLocationID",
+  "name": "Lai Chi Kok",
+  "zh": "荔枝角",
+  "aliases": [
+   "Lai Chi Kok",
+   "荔枝角"
+  ]
+ },
+ {
+  "id": "34",
+  "param": "AreaLocationID",
+  "name": "Lam Tin",
+  "zh": "藍田",
+  "aliases": [
+   "Lam Tin",
+   "藍田"
+  ]
+ },
+ {
+  "id": "35",
+  "param": "AreaLocationID",
+  "name": "Lok Fu",
+  "zh": "樂富",
+  "aliases": [
+   "Lok Fu",
+   "樂富"
+  ]
+ },
+ {
+  "id": "36",
+  "param": "AreaLocationID",
+  "name": "Mei Foo",
+  "zh": "美孚",
+  "aliases": [
+   "Mei Foo",
+   "美孚"
+  ]
+ },
+ {
+  "id": "37",
+  "param": "AreaLocationID",
+  "name": "Mongkok",
+  "zh": "旺角",
+  "aliases": [
+   "Mongkok",
+   "旺角"
+  ]
+ },
+ {
+  "id": "38",
+  "param": "AreaLocationID",
+  "name": "Ngau Chi Wan",
+  "zh": "牛池灣",
+  "aliases": [
+   "Ngau Chi Wan",
+   "牛池灣"
+  ]
+ },
+ {
+  "id": "39",
+  "param": "AreaLocationID",
+  "name": "Ngau Tau Kok",
+  "zh": "牛頭角",
+  "aliases": [
+   "Ngau Tau Kok",
+   "牛頭角"
+  ]
+ },
+ {
+  "id": "40",
+  "param": "AreaLocationID",
+  "name": "Prince Edward",
+  "zh": "太子",
+  "aliases": [
+   "Prince Edward",
+   "太子"
+  ]
+ },
+ {
+  "id": "41",
+  "param": "AreaLocationID",
+  "name": "San Po Kong",
+  "zh": "新蒲崗",
+  "aliases": [
+   "San Po Kong",
+   "新蒲崗"
+  ]
+ },
+ {
+  "id": "42",
+  "param": "AreaLocationID",
+  "name": "Sham Shui Po",
+  "zh": "深水埗",
+  "aliases": [
+   "Sham Shui Po",
+   "深水埗"
+  ]
+ },
+ {
+  "id": "43",
+  "param": "AreaLocationID",
+  "name": "Shek Kip Mei",
+  "zh": "石硤尾",
+  "aliases": [
+   "Shek Kip Mei",
+   "石硤尾"
+  ]
+ },
+ {
+  "id": "44",
+  "param": "AreaLocationID",
+  "name": "Tai Kok Tsui",
+  "zh": "大角咀",
+  "aliases": [
+   "Tai Kok Tsui",
+   "大角咀"
+  ]
+ },
+ {
+  "id": "45",
+  "param": "AreaLocationID",
+  "name": "To Kwa Wan",
+  "zh": "土瓜灣",
+  "aliases": [
+   "To Kwa Wan",
+   "土瓜灣"
+  ]
+ },
+ {
+  "id": "46",
+  "param": "AreaLocationID",
+  "name": "Tsim Sha Tsui",
+  "zh": "尖沙咀",
+  "aliases": [
+   "Tsim Sha Tsui",
+   "尖沙咀"
+  ]
+ },
+ {
+  "id": "47",
+  "param": "AreaLocationID",
+  "name": "Tsz Wan Shan",
+  "zh": "慈雲山",
+  "aliases": [
+   "Tsz Wan Shan",
+   "慈雲山"
+  ]
+ },
+ {
+  "id": "48",
+  "param": "AreaLocationID",
+  "name": "Wong Tai Sin",
+  "zh": "黃大仙",
+  "aliases": [
+   "Wong Tai Sin",
+   "黃大仙"
+  ]
+ },
+ {
+  "id": "49",
+  "param": "AreaLocationID",
+  "name": "Yau Tong",
+  "zh": "油塘",
+  "aliases": [
+   "Yau Tong",
+   "油塘"
+  ]
+ },
+ {
+  "id": "50",
+  "param": "AreaLocationID",
+  "name": "Yau Ma Tei",
+  "zh": "油麻地",
+  "aliases": [
+   "Yau Ma Tei",
+   "油麻地"
+  ]
+ },
+ {
+  "id": "51",
+  "param": "AreaLocationID",
+  "name": "Fanling",
+  "zh": "粉嶺",
+  "aliases": [
+   "Fanling",
+   "粉嶺"
+  ]
+ },
+ {
+  "id": "52",
+  "param": "AreaLocationID",
+  "name": "Fo Tan",
+  "zh": "火炭",
+  "aliases": [
+   "Fo Tan",
+   "火炭"
+  ]
+ },
+ {
+  "id": "53",
+  "param": "AreaLocationID",
+  "name": "Kwai Chung",
+  "zh": "葵涌",
+  "aliases": [
+   "Kwai Chung",
+   "葵涌"
+  ]
+ },
+ {
+  "id": "54",
+  "param": "AreaLocationID",
+  "name": "Kwai Fong",
+  "zh": "葵芳",
+  "aliases": [
+   "Kwai Fong",
+   "葵芳"
+  ]
+ },
+ {
+  "id": "55",
+  "param": "AreaLocationID",
+  "name": "Kwai Hing",
+  "zh": "葵興",
+  "aliases": [
+   "Kwai Hing",
+   "葵興"
+  ]
+ },
+ {
+  "id": "56",
+  "param": "AreaLocationID",
+  "name": "Ma On Shan",
+  "zh": "馬鞍山",
+  "aliases": [
+   "Ma On Shan",
+   "馬鞍山"
+  ]
+ },
+ {
+  "id": "57",
+  "param": "AreaLocationID",
+  "name": "Northern District",
+  "zh": "北區",
+  "aliases": [
+   "Northern District",
+   "北區"
+  ]
+ },
+ {
+  "id": "58",
+  "param": "AreaLocationID",
+  "name": "Sai Kung",
+  "zh": "西貢",
+  "aliases": [
+   "Sai Kung",
+   "西貢"
+  ]
+ },
+ {
+  "id": "59",
+  "param": "AreaLocationID",
+  "name": "Sha Tin",
+  "zh": "沙田",
+  "aliases": [
+   "Sha Tin",
+   "沙田"
+  ]
+ },
+ {
+  "id": "60",
+  "param": "AreaLocationID",
+  "name": "Sheung Shui",
+  "zh": "上水",
+  "aliases": [
+   "Sheung Shui",
+   "上水"
+  ]
+ },
+ {
+  "id": "61",
+  "param": "AreaLocationID",
+  "name": "Tai Po",
+  "zh": "大埔",
+  "aliases": [
+   "Tai Po",
+   "大埔"
+  ]
+ },
+ {
+  "id": "62",
+  "param": "AreaLocationID",
+  "name": "Tai Wai",
+  "zh": "大圍",
+  "aliases": [
+   "Tai Wai",
+   "大圍"
+  ]
+ },
+ {
+  "id": "63",
+  "param": "AreaLocationID",
+  "name": "Tin Shui Wai",
+  "zh": "天水圍",
+  "aliases": [
+   "Tin Shui Wai",
+   "天水圍"
+  ]
+ },
+ {
+  "id": "64",
+  "param": "AreaLocationID",
+  "name": "Tseung Kwan O",
+  "zh": "將軍澳",
+  "aliases": [
+   "Tseung Kwan O",
+   "將軍澳"
+  ]
+ },
+ {
+  "id": "65",
+  "param": "AreaLocationID",
+  "name": "Tsing Yi",
+  "zh": "青衣",
+  "aliases": [
+   "Tsing Yi",
+   "青衣"
+  ]
+ },
+ {
+  "id": "66",
+  "param": "AreaLocationID",
+  "name": "Tsuen Wan",
+  "zh": "荃灣",
+  "aliases": [
+   "Tsuen Wan",
+   "荃灣"
+  ]
+ },
+ {
+  "id": "67",
+  "param": "AreaLocationID",
+  "name": "Tuen Mun",
+  "zh": "屯門",
+  "aliases": [
+   "Tuen Mun",
+   "屯門"
+  ]
+ },
+ {
+  "id": "68",
+  "param": "AreaLocationID",
+  "name": "Yuen Long",
+  "zh": "元朗",
+  "aliases": [
+   "Yuen Long",
+   "元朗"
+  ]
+ },
+ {
+  "id": "69",
+  "param": "AreaLocationID",
+  "name": "HK International Airport",
+  "zh": "香港國際機場",
+  "aliases": [
+   "HK International Airport",
+   "香港國際機場"
+  ]
+ },
+ {
+  "id": "70",
+  "param": "AreaLocationID",
+  "name": "Tung Chung",
+  "zh": "東涌",
+  "aliases": [
+   "Tung Chung",
+   "東涌"
+  ]
+ },
+ {
+  "id": "71",
+  "param": "AreaLocationID",
+  "name": "Other Islands",
+  "zh": "其他島嶼",
+  "aliases": [
+   "Other Islands",
+   "其他島嶼"
+  ]
+ },
+ {
+  "id": "72",
+  "param": "AreaLocationID",
+  "name": "Overseas",
+  "zh": "海外",
+  "aliases": [
+   "Overseas",
+   "海外"
+  ]
+ },
+ {
+  "id": "73",
+  "param": "AreaLocationID",
+  "name": "China",
+  "zh": "中國",
+  "aliases": [
+   "China",
+   "中國"
+  ]
+ },
+ {
+  "id": "74",
+  "param": "AreaLocationID",
+  "name": "Macau",
+  "zh": "澳門",
+  "aliases": [
+   "Macau",
+   "澳門"
+  ]
+ },
+ {
+  "id": "75",
+  "param": "AreaLocationID",
+  "name": "Unspecified",
+  "zh": "未指定",
+  "aliases": [
+   "Unspecified",
+   "未指定"
+  ]
+ }
+]

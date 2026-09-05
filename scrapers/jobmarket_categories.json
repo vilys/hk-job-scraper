@@ -1,0 +1,2216 @@
+[
+ {
+  "id": "1",
+  "type": "jobFunction",
+  "name": "Account & Audit",
+  "zh": "會計及審計",
+  "aliases": [
+   "Account & Audit",
+   "會計及審計"
+  ]
+ },
+ {
+  "id": "2",
+  "type": "jobFunction",
+  "name": "Administration, Clerical & Secretary",
+  "zh": "行政文職及秘書",
+  "aliases": [
+   "Administration, Clerical & Secretary",
+   "行政文職及秘書"
+  ]
+ },
+ {
+  "id": "3",
+  "type": "jobFunction",
+  "name": "Banking & Financial Services",
+  "zh": "銀行及金融服務",
+  "aliases": [
+   "Banking & Financial Services",
+   "銀行及金融服務"
+  ]
+ },
+ {
+  "id": "4",
+  "type": "jobFunction",
+  "name": "Building & Construction",
+  "zh": "建築及建造",
+  "aliases": [
+   "Building & Construction",
+   "建築及建造"
+  ]
+ },
+ {
+  "id": "5",
+  "type": "jobFunction",
+  "name": "Catering (Food & Beverage)",
+  "zh": "餐飲",
+  "aliases": [
+   "Catering (Food & Beverage)",
+   "餐飲"
+  ]
+ },
+ {
+  "id": "6",
+  "type": "jobFunction",
+  "name": "Design",
+  "zh": "設計",
+  "aliases": [
+   "Design",
+   "設計"
+  ]
+ },
+ {
+  "id": "7",
+  "type": "jobFunction",
+  "name": "Education & Training",
+  "zh": "教育及培訓",
+  "aliases": [
+   "Education & Training",
+   "教育及培訓"
+  ]
+ },
+ {
+  "id": "8",
+  "type": "jobFunction",
+  "name": "Engineering / Tech",
+  "zh": "",
+  "aliases": [
+   "Engineering / Tech"
+  ]
+ },
+ {
+  "id": "9",
+  "type": "jobFunction",
+  "name": "Entertainment / Production",
+  "zh": "",
+  "aliases": [
+   "Entertainment / Production"
+  ]
+ },
+ {
+  "id": "10",
+  "type": "jobFunction",
+  "name": "Executive & Management",
+  "zh": "",
+  "aliases": [
+   "Executive & Management"
+  ]
+ },
+ {
+  "id": "11",
+  "type": "jobFunction",
+  "name": "Government, Public Utilities & NGO",
+  "zh": "",
+  "aliases": [
+   "Government, Public Utilities & NGO"
+  ]
+ },
+ {
+  "id": "12",
+  "type": "jobFunction",
+  "name": "Health & Beauty Care",
+  "zh": "健康及美容",
+  "aliases": [
+   "Health & Beauty Care",
+   "健康及美容"
+  ]
+ },
+ {
+  "id": "13",
+  "type": "jobFunction",
+  "name": "Hotel & Hospitality",
+  "zh": "",
+  "aliases": [
+   "Hotel & Hospitality"
+  ]
+ },
+ {
+  "id": "14",
+  "type": "jobFunction",
+  "name": "Human Resources",
+  "zh": "",
+  "aliases": [
+   "Human Resources"
+  ]
+ },
+ {
+  "id": "15",
+  "type": "jobFunction",
+  "name": "Information Technology",
+  "zh": "資訊科技",
+  "aliases": [
+   "Information Technology",
+   "資訊科技"
+  ]
+ },
+ {
+  "id": "16",
+  "type": "jobFunction",
+  "name": "Insurance",
+  "zh": "保險",
+  "aliases": [
+   "Insurance",
+   "保險"
+  ]
+ },
+ {
+  "id": "17",
+  "type": "jobFunction",
+  "name": "Logistics, SCM & Transportation",
+  "zh": "",
+  "aliases": [
+   "Logistics, SCM & Transportation"
+  ]
+ },
+ {
+  "id": "18",
+  "type": "jobFunction",
+  "name": "Manufacturing",
+  "zh": "製造業",
+  "aliases": [
+   "Manufacturing",
+   "製造業"
+  ]
+ },
+ {
+  "id": "19",
+  "type": "jobFunction",
+  "name": "Marketing & Public Relations",
+  "zh": "",
+  "aliases": [
+   "Marketing & Public Relations"
+  ]
+ },
+ {
+  "id": "20",
+  "type": "jobFunction",
+  "name": "Media & Advertising",
+  "zh": "",
+  "aliases": [
+   "Media & Advertising"
+  ]
+ },
+ {
+  "id": "21",
+  "type": "jobFunction",
+  "name": "Medical Services",
+  "zh": "",
+  "aliases": [
+   "Medical Services"
+  ]
+ },
+ {
+  "id": "22",
+  "type": "jobFunction",
+  "name": "Merchandising / Purchasing",
+  "zh": "",
+  "aliases": [
+   "Merchandising / Purchasing"
+  ]
+ },
+ {
+  "id": "23",
+  "type": "jobFunction",
+  "name": "Professional & Legal Services",
+  "zh": "",
+  "aliases": [
+   "Professional & Legal Services"
+  ]
+ },
+ {
+  "id": "24",
+  "type": "jobFunction",
+  "name": "Property / Estate",
+  "zh": "",
+  "aliases": [
+   "Property / Estate"
+  ]
+ },
+ {
+  "id": "25",
+  "type": "jobFunction",
+  "name": "Sales, CS & Business Development",
+  "zh": "",
+  "aliases": [
+   "Sales, CS & Business Development"
+  ]
+ },
+ {
+  "id": "26",
+  "type": "jobFunction",
+  "name": "Sciences, Lab, R&D",
+  "zh": "",
+  "aliases": [
+   "Sciences, Lab, R&D"
+  ]
+ },
+ {
+  "id": "27",
+  "type": "jobFunction",
+  "name": "Tourism, Travel Agency & Airline",
+  "zh": "",
+  "aliases": [
+   "Tourism, Travel Agency & Airline"
+  ]
+ },
+ {
+  "id": "28",
+  "type": "jobFunction",
+  "name": "Others",
+  "zh": "其他",
+  "aliases": [
+   "Others",
+   "其他"
+  ]
+ },
+ {
+  "id": "2",
+  "type": "subFunction",
+  "name": "Accountant",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Accountant"
+  ]
+ },
+ {
+  "id": "200",
+  "type": "subFunction",
+  "name": "Accounting Supervisor / Manager",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Accounting Supervisor / Manager"
+  ]
+ },
+ {
+  "id": "3",
+  "type": "subFunction",
+  "name": "Audit",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Audit"
+  ]
+ },
+ {
+  "id": "100",
+  "type": "subFunction",
+  "name": "Clerk / Officer",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Clerk / Officer"
+  ]
+ },
+ {
+  "id": "68",
+  "type": "subFunction",
+  "name": "Consulting",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Consulting"
+  ]
+ },
+ {
+  "id": "201",
+  "type": "subFunction",
+  "name": "Corporate Finance",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Corporate Finance"
+  ]
+ },
+ {
+  "id": "101",
+  "type": "subFunction",
+  "name": "Credit Control",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Credit Control"
+  ]
+ },
+ {
+  "id": "102",
+  "type": "subFunction",
+  "name": "Financial Analyst",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Financial Analyst"
+  ]
+ },
+ {
+  "id": "103",
+  "type": "subFunction",
+  "name": "Financial Controller / Treasurer",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Financial Controller / Treasurer"
+  ]
+ },
+ {
+  "id": "202",
+  "type": "subFunction",
+  "name": "Risk Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Risk Management"
+  ]
+ },
+ {
+  "id": "104",
+  "type": "subFunction",
+  "name": "Taxation",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Taxation"
+  ]
+ },
+ {
+  "id": "4",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "5",
+  "type": "subFunction",
+  "name": "Administration / Operation",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Administration / Operation"
+  ]
+ },
+ {
+  "id": "12",
+  "type": "subFunction",
+  "name": "Clerical / Admin Staff",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Clerical / Admin Staff"
+  ]
+ },
+ {
+  "id": "105",
+  "type": "subFunction",
+  "name": "General Post / Office Support",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "General Post / Office Support"
+  ]
+ },
+ {
+  "id": "106",
+  "type": "subFunction",
+  "name": "Personal / Executive Assistant",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Personal / Executive Assistant"
+  ]
+ },
+ {
+  "id": "107",
+  "type": "subFunction",
+  "name": "Receptionist",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Receptionist"
+  ]
+ },
+ {
+  "id": "58",
+  "type": "subFunction",
+  "name": "Secretary",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Secretary"
+  ]
+ },
+ {
+  "id": "109",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "110",
+  "type": "subFunction",
+  "name": "Analyst",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Analyst"
+  ]
+ },
+ {
+  "id": "6",
+  "type": "subFunction",
+  "name": "Corporate Banking",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Corporate Banking"
+  ]
+ },
+ {
+  "id": "72",
+  "type": "subFunction",
+  "name": "Credit Analysis / Approval",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Credit Analysis / Approval"
+  ]
+ },
+ {
+  "id": "7",
+  "type": "subFunction",
+  "name": "Dealing & Trading / Securities",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Dealing & Trading / Securities"
+  ]
+ },
+ {
+  "id": "111",
+  "type": "subFunction",
+  "name": "Financial Services",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Financial Services"
+  ]
+ },
+ {
+  "id": "74",
+  "type": "subFunction",
+  "name": "Fund Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Fund Management"
+  ]
+ },
+ {
+  "id": "112",
+  "type": "subFunction",
+  "name": "Investment",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Investment"
+  ]
+ },
+ {
+  "id": "71",
+  "type": "subFunction",
+  "name": "Loan / Mortgage",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Loan / Mortgage"
+  ]
+ },
+ {
+  "id": "113",
+  "type": "subFunction",
+  "name": "Treasury",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Treasury"
+  ]
+ },
+ {
+  "id": "8",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "9",
+  "type": "subFunction",
+  "name": "Architectural Services",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Architectural Services"
+  ]
+ },
+ {
+  "id": "11",
+  "type": "subFunction",
+  "name": "Building / Construction / QS",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Building / Construction / QS"
+  ]
+ },
+ {
+  "id": "117",
+  "type": "subFunction",
+  "name": "Civil / Structural / Geotechnical Engineer",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Civil / Structural / Geotechnical Engineer"
+  ]
+ },
+ {
+  "id": "10",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "162",
+  "type": "subFunction",
+  "name": "Bartender / Barmaid / Sommelier",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Bartender / Barmaid / Sommelier"
+  ]
+ },
+ {
+  "id": "207",
+  "type": "subFunction",
+  "name": "Cashier",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Cashier"
+  ]
+ },
+ {
+  "id": "75",
+  "type": "subFunction",
+  "name": "Chef / Cook",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Chef / Cook"
+  ]
+ },
+ {
+  "id": "208",
+  "type": "subFunction",
+  "name": "Cleaner / Dishwasher / Kitchen worker",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Cleaner / Dishwasher / Kitchen worker"
+  ]
+ },
+ {
+  "id": "31",
+  "type": "subFunction",
+  "name": "Food & Beverage",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Food & Beverage"
+  ]
+ },
+ {
+  "id": "210",
+  "type": "subFunction",
+  "name": "Receptionist",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Receptionist"
+  ]
+ },
+ {
+  "id": "209",
+  "type": "subFunction",
+  "name": "Restaurant Manager / Supervisior / Captain",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Restaurant Manager / Supervisior / Captain"
+  ]
+ },
+ {
+  "id": "163",
+  "type": "subFunction",
+  "name": "Waiter / Waitress",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Waiter / Waitress"
+  ]
+ },
+ {
+  "id": "159",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "16",
+  "type": "subFunction",
+  "name": "Clocks / Jewelry Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Clocks / Jewelry Design"
+  ]
+ },
+ {
+  "id": "17",
+  "type": "subFunction",
+  "name": "Electrical / Electronic Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Electrical / Electronic Design"
+  ]
+ },
+ {
+  "id": "15",
+  "type": "subFunction",
+  "name": "Fashion Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Fashion Design"
+  ]
+ },
+ {
+  "id": "18",
+  "type": "subFunction",
+  "name": "Graphics Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Graphics Design"
+  ]
+ },
+ {
+  "id": "66",
+  "type": "subFunction",
+  "name": "Interior Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Interior Design"
+  ]
+ },
+ {
+  "id": "118",
+  "type": "subFunction",
+  "name": "Multi-media Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Multi-media Design"
+  ]
+ },
+ {
+  "id": "19",
+  "type": "subFunction",
+  "name": "Product Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Product Design"
+  ]
+ },
+ {
+  "id": "119",
+  "type": "subFunction",
+  "name": "Visual Merchandising Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Visual Merchandising Design"
+  ]
+ },
+ {
+  "id": "120",
+  "type": "subFunction",
+  "name": "Web Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Web Design"
+  ]
+ },
+ {
+  "id": "20",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "61",
+  "type": "subFunction",
+  "name": "Lecturer / Professor / Teacher",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Lecturer / Professor / Teacher"
+  ]
+ },
+ {
+  "id": "121",
+  "type": "subFunction",
+  "name": "Tutor / Instructor / Coach",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Tutor / Instructor / Coach"
+  ]
+ },
+ {
+  "id": "122",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "22",
+  "type": "subFunction",
+  "name": "Building Services",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Building Services"
+  ]
+ },
+ {
+  "id": "21",
+  "type": "subFunction",
+  "name": "Chemical",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Chemical"
+  ]
+ },
+ {
+  "id": "23",
+  "type": "subFunction",
+  "name": "Electrical / Electronics",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Electrical / Electronics"
+  ]
+ },
+ {
+  "id": "24",
+  "type": "subFunction",
+  "name": "Industrial / Manufacturing / Production",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Industrial / Manufacturing / Production"
+  ]
+ },
+ {
+  "id": "25",
+  "type": "subFunction",
+  "name": "Mechanical",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Mechanical"
+  ]
+ },
+ {
+  "id": "27",
+  "type": "subFunction",
+  "name": "Telecommunication / Data Communication",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Telecommunication / Data Communication"
+  ]
+ },
+ {
+  "id": "26",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "156",
+  "type": "subFunction",
+  "name": "Artists / Singers / Musicians",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Artists / Singers / Musicians"
+  ]
+ },
+ {
+  "id": "232",
+  "type": "subFunction",
+  "name": "Cinema",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Cinema"
+  ]
+ },
+ {
+  "id": "231",
+  "type": "subFunction",
+  "name": "Production",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Production"
+  ]
+ },
+ {
+  "id": "77",
+  "type": "subFunction",
+  "name": "TV / Radio",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "TV / Radio"
+  ]
+ },
+ {
+  "id": "233",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "132",
+  "type": "subFunction",
+  "name": "Executives Management (CEO, CFO, CTO, GM, MD etc.)",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Executives Management (CEO, CFO, CTO, GM, MD etc.)"
+  ]
+ },
+ {
+  "id": "29",
+  "type": "subFunction",
+  "name": "General Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "General Management"
+  ]
+ },
+ {
+  "id": "76",
+  "type": "subFunction",
+  "name": "Civil Services",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Civil Services"
+  ]
+ },
+ {
+  "id": "60",
+  "type": "subFunction",
+  "name": "Social Work Services",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Social Work Services"
+  ]
+ },
+ {
+  "id": "146",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "30",
+  "type": "subFunction",
+  "name": "Athletics / Fitness / Sports & Recreation",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Athletics / Fitness / Sports & Recreation"
+  ]
+ },
+ {
+  "id": "114",
+  "type": "subFunction",
+  "name": "Beautician",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Beautician"
+  ]
+ },
+ {
+  "id": "115",
+  "type": "subFunction",
+  "name": "Nutritionist",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Nutritionist"
+  ]
+ },
+ {
+  "id": "116",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "81",
+  "type": "subFunction",
+  "name": "Customer Service / Hotel Service",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Customer Service / Hotel Service"
+  ]
+ },
+ {
+  "id": "211",
+  "type": "subFunction",
+  "name": "Front Desk / Office",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Front Desk / Office"
+  ]
+ },
+ {
+  "id": "212",
+  "type": "subFunction",
+  "name": "Guest Relations",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Guest Relations"
+  ]
+ },
+ {
+  "id": "123",
+  "type": "subFunction",
+  "name": "Integrated Resort",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Integrated Resort"
+  ]
+ },
+ {
+  "id": "213",
+  "type": "subFunction",
+  "name": "Reservation",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Reservation"
+  ]
+ },
+ {
+  "id": "214",
+  "type": "subFunction",
+  "name": "Room Attendant / Housekeeping",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Room Attendant / Housekeeping"
+  ]
+ },
+ {
+  "id": "215",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "204",
+  "type": "subFunction",
+  "name": "Compensation & Benefits",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Compensation & Benefits"
+  ]
+ },
+ {
+  "id": "160",
+  "type": "subFunction",
+  "name": "Employee Relations",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Employee Relations"
+  ]
+ },
+ {
+  "id": "203",
+  "type": "subFunction",
+  "name": "HR Officer / Assistant",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "HR Officer / Assistant"
+  ]
+ },
+ {
+  "id": "32",
+  "type": "subFunction",
+  "name": "Human Resources Director / Manager",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Human Resources Director / Manager"
+  ]
+ },
+ {
+  "id": "205",
+  "type": "subFunction",
+  "name": "Recruitment / Executive Search",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Recruitment / Executive Search"
+  ]
+ },
+ {
+  "id": "108",
+  "type": "subFunction",
+  "name": "Training & Development",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Training & Development"
+  ]
+ },
+ {
+  "id": "206",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "124",
+  "type": "subFunction",
+  "name": "Application Specialist - Network",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Application Specialist - Network"
+  ]
+ },
+ {
+  "id": "35",
+  "type": "subFunction",
+  "name": "Application Specialist - Software",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Application Specialist - Software"
+  ]
+ },
+ {
+  "id": "125",
+  "type": "subFunction",
+  "name": "Engineering / Hardware Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Engineering / Hardware Design"
+  ]
+ },
+ {
+  "id": "126",
+  "type": "subFunction",
+  "name": "IT - Webmaster / SEO",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "IT - Webmaster / SEO"
+  ]
+ },
+ {
+  "id": "127",
+  "type": "subFunction",
+  "name": "IT System Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "IT System Management"
+  ]
+ },
+ {
+  "id": "37",
+  "type": "subFunction",
+  "name": "Network & System",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Network & System"
+  ]
+ },
+ {
+  "id": "128",
+  "type": "subFunction",
+  "name": "Security Specialist / Risk Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Security Specialist / Risk Management"
+  ]
+ },
+ {
+  "id": "38",
+  "type": "subFunction",
+  "name": "Software / Web Developer",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Software / Web Developer"
+  ]
+ },
+ {
+  "id": "34",
+  "type": "subFunction",
+  "name": "Systems / Technical Support",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Systems / Technical Support"
+  ]
+ },
+ {
+  "id": "129",
+  "type": "subFunction",
+  "name": "Technical / Functional Consulting",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Technical / Functional Consulting"
+  ]
+ },
+ {
+  "id": "36",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "130",
+  "type": "subFunction",
+  "name": "Claims Officer",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Claims Officer"
+  ]
+ },
+ {
+  "id": "33",
+  "type": "subFunction",
+  "name": "Insurance Agent / Broker",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Insurance Agent / Broker"
+  ]
+ },
+ {
+  "id": "131",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "70",
+  "type": "subFunction",
+  "name": "Logistics - Aviation",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Logistics - Aviation"
+  ]
+ },
+ {
+  "id": "13",
+  "type": "subFunction",
+  "name": "Logistics - Courier",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Logistics - Courier"
+  ]
+ },
+ {
+  "id": "223",
+  "type": "subFunction",
+  "name": "Logistics - Maritime",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Logistics - Maritime"
+  ]
+ },
+ {
+  "id": "226",
+  "type": "subFunction",
+  "name": "Private Transportation",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Private Transportation"
+  ]
+ },
+ {
+  "id": "153",
+  "type": "subFunction",
+  "name": "Public Transportation",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Public Transportation"
+  ]
+ },
+ {
+  "id": "224",
+  "type": "subFunction",
+  "name": "SCM - Documentary Credit / Bill Processing",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "SCM - Documentary Credit / Bill Processing"
+  ]
+ },
+ {
+  "id": "40",
+  "type": "subFunction",
+  "name": "SCM - Freight Forwarding",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "SCM - Freight Forwarding"
+  ]
+ },
+ {
+  "id": "63",
+  "type": "subFunction",
+  "name": "SCM - Inventory / Warehousing",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "SCM - Inventory / Warehousing"
+  ]
+ },
+ {
+  "id": "59",
+  "type": "subFunction",
+  "name": "SCM - Shipping",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "SCM - Shipping"
+  ]
+ },
+ {
+  "id": "225",
+  "type": "subFunction",
+  "name": "Supply Chain Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Supply Chain Management"
+  ]
+ },
+ {
+  "id": "154",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "133",
+  "type": "subFunction",
+  "name": "Garment / Textile",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Garment / Textile"
+  ]
+ },
+ {
+  "id": "83",
+  "type": "subFunction",
+  "name": "Manufacturing Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Manufacturing Management"
+  ]
+ },
+ {
+  "id": "134",
+  "type": "subFunction",
+  "name": "Printing",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Printing"
+  ]
+ },
+ {
+  "id": "42",
+  "type": "subFunction",
+  "name": "Quality Assurance, Control & Testing / ISO",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Quality Assurance, Control & Testing / ISO"
+  ]
+ },
+ {
+  "id": "41",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "137",
+  "type": "subFunction",
+  "name": "Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Management"
+  ]
+ },
+ {
+  "id": "228",
+  "type": "subFunction",
+  "name": "Marketing - Brand / Product Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Marketing - Brand / Product Management"
+  ]
+ },
+ {
+  "id": "138",
+  "type": "subFunction",
+  "name": "Marketing - Communications",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Marketing - Communications"
+  ]
+ },
+ {
+  "id": "43",
+  "type": "subFunction",
+  "name": "Marketing - Direct Marketing",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Marketing - Direct Marketing"
+  ]
+ },
+ {
+  "id": "229",
+  "type": "subFunction",
+  "name": "Marketing - General / Support",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Marketing - General / Support"
+  ]
+ },
+ {
+  "id": "227",
+  "type": "subFunction",
+  "name": "Marketing - Market Research",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Marketing - Market Research"
+  ]
+ },
+ {
+  "id": "79",
+  "type": "subFunction",
+  "name": "Public Relations - Copywriting",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Public Relations - Copywriting"
+  ]
+ },
+ {
+  "id": "135",
+  "type": "subFunction",
+  "name": "Public Relations - Event Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Public Relations - Event Management"
+  ]
+ },
+ {
+  "id": "136",
+  "type": "subFunction",
+  "name": "Public Relations - General / Support",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Public Relations - General / Support"
+  ]
+ },
+ {
+  "id": "139",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "140",
+  "type": "subFunction",
+  "name": "Account Servicing",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Account Servicing"
+  ]
+ },
+ {
+  "id": "69",
+  "type": "subFunction",
+  "name": "Creative / Design",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Creative / Design"
+  ]
+ },
+ {
+  "id": "230",
+  "type": "subFunction",
+  "name": "Digital Media",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Digital Media"
+  ]
+ },
+ {
+  "id": "28",
+  "type": "subFunction",
+  "name": "Media",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Media"
+  ]
+ },
+ {
+  "id": "88",
+  "type": "subFunction",
+  "name": "Photography / Video",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Photography / Video"
+  ]
+ },
+ {
+  "id": "46",
+  "type": "subFunction",
+  "name": "Print Media",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Print Media"
+  ]
+ },
+ {
+  "id": "89",
+  "type": "subFunction",
+  "name": "Production",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Production"
+  ]
+ },
+ {
+  "id": "45",
+  "type": "subFunction",
+  "name": "Reporter / Editorial / Journalism / Copywriter",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Reporter / Editorial / Journalism / Copywriter"
+  ]
+ },
+ {
+  "id": "161",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "221",
+  "type": "subFunction",
+  "name": "Dietician / Surgeon / Specialist",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Dietician / Surgeon / Specialist"
+  ]
+ },
+ {
+  "id": "44",
+  "type": "subFunction",
+  "name": "Doctor / Practitioner",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Doctor / Practitioner"
+  ]
+ },
+ {
+  "id": "141",
+  "type": "subFunction",
+  "name": "Nursing",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Nursing"
+  ]
+ },
+ {
+  "id": "220",
+  "type": "subFunction",
+  "name": "Pharmaceutical",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Pharmaceutical"
+  ]
+ },
+ {
+  "id": "222",
+  "type": "subFunction",
+  "name": "Therapist / Occupational Therapist / Physiotherapist",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Therapist / Occupational Therapist / Physiotherapist"
+  ]
+ },
+ {
+  "id": "142",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "84",
+  "type": "subFunction",
+  "name": "Accessories",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Accessories"
+  ]
+ },
+ {
+  "id": "47",
+  "type": "subFunction",
+  "name": "Electronic",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Electronic"
+  ]
+ },
+ {
+  "id": "48",
+  "type": "subFunction",
+  "name": "Footwear / Bags",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Footwear / Bags"
+  ]
+ },
+ {
+  "id": "143",
+  "type": "subFunction",
+  "name": "Furniture",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Furniture"
+  ]
+ },
+ {
+  "id": "49",
+  "type": "subFunction",
+  "name": "Garment",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Garment"
+  ]
+ },
+ {
+  "id": "85",
+  "type": "subFunction",
+  "name": "Gift & Premium",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Gift & Premium"
+  ]
+ },
+ {
+  "id": "86",
+  "type": "subFunction",
+  "name": "Household",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Household"
+  ]
+ },
+ {
+  "id": "87",
+  "type": "subFunction",
+  "name": "Textile",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Textile"
+  ]
+ },
+ {
+  "id": "51",
+  "type": "subFunction",
+  "name": "Toys",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Toys"
+  ]
+ },
+ {
+  "id": "50",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "78",
+  "type": "subFunction",
+  "name": "Business Consultancy",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Business Consultancy"
+  ]
+ },
+ {
+  "id": "39",
+  "type": "subFunction",
+  "name": "Company Secretary",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Company Secretary"
+  ]
+ },
+ {
+  "id": "144",
+  "type": "subFunction",
+  "name": "Legal & Compliance",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Legal & Compliance"
+  ]
+ },
+ {
+  "id": "93",
+  "type": "subFunction",
+  "name": "Translation",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Translation"
+  ]
+ },
+ {
+  "id": "145",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "234",
+  "type": "subFunction",
+  "name": "Guardian / Keeper / Cleaner",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Guardian / Keeper / Cleaner"
+  ]
+ },
+ {
+  "id": "53",
+  "type": "subFunction",
+  "name": "Property Agency / Leasing",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Property Agency / Leasing"
+  ]
+ },
+ {
+  "id": "52",
+  "type": "subFunction",
+  "name": "Property Management / Development",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Property Management / Development"
+  ]
+ },
+ {
+  "id": "148",
+  "type": "subFunction",
+  "name": "Real Estate",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Real Estate"
+  ]
+ },
+ {
+  "id": "90",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "92",
+  "type": "subFunction",
+  "name": "Account Servicing",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Account Servicing"
+  ]
+ },
+ {
+  "id": "65",
+  "type": "subFunction",
+  "name": "Business Development",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Business Development"
+  ]
+ },
+ {
+  "id": "147",
+  "type": "subFunction",
+  "name": "Call Centre",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Call Centre"
+  ]
+ },
+ {
+  "id": "14",
+  "type": "subFunction",
+  "name": "Customer Service",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Customer Service"
+  ]
+ },
+ {
+  "id": "55",
+  "type": "subFunction",
+  "name": "Direct Sales",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Direct Sales"
+  ]
+ },
+ {
+  "id": "237",
+  "type": "subFunction",
+  "name": "Financial Services Sales",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Financial Services Sales"
+  ]
+ },
+ {
+  "id": "238",
+  "type": "subFunction",
+  "name": "Hotel Sales",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Hotel Sales"
+  ]
+ },
+ {
+  "id": "54",
+  "type": "subFunction",
+  "name": "Retail Sales",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Retail Sales"
+  ]
+ },
+ {
+  "id": "235",
+  "type": "subFunction",
+  "name": "Sales Coordination",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Sales Coordination"
+  ]
+ },
+ {
+  "id": "149",
+  "type": "subFunction",
+  "name": "Sales Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Sales Management"
+  ]
+ },
+ {
+  "id": "236",
+  "type": "subFunction",
+  "name": "Technical Sales / Sales Engineer",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Technical Sales / Sales Engineer"
+  ]
+ },
+ {
+  "id": "57",
+  "type": "subFunction",
+  "name": "Tele-sales (Telemarketing)",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Tele-sales (Telemarketing)"
+  ]
+ },
+ {
+  "id": "239",
+  "type": "subFunction",
+  "name": "Travel Agent Sales",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Travel Agent Sales"
+  ]
+ },
+ {
+  "id": "56",
+  "type": "subFunction",
+  "name": "Wholesale",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Wholesale"
+  ]
+ },
+ {
+  "id": "151",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "73",
+  "type": "subFunction",
+  "name": "Biotechnology / Chemical",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Biotechnology / Chemical"
+  ]
+ },
+ {
+  "id": "80",
+  "type": "subFunction",
+  "name": "Environmental Science / Waste Management",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Environmental Science / Waste Management"
+  ]
+ },
+ {
+  "id": "82",
+  "type": "subFunction",
+  "name": "Laboratory",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Laboratory"
+  ]
+ },
+ {
+  "id": "91",
+  "type": "subFunction",
+  "name": "Research & Development",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Research & Development"
+  ]
+ },
+ {
+  "id": "152",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "216",
+  "type": "subFunction",
+  "name": "Cabin Crew",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Cabin Crew"
+  ]
+ },
+ {
+  "id": "217",
+  "type": "subFunction",
+  "name": "Ground Staff / Passenger Service",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Ground Staff / Passenger Service"
+  ]
+ },
+ {
+  "id": "218",
+  "type": "subFunction",
+  "name": "Ticketing",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Ticketing"
+  ]
+ },
+ {
+  "id": "62",
+  "type": "subFunction",
+  "name": "Tour Guide / Travel Agency",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Tour Guide / Travel Agency"
+  ]
+ },
+ {
+  "id": "219",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ },
+ {
+  "id": "155",
+  "type": "subFunction",
+  "name": "Agriculture / Forestry / Fishing",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Agriculture / Forestry / Fishing"
+  ]
+ },
+ {
+  "id": "157",
+  "type": "subFunction",
+  "name": "Security / Safety Control",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Security / Safety Control"
+  ]
+ },
+ {
+  "id": "67",
+  "type": "subFunction",
+  "name": "Student / Fresh Graduate / No Experience",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Student / Fresh Graduate / No Experience"
+  ]
+ },
+ {
+  "id": "158",
+  "type": "subFunction",
+  "name": "Technician",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Technician"
+  ]
+ },
+ {
+  "id": "64",
+  "type": "subFunction",
+  "name": "Others",
+  "zh": "",
+  "cat_id": "28",
+  "aliases": [
+   "Others"
+  ]
+ }
+]

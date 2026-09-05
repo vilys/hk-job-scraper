@@ -5,6 +5,7 @@ from .jobsdb import JobsDBScraper
 from .linkedin import LinkedInScraper
 from .indeed import IndeedScraper
 from .recruit import RecruitScraper
+from .jobmarket import JobMarketScraper
 
 SCRAPERS = {
     "moovup": MoovupScraper,
@@ -13,6 +14,7 @@ SCRAPERS = {
     "linkedin": LinkedInScraper,
     "indeed": IndeedScraper,
     "recruit": RecruitScraper,
+    "jobmarket": JobMarketScraper,
 }
 
 __all__ = [
@@ -23,4 +25,5 @@ __all__ = [
     "LinkedInScraper",
     "IndeedScraper",
     "RecruitScraper",
+    "JobMarketScraper",
 ]

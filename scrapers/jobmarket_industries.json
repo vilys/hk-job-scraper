@@ -1,0 +1,254 @@
+[
+ {
+  "id": "2",
+  "name": "Accounting / Auditing / Taxation",
+  "zh": "會計審計稅務",
+  "aliases": [
+   "Accounting / Auditing / Taxation",
+   "會計審計稅務"
+  ]
+ },
+ {
+  "id": "24",
+  "name": "Architecture / Surveying",
+  "zh": "建築測量",
+  "aliases": [
+   "Architecture / Surveying",
+   "建築測量"
+  ]
+ },
+ {
+  "id": "4",
+  "name": "Banking / Finance / Investment",
+  "zh": "銀行金融投資",
+  "aliases": [
+   "Banking / Finance / Investment",
+   "銀行金融投資"
+  ]
+ },
+ {
+  "id": "5",
+  "name": "Building / Construction",
+  "zh": "建築建造",
+  "aliases": [
+   "Building / Construction",
+   "建築建造"
+  ]
+ },
+ {
+  "id": "6",
+  "name": "Design / Production House",
+  "zh": "設計",
+  "aliases": [
+   "Design / Production House",
+   "設計"
+  ]
+ },
+ {
+  "id": "7",
+  "name": "Education / Training",
+  "zh": "教育培訓",
+  "aliases": [
+   "Education / Training",
+   "教育培訓"
+  ]
+ },
+ {
+  "id": "25",
+  "name": "Entertainment / Arts / Recreation",
+  "zh": "",
+  "aliases": [
+   "Entertainment / Arts / Recreation"
+  ]
+ },
+ {
+  "id": "26",
+  "name": "Food & Beverage",
+  "zh": "",
+  "aliases": [
+   "Food & Beverage"
+  ]
+ },
+ {
+  "id": "8",
+  "name": "Government & Government Related",
+  "zh": "",
+  "aliases": [
+   "Government & Government Related"
+  ]
+ },
+ {
+  "id": "9",
+  "name": "Health / Beauty Care",
+  "zh": "",
+  "aliases": [
+   "Health / Beauty Care"
+  ]
+ },
+ {
+  "id": "10",
+  "name": "Hotel / Catering",
+  "zh": "",
+  "aliases": [
+   "Hotel / Catering"
+  ]
+ },
+ {
+  "id": "31",
+  "name": "Human Resources Management",
+  "zh": "",
+  "aliases": [
+   "Human Resources Management"
+  ]
+ },
+ {
+  "id": "11",
+  "name": "Information Technology",
+  "zh": "資訊科技",
+  "aliases": [
+   "Information Technology",
+   "資訊科技"
+  ]
+ },
+ {
+  "id": "12",
+  "name": "Insurance",
+  "zh": "保險",
+  "aliases": [
+   "Insurance",
+   "保險"
+  ]
+ },
+ {
+  "id": "13",
+  "name": "Legal Service",
+  "zh": "",
+  "aliases": [
+   "Legal Service"
+  ]
+ },
+ {
+  "id": "27",
+  "name": "Logistics / Warehousing",
+  "zh": "",
+  "aliases": [
+   "Logistics / Warehousing"
+  ]
+ },
+ {
+  "id": "14",
+  "name": "Manufacturing",
+  "zh": "製造業",
+  "aliases": [
+   "Manufacturing",
+   "製造業"
+  ]
+ },
+ {
+  "id": "3",
+  "name": "Marketing / Advertising/ PR",
+  "zh": "",
+  "aliases": [
+   "Marketing / Advertising/ PR"
+  ]
+ },
+ {
+  "id": "15",
+  "name": "Media / Communication / Printing / Publishing",
+  "zh": "",
+  "aliases": [
+   "Media / Communication / Printing / Publishing"
+  ]
+ },
+ {
+  "id": "28",
+  "name": "Medical / Pharmaceutical",
+  "zh": "醫療藥物",
+  "aliases": [
+   "Medical / Pharmaceutical",
+   "醫療藥物"
+  ]
+ },
+ {
+  "id": "16",
+  "name": "Property / Estate",
+  "zh": "",
+  "aliases": [
+   "Property / Estate"
+  ]
+ },
+ {
+  "id": "17",
+  "name": "Public Utilities & Related",
+  "zh": "",
+  "aliases": [
+   "Public Utilities & Related"
+  ]
+ },
+ {
+  "id": "18",
+  "name": "Retail",
+  "zh": "零售",
+  "aliases": [
+   "Retail",
+   "零售"
+  ]
+ },
+ {
+  "id": "19",
+  "name": "Shipping / Freight Forwarding",
+  "zh": "",
+  "aliases": [
+   "Shipping / Freight Forwarding"
+  ]
+ },
+ {
+  "id": "20",
+  "name": "Social Services / Charity",
+  "zh": "",
+  "aliases": [
+   "Social Services / Charity"
+  ]
+ },
+ {
+  "id": "21",
+  "name": "Telecommunications",
+  "zh": "",
+  "aliases": [
+   "Telecommunications"
+  ]
+ },
+ {
+  "id": "29",
+  "name": "Trading",
+  "zh": "",
+  "aliases": [
+   "Trading"
+  ]
+ },
+ {
+  "id": "30",
+  "name": "Transportation",
+  "zh": "",
+  "aliases": [
+   "Transportation"
+  ]
+ },
+ {
+  "id": "22",
+  "name": "Travel / Tourism",
+  "zh": "",
+  "aliases": [
+   "Travel / Tourism"
+  ]
+ },
+ {
+  "id": "23",
+  "name": "Others",
+  "zh": "其他",
+  "aliases": [
+   "Others",
+   "其他"
+  ]
+ }
+]
