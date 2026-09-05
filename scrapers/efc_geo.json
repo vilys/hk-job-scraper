@@ -1,0 +1,24 @@
+{
+  "source": "efc",
+  "note": "eFinancialCareers 地區過濾（location 參數，40km 半徑模糊地理搜尋）。站方地區索引僅支援大區級名稱；細分區域（如 Yuen Long / Sha Tin）實測回 0 筆，不在字典內 → --district 傳入未收錄名稱時警告後忽略。",
+  "locations": [
+    {
+      "id": "Hong Kong",
+      "name": "Hong Kong",
+      "name_zh": "香港（全港）",
+      "aliases": ["香港", "全香港", "全港", "Hong Kong"]
+    },
+    {
+      "id": "Hong Kong Island",
+      "name": "Hong Kong Island",
+      "name_zh": "香港島",
+      "aliases": ["香港島", "港島"]
+    },
+    {
+      "id": "Kowloon",
+      "name": "Kowloon",
+      "name_zh": "九龍",
+      "aliases": ["九龍"]
+    }
+  ]
+}

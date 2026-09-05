@@ -113,6 +113,8 @@ SITE_CONFIG = {
     # ASP.NET WebForms：翻頁須在真瀏覽器內執行 __doPostBack，故 needs_browser
     "recruit": {"needs_browser": True, "request_delay": 2.0},
     "jobmarket": {"request_delay": 1.5},
+    "foundit": {"needs_browser": True, "request_delay": 2.0},
+    "efc": {"request_delay": 1.5},
 }
 
 

@@ -1,0 +1,330 @@
+{
+  "source": "foundit",
+  "note": "foundit.hk 地區瀏覽頁 slug（來源 jobs-by-locations sitemap，46 項）。用法 --district 接受 name 或 aliases。",
+  "locations": [
+    {
+      "id": "admiralty-kranji",
+      "name": "Admiralty Kranji",
+      "aliases": [
+        "金鐘"
+      ]
+    },
+    {
+      "id": "anhui",
+      "name": "Anhui",
+      "aliases": [
+        "安徽"
+      ]
+    },
+    {
+      "id": "ban-bueng",
+      "name": "Ban Bueng",
+      "aliases": [
+        "班崩"
+      ]
+    },
+    {
+      "id": "bangkok-area",
+      "name": "Bangkok Area",
+      "aliases": [
+        "曼谷"
+      ]
+    },
+    {
+      "id": "bay",
+      "name": "Bay",
+      "aliases": []
+    },
+    {
+      "id": "beijing",
+      "name": "Beijing",
+      "aliases": [
+        "北京"
+      ]
+    },
+    {
+      "id": "changhua",
+      "name": "Changhua",
+      "aliases": [
+        "彰化"
+      ]
+    },
+    {
+      "id": "chiayi",
+      "name": "Chiayi",
+      "aliases": [
+        "嘉義"
+      ]
+    },
+    {
+      "id": "china",
+      "name": "China",
+      "aliases": [
+        "中國",
+        "大陸"
+      ]
+    },
+    {
+      "id": "chonburi",
+      "name": "Chonburi",
+      "aliases": [
+        "春武里"
+      ]
+    },
+    {
+      "id": "cyberjaya",
+      "name": "Cyberjaya",
+      "aliases": [
+        "賽城"
+      ]
+    },
+    {
+      "id": "east-coast",
+      "name": "East Coast",
+      "aliases": []
+    },
+    {
+      "id": "gloucester-road",
+      "name": "Gloucester Road",
+      "aliases": [
+        "告士打道"
+      ]
+    },
+    {
+      "id": "guangdong",
+      "name": "Guangdong",
+      "aliases": [
+        "廣東"
+      ]
+    },
+    {
+      "id": "gurgaon-gurugram",
+      "name": "Gurgaon Gurugram",
+      "aliases": [
+        "古爾岡"
+      ]
+    },
+    {
+      "id": "gurugram",
+      "name": "Gurugram",
+      "aliases": []
+    },
+    {
+      "id": "hong-kong",
+      "name": "Hong Kong",
+      "aliases": [
+        "香港",
+        "全香港"
+      ]
+    },
+    {
+      "id": "hsinchu",
+      "name": "Hsinchu",
+      "aliases": [
+        "新竹"
+      ]
+    },
+    {
+      "id": "india",
+      "name": "India",
+      "aliases": [
+        "印度"
+      ]
+    },
+    {
+      "id": "indonesia",
+      "name": "Indonesia",
+      "aliases": [
+        "印尼"
+      ]
+    },
+    {
+      "id": "ireland",
+      "name": "Ireland",
+      "aliases": [
+        "愛爾蘭"
+      ]
+    },
+    {
+      "id": "jakarta-raya",
+      "name": "Jakarta Raya",
+      "aliases": [
+        "雅加達"
+      ]
+    },
+    {
+      "id": "keelung",
+      "name": "Keelung",
+      "aliases": [
+        "基隆"
+      ]
+    },
+    {
+      "id": "kowloon",
+      "name": "Kowloon",
+      "aliases": [
+        "九龍"
+      ]
+    },
+    {
+      "id": "kuala-lumpur",
+      "name": "Kuala Lumpur",
+      "aliases": [
+        "吉隆坡"
+      ]
+    },
+    {
+      "id": "malaysia",
+      "name": "Malaysia",
+      "aliases": [
+        "馬來西亞"
+      ]
+    },
+    {
+      "id": "mexico",
+      "name": "Mexico",
+      "aliases": [
+        "墨西哥"
+      ]
+    },
+    {
+      "id": "mexico-masik",
+      "name": "Mexico Masik",
+      "aliases": []
+    },
+    {
+      "id": "petaling-jaya",
+      "name": "Petaling Jaya",
+      "aliases": [
+        "八打靈再也"
+      ]
+    },
+    {
+      "id": "rayong",
+      "name": "Rayong",
+      "aliases": [
+        "羅勇"
+      ]
+    },
+    {
+      "id": "remote",
+      "name": "Remote",
+      "aliases": [
+        "遙距",
+        "在家工作",
+        "居家辦公"
+      ]
+    },
+    {
+      "id": "samut-prakan",
+      "name": "Samut Prakan",
+      "aliases": [
+        "北欖"
+      ]
+    },
+    {
+      "id": "santiago",
+      "name": "Santiago",
+      "aliases": [
+        "聖地亞哥"
+      ]
+    },
+    {
+      "id": "science-park",
+      "name": "Science Park",
+      "aliases": [
+        "香港科學園"
+      ]
+    },
+    {
+      "id": "selangor",
+      "name": "Selangor",
+      "aliases": [
+        "雪蘭莪"
+      ]
+    },
+    {
+      "id": "shanghai",
+      "name": "Shanghai",
+      "aliases": [
+        "上海"
+      ]
+    },
+    {
+      "id": "singapore",
+      "name": "Singapore",
+      "aliases": [
+        "新加坡",
+        "獅城"
+      ]
+    },
+    {
+      "id": "south-africa",
+      "name": "South Africa",
+      "aliases": [
+        "南非"
+      ]
+    },
+    {
+      "id": "switzerland",
+      "name": "Switzerland",
+      "aliases": [
+        "瑞士"
+      ]
+    },
+    {
+      "id": "taichung",
+      "name": "Taichung",
+      "aliases": [
+        "台中",
+        "臺中"
+      ]
+    },
+    {
+      "id": "tainan",
+      "name": "Tainan",
+      "aliases": [
+        "台南",
+        "臺南"
+      ]
+    },
+    {
+      "id": "taipei-city",
+      "name": "Taipei City",
+      "aliases": [
+        "台北",
+        "臺北",
+        "台北市"
+      ]
+    },
+    {
+      "id": "taiwan",
+      "name": "Taiwan",
+      "aliases": [
+        "台灣",
+        "臺灣"
+      ]
+    },
+    {
+      "id": "taoyuan",
+      "name": "Taoyuan",
+      "aliases": [
+        "桃園"
+      ]
+    },
+    {
+      "id": "thailand",
+      "name": "Thailand",
+      "aliases": [
+        "泰國"
+      ]
+    },
+    {
+      "id": "tianjin",
+      "name": "Tianjin",
+      "aliases": [
+        "天津"
+      ]
+    }
+  ]
+}
