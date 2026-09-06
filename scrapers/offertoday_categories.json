@@ -1,0 +1,2840 @@
+{
+  "source": "offertoday",
+  "note": "職能字典：31 大類 + 細類。id 格式 <大類碼>c<細類碼>，只給大類碼代表全類。",
+  "categories": [
+    {
+      "id": 101000,
+      "name": "會計",
+      "name_en": "All Accounting",
+      "sub_count": 26,
+      "children": [
+        {
+          "id": "101000c101001",
+          "name": "會計主任/辦事員",
+          "name_en": "Accounts Officers&Clerks",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101002",
+          "name": "應付帳款",
+          "name_en": "Accounts Payable",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101003",
+          "name": "應收賬款/信貸控制",
+          "name_en": "Accounts Receivable&Credit Control",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101004",
+          "name": "分析/報告",
+          "name_en": "Analysis & Reporting",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101005",
+          "name": "助理會計師",
+          "name_en": "Assistant Accountants",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101006",
+          "name": "審計-外部",
+          "name_en": "Audit - External",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101007",
+          "name": "審計-內部",
+          "name_en": "Audit - Internal",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101008",
+          "name": "審計",
+          "name_en": "Audit",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101009",
+          "name": "記帳/小規模會計",
+          "name_en": "Bookkeeping & Small Practice Accounting",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101010",
+          "name": "商業服務/企業諮詢",
+          "name_en": "Business Services & Corporate Advisory",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101011",
+          "name": "公司秘書",
+          "name_en": "Company Secretaries",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101012",
+          "name": "合規/風險",
+          "name_en": "Compliance & Risk",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101013",
+          "name": "成本會計",
+          "name_en": "Cost Accounting",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101014",
+          "name": "財務會計/報告",
+          "name_en": "Financial Accounting & Reporting",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101015",
+          "name": "財務經理/總監",
+          "name_en": "Financial Managers & Controllers",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101016",
+          "name": "法務會計/調查",
+          "name_en": "Forensic Accounting & Investigation",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101017",
+          "name": "破產/公司恢復",
+          "name_en": "Insolvency & Corporate Recovery",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101018",
+          "name": "庫存/固定資產",
+          "name_en": "Inventory & Fixed Assets",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101019",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101020",
+          "name": "管理會計/預算",
+          "name_en": "Management Accounting & Budgeting",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101021",
+          "name": "薪酬專員",
+          "name_en": "Payroll",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101022",
+          "name": "戰略/規劃",
+          "name_en": "Strategy & Planning",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101023",
+          "name": "系統會計/IT審計",
+          "name_en": "Systems Accounting & IT Audit",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101024",
+          "name": "稅務",
+          "name_en": "Taxation",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101025",
+          "name": "財政",
+          "name_en": "Treasury",
+          "category": "會計"
+        },
+        {
+          "id": "101000c101999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "會計"
+        }
+      ]
+    },
+    {
+      "id": 102000,
+      "name": "行政 / 辦公室助理",
+      "name_en": "All Administration & Office Support",
+      "sub_count": 9,
+      "children": [
+        {
+          "id": "102000c102001",
+          "name": "行政助理",
+          "name_en": "Administrative Assistants",
+          "category": "行政 / 辦公室助理"
+        },
+        {
+          "id": "102000c102002",
+          "name": "客戶/銷售管理",
+          "name_en": "Client & Sales Administration",
+          "category": "行政 / 辦公室助理"
+        },
+        {
+          "id": "102000c102003",
+          "name": "契约管理",
+          "name_en": "Contracts Administration",
+          "category": "行政 / 辦公室助理"
+        },
+        {
+          "id": "102000c102004",
+          "name": "資料輸入/文字處理",
+          "name_en": "Data Entry & Word Processing",
+          "category": "行政 / 辦公室助理"
+        },
+        {
+          "id": "102000c102005",
+          "name": "辦公室職員",
+          "name_en": "Office Management",
+          "category": "行政 / 辦公室助理"
+        },
+        {
+          "id": "102000c102006",
+          "name": "PA、EA/秘書",
+          "name_en": "PA, EA & Secretarial",
+          "category": "行政 / 辦公室助理"
+        },
+        {
+          "id": "102000c102007",
+          "name": "接待員",
+          "name_en": "Receptionists",
+          "category": "行政 / 辦公室助理"
+        },
+        {
+          "id": "102000c102008",
+          "name": "記錄管理/檔案控制",
+          "name_en": "Records Management & Document Control",
+          "category": "行政 / 辦公室助理"
+        },
+        {
+          "id": "102000c102999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "行政 / 辦公室助理"
+        }
+      ]
+    },
+    {
+      "id": 103000,
+      "name": "廣告 / 多媒體設計",
+      "name_en": "All Advertising & Media",
+      "sub_count": 12,
+      "children": [
+        {
+          "id": "103000c103001",
+          "name": "代理帳戶管理",
+          "name_en": "Agency Account Management",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103002",
+          "name": "藝術指導",
+          "name_en": "Art Direction",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103003",
+          "name": "編輯/出版",
+          "name_en": "Editing & Publishing",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103004",
+          "name": "活動管理",
+          "name_en": "Event Management",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103005",
+          "name": "新聞寫作",
+          "name_en": "Journalism & Writing",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103006",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103007",
+          "name": "媒介戰略、策劃/採買",
+          "name_en": "Media Strategy, Planning & Buying",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103008",
+          "name": "表演藝術",
+          "name_en": "Performing Arts",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103009",
+          "name": "攝影",
+          "name_en": "Photography",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103010",
+          "name": "程式設計/製作",
+          "name_en": "Programming & Production",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103011",
+          "name": "推廣",
+          "name_en": "Promotions",
+          "category": "廣告 / 多媒體設計"
+        },
+        {
+          "id": "103000c103999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "廣告 / 多媒體設計"
+        }
+      ]
+    },
+    {
+      "id": 104000,
+      "name": "銀行 / 金融",
+      "name_en": "All Banking & Financial Services",
+      "sub_count": 17,
+      "children": [
+        {
+          "id": "104000c104001",
+          "name": "客戶關係管理",
+          "name_en": "Account & Relationship Management",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104002",
+          "name": "分析/報告",
+          "name_en": "Analysis & Reporting",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104003",
+          "name": "銀行業務-商業",
+          "name_en": "Banking - Business",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104004",
+          "name": "銀行業務-公司/機構",
+          "name_en": "Banking - Corporate & Institutional",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104005",
+          "name": "銀行業務-零售/分行",
+          "name_en": "Banking - Retail&Branch",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104006",
+          "name": "客戶顧問",
+          "name_en": "Client Services",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104007",
+          "name": "風險合規",
+          "name_en": "Compliance & Risk",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104008",
+          "name": "公司金融/投資銀行",
+          "name_en": "Corporate Finance & Investment Banking",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104009",
+          "name": "信用員",
+          "name_en": "Credit",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104010",
+          "name": "財務規劃",
+          "name_en": "Financial Planning",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104011",
+          "name": "資金管理",
+          "name_en": "Funds Management",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104012",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104013",
+          "name": "按揭",
+          "name_en": "Mortgages",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104014",
+          "name": "結算",
+          "name_en": "Settlements",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104015",
+          "name": "證券交易",
+          "name_en": "Securities Trading",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104016",
+          "name": "財政",
+          "name_en": "Treasury",
+          "category": "銀行 / 金融"
+        },
+        {
+          "id": "104000c104999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "銀行 / 金融"
+        }
+      ]
+    },
+    {
+      "id": 105000,
+      "name": "客戶服務",
+      "name_en": "All Customer Service",
+      "sub_count": 8,
+      "children": [
+        {
+          "id": "105000c105001",
+          "name": "催收",
+          "name_en": "Collections",
+          "category": "客戶服務"
+        },
+        {
+          "id": "105000c105002",
+          "name": "客戶服務-呼叫中心",
+          "name_en": "Customer Service - Call Centre",
+          "category": "客戶服務"
+        },
+        {
+          "id": "105000c105003",
+          "name": "客戶服務-面向客戶",
+          "name_en": "Customer Service - Customer Facing",
+          "category": "客戶服務"
+        },
+        {
+          "id": "105000c105004",
+          "name": "管理/支持",
+          "name_en": "Management & Support",
+          "category": "客戶服務"
+        },
+        {
+          "id": "105000c105005",
+          "name": "銷售-進線",
+          "name_en": "Sales - Inbound",
+          "category": "客戶服務"
+        },
+        {
+          "id": "105000c105006",
+          "name": "銷售-外拓",
+          "name_en": "Sales - Outbound",
+          "category": "客戶服務"
+        },
+        {
+          "id": "105000c105007",
+          "name": "主管/組長",
+          "name_en": "Supervisors & Team Leaders",
+          "category": "客戶服務"
+        },
+        {
+          "id": "105000c105999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "客戶服務"
+        }
+      ]
+    },
+    {
+      "id": 106000,
+      "name": "CEO / GM",
+      "name_en": "All CEO & General Management",
+      "sub_count": 6,
+      "children": [
+        {
+          "id": "106000c106001",
+          "name": "董事",
+          "name_en": "Board Appointments",
+          "category": "CEO / GM"
+        },
+        {
+          "id": "106000c106002",
+          "name": "總裁",
+          "name_en": "CEO",
+          "category": "CEO / GM"
+        },
+        {
+          "id": "106000c106003",
+          "name": "COO / MD",
+          "name_en": "COO & MD",
+          "category": "CEO / GM"
+        },
+        {
+          "id": "106000c106004",
+          "name": "總經理/業務部經理",
+          "name_en": "General & Business Unit Manager",
+          "category": "CEO / GM"
+        },
+        {
+          "id": "106000c106101",
+          "name": "首席执行官&綜合管理",
+          "name_en": "CEO & General Management",
+          "category": "CEO / GM"
+        },
+        {
+          "id": "106000c106999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "CEO / GM"
+        }
+      ]
+    },
+    {
+      "id": 107000,
+      "name": "社區服務",
+      "name_en": "All Community Services",
+      "sub_count": 11,
+      "children": [
+        {
+          "id": "107000c107001",
+          "name": "老年人/殘疾人支持",
+          "name_en": "Aged & Disability Support",
+          "category": "社區服務"
+        },
+        {
+          "id": "107000c107002",
+          "name": "兒童福利、青年/家庭服務",
+          "name_en": "Child Welfare, Youth & Family Services",
+          "category": "社區服務"
+        },
+        {
+          "id": "107000c107003",
+          "name": "社區發展",
+          "name_en": "Community Development",
+          "category": "社區服務"
+        },
+        {
+          "id": "107000c107004",
+          "name": "就業服務",
+          "name_en": "Employment Services",
+          "category": "社區服務"
+        },
+        {
+          "id": "107000c107005",
+          "name": "籌款",
+          "name_en": "Fundraising",
+          "category": "社區服務"
+        },
+        {
+          "id": "107000c107006",
+          "name": "住房/無家者服務",
+          "name_en": "Housing & Homelessness Services",
+          "category": "社區服務"
+        },
+        {
+          "id": "107000c107007",
+          "name": "土著/多元文化服務",
+          "name_en": "Indigenous & Multicultural Services",
+          "category": "社區服務"
+        },
+        {
+          "id": "107000c107008",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "社區服務"
+        },
+        {
+          "id": "107000c107009",
+          "name": "志願者協調/支持",
+          "name_en": "Volunteer Coordination & Support",
+          "category": "社區服務"
+        },
+        {
+          "id": "107000c107101",
+          "name": "社區服務&發展",
+          "name_en": "Community Services & Development",
+          "category": "社區服務"
+        },
+        {
+          "id": "107000c107999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "社區服務"
+        }
+      ]
+    },
+    {
+      "id": 108000,
+      "name": "建造業",
+      "name_en": "All Construction",
+      "sub_count": 11,
+      "children": [
+        {
+          "id": "108000c108001",
+          "name": "契约管理",
+          "name_en": "Contracts Management",
+          "category": "建造業"
+        },
+        {
+          "id": "108000c108002",
+          "name": "報價",
+          "name_en": "Estimating",
+          "category": "建造業"
+        },
+        {
+          "id": "108000c108003",
+          "name": "主管",
+          "name_en": "Foreperson&Supervisors",
+          "category": "建造業"
+        },
+        {
+          "id": "108000c108004",
+          "name": "健康、安全/環境",
+          "name_en": "Health, Safety & Environment",
+          "category": "建造業"
+        },
+        {
+          "id": "108000c108005",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "建造業"
+        },
+        {
+          "id": "108000c108006",
+          "name": "計劃/調度",
+          "name_en": "Planning & Scheduling",
+          "category": "建造業"
+        },
+        {
+          "id": "108000c108007",
+          "name": "工廠/機械操作員",
+          "name_en": "Plant & Machinery Operators",
+          "category": "建造業"
+        },
+        {
+          "id": "108000c108008",
+          "name": "項目管理",
+          "name_en": "Project Management",
+          "category": "建造業"
+        },
+        {
+          "id": "108000c108009",
+          "name": "品質控制",
+          "name_en": "Quality Assurance & Control",
+          "category": "建造業"
+        },
+        {
+          "id": "108000c108010",
+          "name": "測量",
+          "name_en": "Surveying",
+          "category": "建造業"
+        },
+        {
+          "id": "108000c108999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "建造業"
+        }
+      ]
+    },
+    {
+      "id": 109000,
+      "name": "顧問",
+      "name_en": "All Consulting",
+      "sub_count": 8,
+      "children": [
+        {
+          "id": "109000c109001",
+          "name": "分析員",
+          "name_en": "Analysts",
+          "category": "顧問"
+        },
+        {
+          "id": "109000c109002",
+          "name": "企業發展",
+          "name_en": "Corporate Development",
+          "category": "顧問"
+        },
+        {
+          "id": "109000c109003",
+          "name": "環境/可持續發展諮詢",
+          "name_en": "Environment & Sustainability Consulting",
+          "category": "顧問"
+        },
+        {
+          "id": "109000c109004",
+          "name": "管理/變革諮詢",
+          "name_en": "Management & Change Consulting",
+          "category": "顧問"
+        },
+        {
+          "id": "109000c109005",
+          "name": "政策",
+          "name_en": "Policy",
+          "category": "顧問"
+        },
+        {
+          "id": "109000c109006",
+          "name": "戰略/規劃",
+          "name_en": "Strategy & Planning",
+          "category": "顧問"
+        },
+        {
+          "id": "109000c109101",
+          "name": "諮詢&戰略",
+          "name_en": "Consulting & Strategy",
+          "category": "顧問"
+        },
+        {
+          "id": "109000c109999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "顧問"
+        }
+      ]
+    },
+    {
+      "id": 110000,
+      "name": "設計",
+      "name_en": "All Design",
+      "sub_count": 12,
+      "children": [
+        {
+          "id": "110000c110001",
+          "name": "建築製圖",
+          "name_en": "Architectural Drafting",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110002",
+          "name": "建築設計",
+          "name_en": "Architecture",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110003",
+          "name": "時尚/紡織品設計",
+          "name_en": "Fashion & Textile Design",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110004",
+          "name": "平面設計",
+          "name_en": "Graphic Design",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110005",
+          "name": "插圖/動畫",
+          "name_en": "Illustration & Animation",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110006",
+          "name": "工業設計",
+          "name_en": "Industrial Design",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110007",
+          "name": "室內設計",
+          "name_en": "Interior Design",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110008",
+          "name": "景觀建築學",
+          "name_en": "Landscape Architecture",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110009",
+          "name": "城市設計/規劃",
+          "name_en": "Urban Design & Planning",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110010",
+          "name": "Web/交互設計",
+          "name_en": "Web & Interaction Design",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110101",
+          "name": "平面/視覺設計",
+          "name_en": "Graphic & Visual Design",
+          "category": "設計"
+        },
+        {
+          "id": "110000c110999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "設計"
+        }
+      ]
+    },
+    {
+      "id": 111000,
+      "name": "教育",
+      "name_en": "All Education",
+      "sub_count": 22,
+      "children": [
+        {
+          "id": "111000c111001",
+          "name": "兒童保育/校外保育",
+          "name_en": "Childcare & Outside School Hours Care",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111002",
+          "name": "圖書館服務/資訊管理",
+          "name_en": "Library Services & Information Management",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111003",
+          "name": "管理-學校",
+          "name_en": "Management - Schools",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111004",
+          "name": "管理-大學",
+          "name_en": "Management - Universities",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111005",
+          "name": "管理-職業",
+          "name_en": "Management - Vocational",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111006",
+          "name": "研究員",
+          "name_en": "Research & Fellowships",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111007",
+          "name": "學生服務",
+          "name_en": "Student Services",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111008",
+          "name": "教學-幼兒",
+          "name_en": "Teaching - Early Childhood",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111009",
+          "name": "教學-小學",
+          "name_en": "Teaching - Primary",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111010",
+          "name": "教學-中學",
+          "name_en": "Teaching - Secondary",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111011",
+          "name": "教學-高等教育",
+          "name_en": "Teaching - Tertiary",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111012",
+          "name": "教學-職業",
+          "name_en": "Teaching - Vocational",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111013",
+          "name": "助教/特殊需求",
+          "name_en": "Teaching Aides & Special Needs",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111014",
+          "name": "教師",
+          "name_en": "Teacher",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111015",
+          "name": "輔導",
+          "name_en": "Tutoring",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111016",
+          "name": "工作場所培訓/評估",
+          "name_en": "Workplace Training & Assessment",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111101",
+          "name": "幼兒&特殊教育",
+          "name_en": "Early Childhood & Special Education",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111102",
+          "name": "小學&中學教育",
+          "name_en": "Primary & Secondary Education",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111103",
+          "name": "高等教育&學術研究",
+          "name_en": "Higher Education & Research",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111104",
+          "name": "職業教育&技能進修",
+          "name_en": "Vocational & Skills Education",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111105",
+          "name": "教育行政&學生支援",
+          "name_en": "Education Admin & Student Support",
+          "category": "教育"
+        },
+        {
+          "id": "111000c111999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "教育"
+        }
+      ]
+    },
+    {
+      "id": 112000,
+      "name": "工程師",
+      "name_en": "All Engineering",
+      "sub_count": 24,
+      "children": [
+        {
+          "id": "112000c112001",
+          "name": "航空工程",
+          "name_en": "Aerospace Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112002",
+          "name": "品質保證",
+          "name_en": "Quality Assurance",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112003",
+          "name": "汽車工程",
+          "name_en": "Automotive Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112004",
+          "name": "建築服務工程",
+          "name_en": "Building Services Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112005",
+          "name": "化學工程",
+          "name_en": "Chemical Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112006",
+          "name": "土木/結構工程",
+          "name_en": "Civil & Structural Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112007",
+          "name": "電力/電子工程",
+          "name_en": "Electrical & Electronic Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112008",
+          "name": "工程製圖",
+          "name_en": "Engineering Drafting",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112009",
+          "name": "環境工程",
+          "name_en": "Environmental Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112010",
+          "name": "現場工程",
+          "name_en": "Field Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112011",
+          "name": "工業工程學",
+          "name_en": "Industrial Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112012",
+          "name": "維修",
+          "name_en": "Maintenance",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112013",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112014",
+          "name": "物料搬運工程",
+          "name_en": "Materials Handling Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112015",
+          "name": "機械工程",
+          "name_en": "Mechanical Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112016",
+          "name": "工藝工程",
+          "name_en": "Process Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112017",
+          "name": "項目工程",
+          "name_en": "Project Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112018",
+          "name": "項目管理",
+          "name_en": "Project Management",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112019",
+          "name": "主管",
+          "name_en": "Supervisors",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112020",
+          "name": "系統工程",
+          "name_en": "Systems Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112021",
+          "name": "水處理工程",
+          "name_en": "Water & Waste Engineering",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112022",
+          "name": "品質保證",
+          "name_en": "Quality Assurance",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112101",
+          "name": "工程师",
+          "name_en": "Engineer",
+          "category": "工程師"
+        },
+        {
+          "id": "112000c112999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "工程師"
+        }
+      ]
+    },
+    {
+      "id": 113000,
+      "name": "農業",
+      "name_en": "All Farming",
+      "sub_count": 10,
+      "children": [
+        {
+          "id": "113000c113001",
+          "name": "農學/農業服務",
+          "name_en": "Agronomy & Farm Services",
+          "category": "農業"
+        },
+        {
+          "id": "113000c113002",
+          "name": "公園/野生動物保護",
+          "name_en": "Conservation, Parks & Wildlife",
+          "category": "農業"
+        },
+        {
+          "id": "113000c113003",
+          "name": "農場工人",
+          "name_en": "Farm Labour",
+          "category": "農業"
+        },
+        {
+          "id": "113000c113004",
+          "name": "農場管理",
+          "name_en": "Farm Management",
+          "category": "農業"
+        },
+        {
+          "id": "113000c113005",
+          "name": "漁業/水產養殖",
+          "name_en": "Fishing & Aquaculture",
+          "category": "農業"
+        },
+        {
+          "id": "113000c113006",
+          "name": "園藝",
+          "name_en": "Horticulture",
+          "category": "農業"
+        },
+        {
+          "id": "113000c113007",
+          "name": "獸醫/動物福利",
+          "name_en": "Veterinary Services & Animal Welfare",
+          "category": "農業"
+        },
+        {
+          "id": "113000c113008",
+          "name": "釀酒/葡萄栽培",
+          "name_en": "Winery & Viticulture",
+          "category": "農業"
+        },
+        {
+          "id": "113000c113101",
+          "name": "農業&動物保護",
+          "name_en": "Farming, Animals & Conservation",
+          "category": "農業"
+        },
+        {
+          "id": "113000c113999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "農業"
+        }
+      ]
+    },
+    {
+      "id": 114000,
+      "name": "政府工",
+      "name_en": "All Government",
+      "sub_count": 13,
+      "children": [
+        {
+          "id": "114000c114001",
+          "name": "空軍",
+          "name_en": "Air Force",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114002",
+          "name": "軍隊",
+          "name_en": "Army",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114003",
+          "name": "緊急服務",
+          "name_en": "Emergency Services",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114004",
+          "name": "政府",
+          "name_en": "Government",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114005",
+          "name": "聯邦政府",
+          "name_en": "Government - Federal",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114006",
+          "name": "地方政府",
+          "name_en": "Government - Local",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114007",
+          "name": "州政府",
+          "name_en": "Government - State",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114008",
+          "name": "地方政府",
+          "name_en": "Local Government",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114009",
+          "name": "海軍",
+          "name_en": "Navy",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114010",
+          "name": "警察/懲教",
+          "name_en": "Police & Corrections",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114011",
+          "name": "政策、規劃/法規",
+          "name_en": "Policy, Planning & Regulation",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114012",
+          "name": "區域市政局",
+          "name_en": "Regional Council",
+          "category": "政府工"
+        },
+        {
+          "id": "114000c114999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "政府工"
+        }
+      ]
+    },
+    {
+      "id": 115000,
+      "name": "醫療",
+      "name_en": "All Healthcare & Medical",
+      "sub_count": 36,
+      "children": [
+        {
+          "id": "115000c115001",
+          "name": "救護車/醫護人員",
+          "name_en": "Ambulance & Paramedics",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115002",
+          "name": "脊椎按摩/骨病",
+          "name_en": "Chiropractic & Osteopathic",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115003",
+          "name": "臨床/醫學研究",
+          "name_en": "Clinical&Medical Research",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115004",
+          "name": "牙科醫生",
+          "name_en": "Dental",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115005",
+          "name": "營養師",
+          "name_en": "Dieticians",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115006",
+          "name": "環境服務",
+          "name_en": "Environmental Services",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115007",
+          "name": "全科醫生",
+          "name_en": "General Practitioners",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115008",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115009",
+          "name": "醫療行政",
+          "name_en": "Medical Administration",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115010",
+          "name": "醫學影像學",
+          "name_en": "Medical Imaging",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115011",
+          "name": "醫學專家",
+          "name_en": "Medical Specialists",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115012",
+          "name": "自然療法/替代醫學",
+          "name_en": "Natural Therapies & Alternative Medicine",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115013",
+          "name": "護理-急診、重症監護/重症監護室",
+          "name_en": "Nursing - A&E, Critical Care & ICU",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115014",
+          "name": "護理-老年護理",
+          "name_en": "Nursing - Aged Care",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115015",
+          "name": "護理-社區、婦幼保健",
+          "name_en": "Nursing - Community, Maternal & Child Health",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115016",
+          "name": "護理-教育輔導",
+          "name_en": "Nursing - Educators & Facilitators",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115017",
+          "name": "護理-普通醫療/外科",
+          "name_en": "Nursing - General Medical & Surgical",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115018",
+          "name": "護理-高敏",
+          "name_en": "Nursing - High Acuity",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115019",
+          "name": "護理-管理",
+          "name_en": "Nursing - Management",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115020",
+          "name": "護理-助產、新生兒、重症監護室專科",
+          "name_en": "Nursing - Midwifery, Neo-Natal, SCN & NICU",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115021",
+          "name": "護理-兒科/PICU",
+          "name_en": "Nursing - Paediatric & PICU",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115022",
+          "name": "護理-心理、法醫/懲教健康",
+          "name_en": "Nursing - Psych, Forensic & Correctional Health",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115023",
+          "name": "護理-手術室/康復",
+          "name_en": "Nursing - Theatre & Recovery",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115024",
+          "name": "視力",
+          "name_en": "Optical",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115025",
+          "name": "病理學",
+          "name_en": "Pathology",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115026",
+          "name": "藥品/醫療器械",
+          "name_en": "Pharmaceuticals & Medical Devices",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115027",
+          "name": "藥房",
+          "name_en": "Pharmacy",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115028",
+          "name": "理療、OT/康復",
+          "name_en": "Physiotherapy, OT & Rehabilitation",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115029",
+          "name": "心理學、諮詢/社會工作",
+          "name_en": "Psychology, Counselling & Social Work",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115030",
+          "name": "住院醫生",
+          "name_en": "Residents & Registrars",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115031",
+          "name": "銷售",
+          "name_en": "Sales",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115032",
+          "name": "言語治療",
+          "name_en": "Speech Therapy",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115101",
+          "name": "護理",
+          "name_en": "Nursing",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115102",
+          "name": "醫生&專科醫療",
+          "name_en": "Doctors & Medical Specialty",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115103",
+          "name": "理療保健",
+          "name_en": "Physiotherapy & Rehabilitation",
+          "category": "醫療"
+        },
+        {
+          "id": "115000c115999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "醫療"
+        }
+      ]
+    },
+    {
+      "id": 116000,
+      "name": "酒店 / 餐飲 / 旅遊",
+      "name_en": "All Hospitality & Catering & Tourism",
+      "sub_count": 13,
+      "children": [
+        {
+          "id": "116000c116001",
+          "name": "航空",
+          "name_en": "Airlines",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116002",
+          "name": "酒吧/飲料員工",
+          "name_en": "Bar & Beverage Staff",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116003",
+          "name": "廚師",
+          "name_en": "Chefs & Cooks",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116004",
+          "name": "前臺/賓客服務",
+          "name_en": "Front Office & Guest Services",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116005",
+          "name": "遊戲",
+          "name_en": "Gaming",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116006",
+          "name": "房務",
+          "name_en": "Housekeeping",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116007",
+          "name": "廚房/三明治手",
+          "name_en": "Kitchen & Sandwich Hands",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116008",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116009",
+          "name": "預訂",
+          "name_en": "Reservations",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116010",
+          "name": "導遊",
+          "name_en": "Tour Guides",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116011",
+          "name": "旅行社/顧問",
+          "name_en": "Travel Agents&Consultants",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116012",
+          "name": "侍應",
+          "name_en": "Waiting Staff",
+          "category": "酒店 / 餐飲 / 旅遊"
+        },
+        {
+          "id": "116000c116999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "酒店 / 餐飲 / 旅遊"
+        }
+      ]
+    },
+    {
+      "id": 117000,
+      "name": "人力資源",
+      "name_en": "All Human Resources & Recruitment",
+      "sub_count": 13,
+      "children": [
+        {
+          "id": "117000c117001",
+          "name": "人力資源諮詢專家",
+          "name_en": "Consulting & Generalist HR",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117002",
+          "name": "勞資關係",
+          "name_en": "Industrial & Employee Relations",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117003",
+          "name": "管理-代理",
+          "name_en": "Management - Agency",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117004",
+          "name": "管理-內部",
+          "name_en": "Management - Internal",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117005",
+          "name": "職業健康/安全",
+          "name_en": "Occupational Health & Safety",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117006",
+          "name": "組織發展",
+          "name_en": "Organisational Development",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117007",
+          "name": "招聘-代理",
+          "name_en": "Recruitment - Agency",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117008",
+          "name": "招聘-內部",
+          "name_en": "Recruitment - Internal",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117009",
+          "name": "薪酬/福利",
+          "name_en": "Remuneration & Benefits",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117010",
+          "name": "培訓/發展",
+          "name_en": "Training & Development",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117101",
+          "name": "招聘",
+          "name_en": "Recruitment",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117102",
+          "name": "人力資源管理",
+          "name_en": "HR Generalist",
+          "category": "人力資源"
+        },
+        {
+          "id": "117000c117999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "人力資源"
+        }
+      ]
+    },
+    {
+      "id": 118000,
+      "name": "資訊科技",
+      "name_en": "All Information Technology",
+      "sub_count": 22,
+      "children": [
+        {
+          "id": "118000c118001",
+          "name": "架構師",
+          "name_en": "Architects",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118002",
+          "name": "業務/系統分析師",
+          "name_en": "Business & Systems Analysts",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118003",
+          "name": "電腦操作員",
+          "name_en": "Computer Operators",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118004",
+          "name": "顧問",
+          "name_en": "Consultants",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118005",
+          "name": "數據庫開發管理",
+          "name_en": "Database Development & Administration",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118006",
+          "name": "開發者",
+          "name_en": "Developers & Programmers",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118007",
+          "name": "硬體工程師",
+          "name_en": "Engineering - Hardware",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118008",
+          "name": "網絡工程師",
+          "name_en": "Engineering - Network",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118009",
+          "name": "軟體工程師",
+          "name_en": "Engineering - Software",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118010",
+          "name": "桌面運維/IT支持",
+          "name_en": "Help Desk & IT Support",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118011",
+          "name": "經營",
+          "name_en": "Management",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118012",
+          "name": "網絡/系統管理",
+          "name_en": "Networks & Systems Administration",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118013",
+          "name": "產品管理/開發",
+          "name_en": "Product Management & Development",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118014",
+          "name": "計畫/項目管理",
+          "name_en": "Programme & Project Management",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118015",
+          "name": "售前/售後",
+          "name_en": "Sales - Pre & Post",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118016",
+          "name": "IT安全",
+          "name_en": "Security",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118017",
+          "name": "團隊負責人",
+          "name_en": "Team Leaders",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118018",
+          "name": "技術寫作",
+          "name_en": "Technical Writing",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118019",
+          "name": "電訊",
+          "name_en": "Telecommunications",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118020",
+          "name": "測試",
+          "name_en": "Testing & Quality Assurance",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118021",
+          "name": "Web產品開發",
+          "name_en": "Web Development & Production",
+          "category": "資訊科技"
+        },
+        {
+          "id": "118000c118999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "資訊科技"
+        }
+      ]
+    },
+    {
+      "id": 119000,
+      "name": "保險",
+      "name_en": "All Insurance",
+      "sub_count": 11,
+      "children": [
+        {
+          "id": "119000c119001",
+          "name": "精算",
+          "name_en": "Actuarial",
+          "category": "保險"
+        },
+        {
+          "id": "119000c119002",
+          "name": "保險估價",
+          "name_en": "Assessment",
+          "category": "保險"
+        },
+        {
+          "id": "119000c119003",
+          "name": "保險經紀",
+          "name_en": "Brokerage",
+          "category": "保險"
+        },
+        {
+          "id": "119000c119004",
+          "name": "理賠員",
+          "name_en": "Claims",
+          "category": "保險"
+        },
+        {
+          "id": "119000c119005",
+          "name": "基金管理",
+          "name_en": "Fund Administration",
+          "category": "保險"
+        },
+        {
+          "id": "119000c119006",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "保險"
+        },
+        {
+          "id": "119000c119007",
+          "name": "風險諮詢",
+          "name_en": "Risk Consulting",
+          "category": "保險"
+        },
+        {
+          "id": "119000c119008",
+          "name": "養老保險",
+          "name_en": "Superannuation",
+          "category": "保險"
+        },
+        {
+          "id": "119000c119009",
+          "name": "保險承保",
+          "name_en": "Underwriting",
+          "category": "保險"
+        },
+        {
+          "id": "119000c119010",
+          "name": "工傷賠償",
+          "name_en": "Workers' Compensation",
+          "category": "保險"
+        },
+        {
+          "id": "119000c119999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "保險"
+        }
+      ]
+    },
+    {
+      "id": 120000,
+      "name": "法律",
+      "name_en": "All Legal",
+      "sub_count": 19,
+      "children": [
+        {
+          "id": "120000c120001",
+          "name": "銀行/金融法",
+          "name_en": "Banking & Finance Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120002",
+          "name": "建築法",
+          "name_en": "Construction Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120003",
+          "name": "公司法/商法",
+          "name_en": "Corporate & Commercial Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120004",
+          "name": "刑法/民法",
+          "name_en": "Criminal & Civil Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120005",
+          "name": "環境/規劃法",
+          "name_en": "Environment & Planning Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120006",
+          "name": "家庭法",
+          "name_en": "Family Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120007",
+          "name": "律師-內部",
+          "name_en": "Generalists - In-house",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120008",
+          "name": "律師-律師事務所",
+          "name_en": "Generalists - Law Firm",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120009",
+          "name": "勞資關係/就業法",
+          "name_en": "Industrial Relations & Employment Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120010",
+          "name": "保險/養老金法",
+          "name_en": "Insurance & Superannuation Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120011",
+          "name": "知識產權法",
+          "name_en": "Intellectual Property Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120012",
+          "name": "律師助理",
+          "name_en": "Law Clerks & Paralegals",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120013",
+          "name": "法律實踐管理",
+          "name_en": "Legal Practice Management",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120014",
+          "name": "法律秘書",
+          "name_en": "Legal Secretaries",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120015",
+          "name": "訴訟/爭議解决",
+          "name_en": "Litigation & Dispute Resolution",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120016",
+          "name": "人身傷害法",
+          "name_en": "Personal Injury Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120017",
+          "name": "財產法",
+          "name_en": "Property Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120018",
+          "name": "稅法",
+          "name_en": "Tax Law",
+          "category": "法律"
+        },
+        {
+          "id": "120000c120999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "法律"
+        }
+      ]
+    },
+    {
+      "id": 121000,
+      "name": "製造 / 物流",
+      "name_en": "All Manufacturing & Logistics",
+      "sub_count": 22,
+      "children": [
+        {
+          "id": "121000c121001",
+          "name": "分析/報告",
+          "name_en": "Analysis & Reporting",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121002",
+          "name": "裝配/工藝工作",
+          "name_en": "Assembly & Process Work",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121003",
+          "name": "航空服務",
+          "name_en": "Aviation Services",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121004",
+          "name": "快遞員、司機/郵政服務",
+          "name_en": "Couriers, Drivers & Postal Services",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121005",
+          "name": "車隊管理",
+          "name_en": "Fleet Management",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121006",
+          "name": "貨運/貨運代理",
+          "name_en": "Freight&Cargo Forwarding",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121007",
+          "name": "進出口/海關",
+          "name_en": "Import&Export & Customs",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121008",
+          "name": "操作員",
+          "name_en": "Machine Operators",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121009",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121010",
+          "name": "圖案製作/服裝科技",
+          "name_en": "Pattern Makers & Garment Technicians",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121011",
+          "name": "包裝揀貨",
+          "name_en": "Pickers & Packers",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121012",
+          "name": "生產、計畫/調度",
+          "name_en": "Production, Planning & Scheduling",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121013",
+          "name": "公共交通/計程車服務",
+          "name_en": "Public Transport & Taxi Services",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121014",
+          "name": "採購/庫存",
+          "name_en": "Purchasing, Procurement & Inventory",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121015",
+          "name": "品質保證/控制",
+          "name_en": "Quality Assurance & Control",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121016",
+          "name": "鐵路海運",
+          "name_en": "Rail & Maritime Transport",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121017",
+          "name": "道路運輸",
+          "name_en": "Road Transport",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121018",
+          "name": "主管/組長",
+          "name_en": "Team Leaders&Supervisors",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121019",
+          "name": "倉儲、儲存/配送",
+          "name_en": "Warehousing, Storage & Distribution",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121020",
+          "name": "外賣",
+          "name_en": "Delivery",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121101",
+          "name": "圖案製作/工藝工作",
+          "name_en": "Pattern Makers/Process Work",
+          "category": "製造 / 物流"
+        },
+        {
+          "id": "121000c121999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "製造 / 物流"
+        }
+      ]
+    },
+    {
+      "id": 122000,
+      "name": "市場推廣 / 傳媒",
+      "name_en": "All Marketing & Communications",
+      "sub_count": 13,
+      "children": [
+        {
+          "id": "122000c122001",
+          "name": "品牌管理",
+          "name_en": "Brand Management",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122002",
+          "name": "數字營銷",
+          "name_en": "Digital & Search Marketing",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122003",
+          "name": "直銷/CRM",
+          "name_en": "Direct Marketing & CRM",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122004",
+          "name": "活動管理",
+          "name_en": "Event Management",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122005",
+          "name": "內部通信",
+          "name_en": "Internal Communications",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122006",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122007",
+          "name": "市場調查/分析",
+          "name_en": "Market Research & Analysis",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122008",
+          "name": "营銷助理/協調員",
+          "name_en": "Marketing Assistants&Coordinators",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122009",
+          "name": "营銷傳播",
+          "name_en": "Marketing Communications",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122010",
+          "name": "產品管理/開發",
+          "name_en": "Product Management & Development",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122011",
+          "name": "公共關係/企業事務",
+          "name_en": "Public Relations & Corporate Affairs",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122012",
+          "name": "貿易營銷",
+          "name_en": "Trade Marketing",
+          "category": "市場推廣 / 傳媒"
+        },
+        {
+          "id": "122000c122999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "市場推廣 / 傳媒"
+        }
+      ]
+    },
+    {
+      "id": 123000,
+      "name": "天然能源",
+      "name_en": "All Natural Energy",
+      "sub_count": 18,
+      "children": [
+        {
+          "id": "123000c123001",
+          "name": "分析/報告",
+          "name_en": "Analysis & Reporting",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123002",
+          "name": "健康、安全/環境",
+          "name_en": "Health, Safety & Environment",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123003",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123004",
+          "name": "採礦-鑽孔/爆破",
+          "name_en": "Mining - Drill & Blast",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123005",
+          "name": "採礦-工程/維護",
+          "name_en": "Mining - Engineering & Maintenance",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123006",
+          "name": "採礦-勘探/地球科學",
+          "name_en": "Mining - Exploration & Geoscience",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123007",
+          "name": "採礦-運營",
+          "name_en": "Mining - Operations",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123008",
+          "name": "採礦-處理",
+          "name_en": "Mining - Processing",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123009",
+          "name": "自然資源/水",
+          "name_en": "Natural Resources & Water",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123010",
+          "name": "石油/瓦斯-鑽井",
+          "name_en": "Oil & Gas - Drilling",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123011",
+          "name": "石油/瓦斯-工程/維護",
+          "name_en": "Oil & Gas - Engineering & Maintenance",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123012",
+          "name": "石油/瓦斯-勘探/地球科學",
+          "name_en": "Oil & Gas - Exploration & Geoscience",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123013",
+          "name": "石油/瓦斯-運營",
+          "name_en": "Oil & Gas - Operations",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123014",
+          "name": "石油/瓦斯-生產/精煉",
+          "name_en": "Oil & Gas - Production & Refinement",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123015",
+          "name": "發電/配電",
+          "name_en": "Power Generation & Distribution",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123016",
+          "name": "測量",
+          "name_en": "Surveying",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123101",
+          "name": "採礦、資源&能源",
+          "name_en": "Mining, Resources & Energy",
+          "category": "天然能源"
+        },
+        {
+          "id": "123000c123999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "天然能源"
+        }
+      ]
+    },
+    {
+      "id": 124000,
+      "name": "地產",
+      "name_en": "All Real Estate & Property",
+      "sub_count": 11,
+      "children": [
+        {
+          "id": "124000c124001",
+          "name": "行政",
+          "name_en": "Administration",
+          "category": "地產"
+        },
+        {
+          "id": "124000c124002",
+          "name": "分析員",
+          "name_en": "Analysts",
+          "category": "地產"
+        },
+        {
+          "id": "124000c124003",
+          "name": "法人團體/設施管理",
+          "name_en": "Body Corporate & Facilities Management",
+          "category": "地產"
+        },
+        {
+          "id": "124000c124004",
+          "name": "商業銷售、租賃/物業管理",
+          "name_en": "Commercial Sales, Leasing & Property Mgmt",
+          "category": "地產"
+        },
+        {
+          "id": "124000c124005",
+          "name": "住宅租賃/物業管理",
+          "name_en": "Residential Leasing & Property Management",
+          "category": "地產"
+        },
+        {
+          "id": "124000c124006",
+          "name": "住宅銷售",
+          "name_en": "Residential Sales",
+          "category": "地產"
+        },
+        {
+          "id": "124000c124007",
+          "name": "零售/房地產開發",
+          "name_en": "Retail & Property Development",
+          "category": "地產"
+        },
+        {
+          "id": "124000c124008",
+          "name": "估價",
+          "name_en": "Valuation",
+          "category": "地產"
+        },
+        {
+          "id": "124000c124009",
+          "name": "測量",
+          "name_en": "Surveying",
+          "category": "地產"
+        },
+        {
+          "id": "124000c124010",
+          "name": "安保/安全",
+          "name_en": "Security & Safety Control",
+          "category": "地產"
+        },
+        {
+          "id": "124000c124999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "地產"
+        }
+      ]
+    },
+    {
+      "id": 125000,
+      "name": "採購",
+      "name_en": "All Retail & Consumer Products",
+      "sub_count": 11,
+      "children": [
+        {
+          "id": "125000c125001",
+          "name": "買手",
+          "name_en": "Buying",
+          "category": "採購"
+        },
+        {
+          "id": "125000c125002",
+          "name": "管理-區域/多網站",
+          "name_en": "Management - Area&Multi-site",
+          "category": "採購"
+        },
+        {
+          "id": "125000c125003",
+          "name": "管理-部門/助理",
+          "name_en": "Management - Department&Assistant",
+          "category": "採購"
+        },
+        {
+          "id": "125000c125004",
+          "name": "管理-商店",
+          "name_en": "Management - Store",
+          "category": "採購"
+        },
+        {
+          "id": "125000c125005",
+          "name": "售貨員",
+          "name_en": "Merchandisers",
+          "category": "採購"
+        },
+        {
+          "id": "125000c125006",
+          "name": "零售規劃",
+          "name_en": "Planning",
+          "category": "採購"
+        },
+        {
+          "id": "125000c125007",
+          "name": "零售助理",
+          "name_en": "Retail Assistants",
+          "category": "採購"
+        },
+        {
+          "id": "125000c125008",
+          "name": "理货員",
+          "name_en": "Stockkeeper",
+          "category": "採購"
+        },
+        {
+          "id": "125000c125009",
+          "name": "收銀員",
+          "name_en": "Cashier",
+          "category": "採購"
+        },
+        {
+          "id": "125000c125101",
+          "name": "零售管理",
+          "name_en": "Retail Management",
+          "category": "採購"
+        },
+        {
+          "id": "125000c125999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "採購"
+        }
+      ]
+    },
+    {
+      "id": 126000,
+      "name": "銷售",
+      "name_en": "All Sales",
+      "sub_count": 7,
+      "children": [
+        {
+          "id": "126000c126001",
+          "name": "客戶/關係管理",
+          "name_en": "Account & Relationship Management",
+          "category": "銷售"
+        },
+        {
+          "id": "126000c126002",
+          "name": "分析/報告",
+          "name_en": "Analysis & Reporting",
+          "category": "銷售"
+        },
+        {
+          "id": "126000c126003",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "銷售"
+        },
+        {
+          "id": "126000c126004",
+          "name": "業務發展",
+          "name_en": "New Business Development",
+          "category": "銷售"
+        },
+        {
+          "id": "126000c126005",
+          "name": "銷售協調員",
+          "name_en": "Sales Coordinators",
+          "category": "銷售"
+        },
+        {
+          "id": "126000c126006",
+          "name": "銷售代表/顧問",
+          "name_en": "Sales Representatives&Consultants",
+          "category": "銷售"
+        },
+        {
+          "id": "126000c126999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "銷售"
+        }
+      ]
+    },
+    {
+      "id": 127000,
+      "name": "科技",
+      "name_en": "All Science & Technology",
+      "sub_count": 12,
+      "children": [
+        {
+          "id": "127000c127001",
+          "name": "生物/生物醫學類",
+          "name_en": "Biological & Biomedical Sciences",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127002",
+          "name": "生物技術/遺傳學",
+          "name_en": "Biotechnology & Genetics",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127003",
+          "name": "化學/物理",
+          "name_en": "Chemistry & Physics",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127004",
+          "name": "環境/地球科學",
+          "name_en": "Environmental, Earth & Geosciences",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127005",
+          "name": "食品科技/安全",
+          "name_en": "Food Technology & Safety",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127006",
+          "name": "實驗室/技術服務",
+          "name_en": "Laboratory & Technical Services",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127007",
+          "name": "材料科學",
+          "name_en": "Materials Sciences",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127008",
+          "name": "數學、統計/資訊科學",
+          "name_en": "Mathematics, Statistics & Information Sciences",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127009",
+          "name": "建模/模擬",
+          "name_en": "Modelling & Simulation",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127010",
+          "name": "品質保證/控制",
+          "name_en": "Quality Assurance & Control",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127101",
+          "name": "生物科學與生物技術",
+          "name_en": "Biological Sciences & Biotechnology",
+          "category": "科技"
+        },
+        {
+          "id": "127000c127999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "科技"
+        }
+      ]
+    },
+    {
+      "id": 128000,
+      "name": "自僱 / 自由工作者",
+      "name_en": "All Self Employment",
+      "sub_count": 1,
+      "children": [
+        {
+          "id": "128000c128001",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "自僱 / 自由工作者"
+        }
+      ]
+    },
+    {
+      "id": 129000,
+      "name": "體育",
+      "name_en": "All Sport",
+      "sub_count": 5,
+      "children": [
+        {
+          "id": "129000c129001",
+          "name": "輔導/指導",
+          "name_en": "Coaching & Instruction",
+          "category": "體育"
+        },
+        {
+          "id": "129000c129002",
+          "name": "健身/個人訓練",
+          "name_en": "Fitness & Personal Training",
+          "category": "體育"
+        },
+        {
+          "id": "129000c129003",
+          "name": "管理",
+          "name_en": "Management",
+          "category": "體育"
+        },
+        {
+          "id": "129000c129101",
+          "name": "運動與教練服務",
+          "name_en": "Sports & Coaching Services",
+          "category": "體育"
+        },
+        {
+          "id": "129000c129999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "體育"
+        }
+      ]
+    },
+    {
+      "id": 130000,
+      "name": "零售 / 服務",
+      "name_en": "All Trades & Services",
+      "sub_count": 27,
+      "children": [
+        {
+          "id": "130000c130001",
+          "name": "空調製冷",
+          "name_en": "Air Conditioning & Refrigeration",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130002",
+          "name": "汽車技工",
+          "name_en": "Automotive Trades",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130003",
+          "name": "麵包師/糕點師",
+          "name_en": "Bakers & Pastry Chefs",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130004",
+          "name": "建築技工",
+          "name_en": "Building Trades",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130005",
+          "name": "屠夫",
+          "name_en": "Butchers",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130006",
+          "name": "木工/櫥櫃製作",
+          "name_en": "Carpentry & Cabinet Making",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130007",
+          "name": "清潔服務",
+          "name_en": "Cleaning Services",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130008",
+          "name": "電工",
+          "name_en": "Electricians",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130009",
+          "name": "鉗工、車削工/機械師",
+          "name_en": "Fitters, Turners & Machinists",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130010",
+          "name": "花藝師",
+          "name_en": "Floristry",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130011",
+          "name": "園藝/景觀",
+          "name_en": "Gardening & Landscaping",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130012",
+          "name": "美髮美容服務",
+          "name_en": "Hair & Beauty Services",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130013",
+          "name": "工人",
+          "name_en": "Labourers",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130014",
+          "name": "鎖匠",
+          "name_en": "Locksmiths",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130015",
+          "name": "維護/雜工服務",
+          "name_en": "Maintenance & Handyperson Services",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130016",
+          "name": "保姆/陪月",
+          "name_en": "Nannies & Babysitters",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130017",
+          "name": "畫家/招牌作家",
+          "name_en": "Painters & Sign Writers",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130018",
+          "name": "水管工",
+          "name_en": "Plumbers",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130019",
+          "name": "印刷/出版服務",
+          "name_en": "Printing & Publishing Services",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130020",
+          "name": "安全服務",
+          "name_en": "Security Services",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130021",
+          "name": "裁縫",
+          "name_en": "Tailors & Dressmakers",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130022",
+          "name": "技術人員",
+          "name_en": "Technicians",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130023",
+          "name": "焊工/鍋爐工",
+          "name_en": "Welders & Boilermakers",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130024",
+          "name": "美甲師",
+          "name_en": "Manicurist",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130025",
+          "name": "化妝師",
+          "name_en": "Makeup Artist",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130101",
+          "name": "花藝&園藝設計",
+          "name_en": "Floristry & Gardening",
+          "category": "零售 / 服務"
+        },
+        {
+          "id": "130000c130999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "零售 / 服務"
+        }
+      ]
+    },
+    {
+      "id": 999000,
+      "name": "其他",
+      "name_en": "All Other",
+      "sub_count": 1,
+      "children": [
+        {
+          "id": "999000c999999",
+          "name": "其他",
+          "name_en": "Other",
+          "category": "其他"
+        }
+      ]
+    }
+  ]
+}

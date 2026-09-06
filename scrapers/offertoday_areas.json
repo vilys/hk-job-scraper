@@ -1,0 +1,924 @@
+{
+  "source": "offertoday",
+  "note": "地區字典：香港 18 行政區 + 子區。id 為送給站方的 locationCode（s<區碼>c<子區碼>）；只給區碼（如 HK101304）代表全區。來源 /wapi/geek/recommend/filter/content/all。",
+  "districts": [
+    {
+      "id": "HK101101",
+      "name": "中西區",
+      "name_en": "All Central and Western",
+      "sub_count": 8,
+      "children": [
+        {
+          "id": "sHK101101cHK101101104",
+          "name": "上環",
+          "name_en": "Sheung Wan",
+          "district": "中西區"
+        },
+        {
+          "id": "sHK101101cHK101101105",
+          "name": "中環",
+          "name_en": "Central",
+          "district": "中西區"
+        },
+        {
+          "id": "sHK101101cHK101101102",
+          "name": "石塘咀",
+          "name_en": "Shek Tong Tsui",
+          "district": "中西區"
+        },
+        {
+          "id": "sHK101101cHK101101103",
+          "name": "西營盤",
+          "name_en": "Sai Ying Pun",
+          "district": "中西區"
+        },
+        {
+          "id": "sHK101101cHK101101108",
+          "name": "山頂",
+          "name_en": "Peak",
+          "district": "中西區"
+        },
+        {
+          "id": "sHK101101cHK101101106",
+          "name": "金鐘",
+          "name_en": "Admiralty",
+          "district": "中西區"
+        },
+        {
+          "id": "sHK101101cHK101101107",
+          "name": "半山區",
+          "name_en": "Mid-levels",
+          "district": "中西區"
+        },
+        {
+          "id": "sHK101101cHK101101101",
+          "name": "堅尼地城",
+          "name_en": "Kennedy Town",
+          "district": "中西區"
+        }
+      ]
+    },
+    {
+      "id": "HK101102",
+      "name": "灣仔",
+      "name_en": "All Wan Chai",
+      "sub_count": 6,
+      "children": [
+        {
+          "id": "sHK101102cHK101102105",
+          "name": "掃桿埔",
+          "name_en": "So Kon Po",
+          "district": "灣仔"
+        },
+        {
+          "id": "sHK101102cHK101102106",
+          "name": "渣甸山",
+          "name_en": "Jardine's Lookout",
+          "district": "灣仔"
+        },
+        {
+          "id": "sHK101102cHK101102103",
+          "name": "跑馬地",
+          "name_en": "Happy Valley",
+          "district": "灣仔"
+        },
+        {
+          "id": "sHK101102cHK101102104",
+          "name": "大坑",
+          "name_en": "Tai Hang",
+          "district": "灣仔"
+        },
+        {
+          "id": "sHK101102cHK101102101",
+          "name": "灣仔",
+          "name_en": "Wan Chai",
+          "district": "灣仔"
+        },
+        {
+          "id": "sHK101102cHK101102102",
+          "name": "銅鑼灣",
+          "name_en": "Causeway Bay",
+          "district": "灣仔"
+        }
+      ]
+    },
+    {
+      "id": "HK101103",
+      "name": "東區",
+      "name_en": "All Eastern",
+      "sub_count": 8,
+      "children": [
+        {
+          "id": "sHK101103cHK101103107",
+          "name": "柴灣",
+          "name_en": "Chai Wan",
+          "district": "東區"
+        },
+        {
+          "id": "sHK101103cHK101103106",
+          "name": "筲箕灣",
+          "name_en": "Shau Kei Wan",
+          "district": "東區"
+        },
+        {
+          "id": "sHK101103cHK101103105",
+          "name": "西灣河",
+          "name_en": "Sai Wan Ho",
+          "district": "東區"
+        },
+        {
+          "id": "sHK101103cHK101103104",
+          "name": "鰂魚涌",
+          "name_en": "Quarry Bay",
+          "district": "東區"
+        },
+        {
+          "id": "sHK101103cHK101103108",
+          "name": "小西灣",
+          "name_en": "Siu Sai Wan",
+          "district": "東區"
+        },
+        {
+          "id": "sHK101103cHK101103103",
+          "name": "北角",
+          "name_en": "North Point",
+          "district": "東區"
+        },
+        {
+          "id": "sHK101103cHK101103102",
+          "name": "寶馬山",
+          "name_en": "Braemar Hill",
+          "district": "東區"
+        },
+        {
+          "id": "sHK101103cHK101103101",
+          "name": "天后",
+          "name_en": "Tin Hau",
+          "district": "東區"
+        }
+      ]
+    },
+    {
+      "id": "HK101104",
+      "name": "南區",
+      "name_en": "All Southern",
+      "sub_count": 10,
+      "children": [
+        {
+          "id": "sHK101104cHK101104108",
+          "name": "赤柱",
+          "name_en": "Stanley",
+          "district": "南區"
+        },
+        {
+          "id": "sHK101104cHK101104107",
+          "name": "舂磡角",
+          "name_en": "Chung Hom Kok",
+          "district": "南區"
+        },
+        {
+          "id": "sHK101104cHK101104106",
+          "name": "淺水灣",
+          "name_en": "Repulse Bay",
+          "district": "南區"
+        },
+        {
+          "id": "sHK101104cHK101104105",
+          "name": "壽臣山",
+          "name_en": "Shouson Hill",
+          "district": "南區"
+        },
+        {
+          "id": "sHK101104cHK101104109",
+          "name": "大潭",
+          "name_en": "Tai Tam",
+          "district": "南區"
+        },
+        {
+          "id": "sHK101104cHK101104104",
+          "name": "黃竹坑",
+          "name_en": "Wong Chuk Hang",
+          "district": "南區"
+        },
+        {
+          "id": "sHK101104cHK101104103",
+          "name": "鴨脷洲",
+          "name_en": "Ap Lei Chau",
+          "district": "南區"
+        },
+        {
+          "id": "sHK101104cHK101104102",
+          "name": "香港仔",
+          "name_en": "Aberdeen",
+          "district": "南區"
+        },
+        {
+          "id": "sHK101104cHK101104101",
+          "name": "薄扶林",
+          "name_en": "Pok Fu Lam",
+          "district": "南區"
+        },
+        {
+          "id": "sHK101104cHK101104110",
+          "name": "石澳",
+          "name_en": "Shek O",
+          "district": "南區"
+        }
+      ]
+    },
+    {
+      "id": "HK101201",
+      "name": "油尖旺",
+      "name_en": "All Yau Tsim Mong",
+      "sub_count": 6,
+      "children": [
+        {
+          "id": "sHK101201cHK101201102",
+          "name": "油麻地",
+          "name_en": "Yau Ma Tei",
+          "district": "油尖旺"
+        },
+        {
+          "id": "sHK101201cHK101201101",
+          "name": "尖沙咀",
+          "name_en": "Tsim Sha Tsui",
+          "district": "油尖旺"
+        },
+        {
+          "id": "sHK101201cHK101201106",
+          "name": "大角咀",
+          "name_en": "Tai Kok Tsui",
+          "district": "油尖旺"
+        },
+        {
+          "id": "sHK101201cHK101201105",
+          "name": "旺角",
+          "name_en": "Mong Kok",
+          "district": "油尖旺"
+        },
+        {
+          "id": "sHK101201cHK101201104",
+          "name": "京士柏",
+          "name_en": "King's Park",
+          "district": "油尖旺"
+        },
+        {
+          "id": "sHK101201cHK101201103",
+          "name": "西九龍填海區",
+          "name_en": "West Kowloon Reclamation",
+          "district": "油尖旺"
+        }
+      ]
+    },
+    {
+      "id": "HK101202",
+      "name": "深水埗",
+      "name_en": "All Sham Shui Po",
+      "sub_count": 8,
+      "children": [
+        {
+          "id": "sHK101202cHK101202103",
+          "name": "長沙灣",
+          "name_en": "Cheung Sha Wan",
+          "district": "深水埗"
+        },
+        {
+          "id": "sHK101202cHK101202102",
+          "name": "荔枝角",
+          "name_en": "Lai Chi Kok",
+          "district": "深水埗"
+        },
+        {
+          "id": "sHK101202cHK101202101",
+          "name": "美孚",
+          "name_en": "Mei Foo",
+          "district": "深水埗"
+        },
+        {
+          "id": "sHK101202cHK101202108",
+          "name": "昂船洲",
+          "name_en": "Stonecutters Island",
+          "district": "深水埗"
+        },
+        {
+          "id": "sHK101202cHK101202107",
+          "name": "大窩坪",
+          "name_en": "Tai Wo Ping",
+          "district": "深水埗"
+        },
+        {
+          "id": "sHK101202cHK101202106",
+          "name": "又一村",
+          "name_en": "Yau Yat Tsuen",
+          "district": "深水埗"
+        },
+        {
+          "id": "sHK101202cHK101202105",
+          "name": "石硤尾",
+          "name_en": "Shek Kip Mei",
+          "district": "深水埗"
+        },
+        {
+          "id": "sHK101202cHK101202104",
+          "name": "深水埗",
+          "name_en": "Sham Shui Po",
+          "district": "深水埗"
+        }
+      ]
+    },
+    {
+      "id": "HK101203",
+      "name": "九龍城",
+      "name_en": "All Kowloon City",
+      "sub_count": 9,
+      "children": [
+        {
+          "id": "sHK101203cHK101203101",
+          "name": "紅磡",
+          "name_en": "Hung Hom",
+          "district": "九龍城"
+        },
+        {
+          "id": "sHK101203cHK101203102",
+          "name": "土瓜灣",
+          "name_en": "To Kwa Wan",
+          "district": "九龍城"
+        },
+        {
+          "id": "sHK101203cHK101203103",
+          "name": "馬頭角",
+          "name_en": "Ma Tau Kok",
+          "district": "九龍城"
+        },
+        {
+          "id": "sHK101203cHK101203104",
+          "name": "馬頭圍",
+          "name_en": "Ma Tau Wai",
+          "district": "九龍城"
+        },
+        {
+          "id": "sHK101203cHK101203105",
+          "name": "啟德",
+          "name_en": "Kai Tak",
+          "district": "九龍城"
+        },
+        {
+          "id": "sHK101203cHK101203106",
+          "name": "九龍城",
+          "name_en": "Kowloon City",
+          "district": "九龍城"
+        },
+        {
+          "id": "sHK101203cHK101203107",
+          "name": "何文田",
+          "name_en": "Ho Man Tin",
+          "district": "九龍城"
+        },
+        {
+          "id": "sHK101203cHK101203108",
+          "name": "九龍塘",
+          "name_en": "Kowloon Tong",
+          "district": "九龍城"
+        },
+        {
+          "id": "sHK101203cHK101203109",
+          "name": "筆架山",
+          "name_en": "Beacon Hill",
+          "district": "九龍城"
+        }
+      ]
+    },
+    {
+      "id": "HK101204",
+      "name": "黃大仙",
+      "name_en": "All Wong Tai Sin",
+      "sub_count": 8,
+      "children": [
+        {
+          "id": "sHK101204cHK101204101",
+          "name": "新蒲崗",
+          "name_en": "San Po Kong",
+          "district": "黃大仙"
+        },
+        {
+          "id": "sHK101204cHK101204102",
+          "name": "黃大仙",
+          "name_en": "Wong Tai Sin",
+          "district": "黃大仙"
+        },
+        {
+          "id": "sHK101204cHK101204103",
+          "name": "東頭",
+          "name_en": "Tung Tau",
+          "district": "黃大仙"
+        },
+        {
+          "id": "sHK101204cHK101204104",
+          "name": "橫頭磡",
+          "name_en": "Wang Tau Hom",
+          "district": "黃大仙"
+        },
+        {
+          "id": "sHK101204cHK101204105",
+          "name": "樂富",
+          "name_en": "Lok Fu",
+          "district": "黃大仙"
+        },
+        {
+          "id": "sHK101204cHK101204106",
+          "name": "鑽石山",
+          "name_en": "Diamond Hill",
+          "district": "黃大仙"
+        },
+        {
+          "id": "sHK101204cHK101204107",
+          "name": "慈雲山",
+          "name_en": "Tsz Wan Shan",
+          "district": "黃大仙"
+        },
+        {
+          "id": "sHK101204cHK101204108",
+          "name": "牛池灣",
+          "name_en": "Ngau Chi Wan",
+          "district": "黃大仙"
+        }
+      ]
+    },
+    {
+      "id": "HK101205",
+      "name": "觀塘",
+      "name_en": "All Kwun Tong",
+      "sub_count": 9,
+      "children": [
+        {
+          "id": "sHK101205cHK101205101",
+          "name": "坪石",
+          "name_en": "Ping Shek",
+          "district": "觀塘"
+        },
+        {
+          "id": "sHK101205cHK101205102",
+          "name": "九龍灣",
+          "name_en": "Kowloon Bay",
+          "district": "觀塘"
+        },
+        {
+          "id": "sHK101205cHK101205103",
+          "name": "牛頭角",
+          "name_en": "Ngau Tau Kok",
+          "district": "觀塘"
+        },
+        {
+          "id": "sHK101205cHK101205104",
+          "name": "佐敦谷",
+          "name_en": "Jordan Valley",
+          "district": "觀塘"
+        },
+        {
+          "id": "sHK101205cHK101205105",
+          "name": "觀塘",
+          "name_en": "Kwun Tong",
+          "district": "觀塘"
+        },
+        {
+          "id": "sHK101205cHK101205106",
+          "name": "秀茂坪",
+          "name_en": "Sau Mau Ping",
+          "district": "觀塘"
+        },
+        {
+          "id": "sHK101205cHK101205107",
+          "name": "藍田",
+          "name_en": "Lam Tin",
+          "district": "觀塘"
+        },
+        {
+          "id": "sHK101205cHK101205108",
+          "name": "油塘",
+          "name_en": "Yau Tong",
+          "district": "觀塘"
+        },
+        {
+          "id": "sHK101205cHK101205109",
+          "name": "鯉魚門",
+          "name_en": "Lei Yue Mun",
+          "district": "觀塘"
+        }
+      ]
+    },
+    {
+      "id": "HK101301",
+      "name": "葵青",
+      "name_en": "All Kwai Tsing",
+      "sub_count": 2,
+      "children": [
+        {
+          "id": "sHK101301cHK101301102",
+          "name": "青衣",
+          "name_en": "Tsing Yi",
+          "district": "葵青"
+        },
+        {
+          "id": "sHK101301cHK101301101",
+          "name": "葵涌",
+          "name_en": "Kwai Chung",
+          "district": "葵青"
+        }
+      ]
+    },
+    {
+      "id": "HK101302",
+      "name": "荃灣",
+      "name_en": "All Tsuen Wan",
+      "sub_count": 7,
+      "children": [
+        {
+          "id": "sHK101302cHK101302105",
+          "name": "青龍頭",
+          "name_en": "Tsing Lung Tau",
+          "district": "荃灣"
+        },
+        {
+          "id": "sHK101302cHK101302106",
+          "name": "馬灣",
+          "name_en": "Ma Wan",
+          "district": "荃灣"
+        },
+        {
+          "id": "sHK101302cHK101302107",
+          "name": "欣澳",
+          "name_en": "Sunny Bay",
+          "district": "荃灣"
+        },
+        {
+          "id": "sHK101302cHK101302101",
+          "name": "荃灣",
+          "name_en": "Tsuen Wan",
+          "district": "荃灣"
+        },
+        {
+          "id": "sHK101302cHK101302102",
+          "name": "梨木樹",
+          "name_en": "Lei Muk Shue",
+          "district": "荃灣"
+        },
+        {
+          "id": "sHK101302cHK101302103",
+          "name": "汀九",
+          "name_en": "Ting Kau",
+          "district": "荃灣"
+        },
+        {
+          "id": "sHK101302cHK101302104",
+          "name": "深井",
+          "name_en": "Sham Tseng",
+          "district": "荃灣"
+        }
+      ]
+    },
+    {
+      "id": "HK101303",
+      "name": "屯門",
+      "name_en": "All Tuen Mun",
+      "sub_count": 4,
+      "children": [
+        {
+          "id": "sHK101303cHK101303102",
+          "name": "掃管笏",
+          "name_en": "So Kwun Wat",
+          "district": "屯門"
+        },
+        {
+          "id": "sHK101303cHK101303103",
+          "name": "屯門",
+          "name_en": "Tuen Mun",
+          "district": "屯門"
+        },
+        {
+          "id": "sHK101303cHK101303104",
+          "name": "藍地",
+          "name_en": "Lam Tei",
+          "district": "屯門"
+        },
+        {
+          "id": "sHK101303cHK101303101",
+          "name": "大欖涌",
+          "name_en": "Tai Lam Chung",
+          "district": "屯門"
+        }
+      ]
+    },
+    {
+      "id": "HK101304",
+      "name": "元朗",
+      "name_en": "All Yuen Long",
+      "sub_count": 10,
+      "children": [
+        {
+          "id": "sHK101304cHK101304108",
+          "name": "錦田",
+          "name_en": "Kam Tin",
+          "district": "元朗"
+        },
+        {
+          "id": "sHK101304cHK101304107",
+          "name": "落馬洲",
+          "name_en": "Lok Ma Chau",
+          "district": "元朗"
+        },
+        {
+          "id": "sHK101304cHK101304109",
+          "name": "石崗",
+          "name_en": "Shek Kong",
+          "district": "元朗"
+        },
+        {
+          "id": "sHK101304cHK101304104",
+          "name": "天水圍",
+          "name_en": "Tin Shui Wai",
+          "district": "元朗"
+        },
+        {
+          "id": "sHK101304cHK101304103",
+          "name": "流浮山",
+          "name_en": "Lau Fau Shan",
+          "district": "元朗"
+        },
+        {
+          "id": "sHK101304cHK101304106",
+          "name": "新田",
+          "name_en": "San Tin",
+          "district": "元朗"
+        },
+        {
+          "id": "sHK101304cHK101304105",
+          "name": "元朗",
+          "name_en": "Yuen Long",
+          "district": "元朗"
+        },
+        {
+          "id": "sHK101304cHK101304102",
+          "name": "廈村",
+          "name_en": "Ha Tsuen",
+          "district": "元朗"
+        },
+        {
+          "id": "sHK101304cHK101304101",
+          "name": "洪水橋",
+          "name_en": "Hung Shui Kiu",
+          "district": "元朗"
+        },
+        {
+          "id": "sHK101304cHK101304110",
+          "name": "八鄉",
+          "name_en": "Pat Heung",
+          "district": "元朗"
+        }
+      ]
+    },
+    {
+      "id": "HK101305",
+      "name": "北區",
+      "name_en": "All North",
+      "sub_count": 7,
+      "children": [
+        {
+          "id": "sHK101305cHK101305105",
+          "name": "沙頭角",
+          "name_en": "Sha Tau Kok",
+          "district": "北區"
+        },
+        {
+          "id": "sHK101305cHK101305104",
+          "name": "石湖墟",
+          "name_en": "Shek Wu Hui",
+          "district": "北區"
+        },
+        {
+          "id": "sHK101305cHK101305107",
+          "name": "烏蛟騰",
+          "name_en": "Wu Kau Tang",
+          "district": "北區"
+        },
+        {
+          "id": "sHK101305cHK101305106",
+          "name": "鹿頸",
+          "name_en": "Luk Keng",
+          "district": "北區"
+        },
+        {
+          "id": "sHK101305cHK101305101",
+          "name": "粉嶺",
+          "name_en": "Fanling",
+          "district": "北區"
+        },
+        {
+          "id": "sHK101305cHK101305103",
+          "name": "上水",
+          "name_en": "Sheung Shui",
+          "district": "北區"
+        },
+        {
+          "id": "sHK101305cHK101305102",
+          "name": "聯和墟",
+          "name_en": "Luen Wo Hui",
+          "district": "北區"
+        }
+      ]
+    },
+    {
+      "id": "HK101306",
+      "name": "大埔",
+      "name_en": "All Tai Po",
+      "sub_count": 7,
+      "children": [
+        {
+          "id": "sHK101306cHK101306107",
+          "name": "企嶺下",
+          "name_en": "Kei Ling Ha",
+          "district": "大埔"
+        },
+        {
+          "id": "sHK101306cHK101306105",
+          "name": "船灣",
+          "name_en": "Shuen Wan",
+          "district": "大埔"
+        },
+        {
+          "id": "sHK101306cHK101306106",
+          "name": "樟木頭",
+          "name_en": "Cheung Muk Tau",
+          "district": "大埔"
+        },
+        {
+          "id": "sHK101306cHK101306103",
+          "name": "大埔滘",
+          "name_en": "Tai Po Kau",
+          "district": "大埔"
+        },
+        {
+          "id": "sHK101306cHK101306104",
+          "name": "大尾篤",
+          "name_en": "Tai Mei Tuk",
+          "district": "大埔"
+        },
+        {
+          "id": "sHK101306cHK101306101",
+          "name": "大埔墟",
+          "name_en": "Tai Po Market",
+          "district": "大埔"
+        },
+        {
+          "id": "sHK101306cHK101306102",
+          "name": "大埔",
+          "name_en": "Tai Po",
+          "district": "大埔"
+        }
+      ]
+    },
+    {
+      "id": "HK101307",
+      "name": "沙田",
+      "name_en": "All Sha Tin",
+      "sub_count": 6,
+      "children": [
+        {
+          "id": "sHK101307cHK101307106",
+          "name": "馬鞍山",
+          "name_en": "Ma On Shan",
+          "district": "沙田"
+        },
+        {
+          "id": "sHK101307cHK101307104",
+          "name": "馬料水",
+          "name_en": "Ma Liu Shui",
+          "district": "沙田"
+        },
+        {
+          "id": "sHK101307cHK101307105",
+          "name": "烏溪沙",
+          "name_en": "Wu Kai Sha",
+          "district": "沙田"
+        },
+        {
+          "id": "sHK101307cHK101307102",
+          "name": "沙田",
+          "name_en": "Sha Tin",
+          "district": "沙田"
+        },
+        {
+          "id": "sHK101307cHK101307103",
+          "name": "火炭",
+          "name_en": "Fo Tan",
+          "district": "沙田"
+        },
+        {
+          "id": "sHK101307cHK101307101",
+          "name": "大圍",
+          "name_en": "Tai Wai",
+          "district": "沙田"
+        }
+      ]
+    },
+    {
+      "id": "HK101308",
+      "name": "西貢",
+      "name_en": "All Sai Kung",
+      "sub_count": 7,
+      "children": [
+        {
+          "id": "sHK101308cHK101308107",
+          "name": "馬游塘",
+          "name_en": "Ma Yau Tong",
+          "district": "西貢"
+        },
+        {
+          "id": "sHK101308cHK101308106",
+          "name": "調景嶺",
+          "name_en": "Tiu Keng Leng",
+          "district": "西貢"
+        },
+        {
+          "id": "sHK101308cHK101308105",
+          "name": "坑口",
+          "name_en": "Hang Hau",
+          "district": "西貢"
+        },
+        {
+          "id": "sHK101308cHK101308104",
+          "name": "將軍澳",
+          "name_en": "Tseung Kwan O",
+          "district": "西貢"
+        },
+        {
+          "id": "sHK101308cHK101308103",
+          "name": "大網仔",
+          "name_en": "Tai Mong Tsai",
+          "district": "西貢"
+        },
+        {
+          "id": "sHK101308cHK101308102",
+          "name": "西貢",
+          "name_en": "Sai Kung",
+          "district": "西貢"
+        },
+        {
+          "id": "sHK101308cHK101308101",
+          "name": "清水灣",
+          "name_en": "Clear Water Bay",
+          "district": "西貢"
+        }
+      ]
+    },
+    {
+      "id": "HK101401",
+      "name": "離島區",
+      "name_en": "All Islands",
+      "sub_count": 7,
+      "children": [
+        {
+          "id": "sHK101401cHK101401105",
+          "name": "南丫島",
+          "name_en": "Lamma Island",
+          "district": "離島區"
+        },
+        {
+          "id": "sHK101401cHK101401106",
+          "name": "大澳",
+          "name_en": "Tai O",
+          "district": "離島區"
+        },
+        {
+          "id": "sHK101401cHK101401107",
+          "name": "昂坪",
+          "name_en": "Ngong Ping",
+          "district": "離島區"
+        },
+        {
+          "id": "sHK101401cHK101401101",
+          "name": "東涌",
+          "name_en": "Tung Chung",
+          "district": "離島區"
+        },
+        {
+          "id": "sHK101401cHK101401102",
+          "name": "梅窩",
+          "name_en": "Mui Wo",
+          "district": "離島區"
+        },
+        {
+          "id": "sHK101401cHK101401103",
+          "name": "坪洲",
+          "name_en": "Peng Chau",
+          "district": "離島區"
+        },
+        {
+          "id": "sHK101401cHK101401104",
+          "name": "長洲",
+          "name_en": "Cheung Chau",
+          "district": "離島區"
+        }
+      ]
+    }
+  ]
+}

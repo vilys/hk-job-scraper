@@ -1,0 +1,558 @@
+{
+  "source": "offertoday",
+  "note": "行業字典：15 大類 + 細類。id 格式 <大類碼>c<細類碼>。",
+  "industries": [
+    {
+      "id": 101,
+      "name": "財務/金融",
+      "name_en": "Finance & Banking",
+      "sub_count": 4,
+      "children": [
+        {
+          "id": "101c1001",
+          "name": "會計/審計/稅務服務",
+          "name_en": "Accounting / Audit / Tax Services",
+          "industry": "財務/金融"
+        },
+        {
+          "id": "101c1005",
+          "name": "銀行",
+          "name_en": "Banking",
+          "industry": "財務/金融"
+        },
+        {
+          "id": "101c1018",
+          "name": "金融服務",
+          "name_en": "Financial Services",
+          "industry": "財務/金融"
+        },
+        {
+          "id": "101c1027",
+          "name": "保險",
+          "name_en": "Insurance",
+          "industry": "財務/金融"
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "name": "商業/專業服務",
+      "name_en": "B&P Service",
+      "sub_count": 5,
+      "children": [
+        {
+          "id": "102c1002",
+          "name": "廣告/公關/市場營銷",
+          "name_en": "Advertising / Public Relations / Marketing Services",
+          "industry": "商業/專業服務"
+        },
+        {
+          "id": "102c1021",
+          "name": "綜合商業服務",
+          "name_en": "General Business Services",
+          "industry": "商業/專業服務"
+        },
+        {
+          "id": "102c1024",
+          "name": "人力資源管理/顧問",
+          "name_en": "Human Resources Management / Consultancy",
+          "industry": "商業/專業服務"
+        },
+        {
+          "id": "102c1031",
+          "name": "法律服務",
+          "name_en": "Legal Services",
+          "industry": "商業/專業服務"
+        },
+        {
+          "id": "102c1032",
+          "name": "管理顧問/服務",
+          "name_en": "Management Consultancy / Service",
+          "industry": "商業/專業服務"
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "name": "工程/製造",
+      "name_en": "Engg & Mfg",
+      "sub_count": 8,
+      "children": [
+        {
+          "id": "103c1003",
+          "name": "建造業",
+          "name_en": "Construction Industry",
+          "industry": "工程/製造"
+        },
+        {
+          "id": "103c1013",
+          "name": "工程-電機/電子/機械",
+          "name_en": "Engineering - Electrical / Electronic / Mechanical",
+          "industry": "工程/製造"
+        },
+        {
+          "id": "103c1014",
+          "name": "工程 – 建築,土木,建造/工料測量",
+          "name_en": "Engineering – Building, Civil, Construction / Quantity Survey",
+          "industry": "工程/製造"
+        },
+        {
+          "id": "103c1015",
+          "name": "其他工程",
+          "name_en": "Engineering – Others",
+          "industry": "工程/製造"
+        },
+        {
+          "id": "103c1025",
+          "name": "工業機械/自動化設備",
+          "name_en": "Industrial Machinery / Automation Equipment",
+          "industry": "工程/製造"
+        },
+        {
+          "id": "103c1033",
+          "name": "製造業",
+          "name_en": "Manufacturing",
+          "industry": "工程/製造"
+        },
+        {
+          "id": "103c1038",
+          "name": "汽車",
+          "name_en": "Motor Vehicles",
+          "industry": "工程/製造"
+        },
+        {
+          "id": "103c1039",
+          "name": "包裝",
+          "name_en": "Packaging",
+          "industry": "工程/製造"
+        }
+      ]
+    },
+    {
+      "id": 104,
+      "name": "科技/通訊",
+      "name_en": "Tech & Telecom",
+      "sub_count": 3,
+      "children": [
+        {
+          "id": "104c1011",
+          "name": "電子/電氣設備",
+          "name_en": "Electronics / Electrical Equipment",
+          "industry": "科技/通訊"
+        },
+        {
+          "id": "104c1026",
+          "name": "IT資訊科技/電子商務",
+          "name_en": "IT / E-Business",
+          "industry": "科技/通訊"
+        },
+        {
+          "id": "104c1048",
+          "name": "電訊",
+          "name_en": "Telecommunication",
+          "industry": "科技/通訊"
+        }
+      ]
+    },
+    {
+      "id": 105,
+      "name": "能源/環境",
+      "name_en": "Energy & Env.",
+      "sub_count": 4,
+      "children": [
+        {
+          "id": "105c1007",
+          "name": "化工/塑料/紙張/石油化工",
+          "name_en": "Chemical / Plastic / Paper / Petrochemical",
+          "industry": "能源/環境"
+        },
+        {
+          "id": "105c1012",
+          "name": "能源/電力/水務/油氣/廢物管理",
+          "name_en": "Energy / Power / Water / Oil & Gas / Waste Management",
+          "industry": "能源/環境"
+        },
+        {
+          "id": "105c1017",
+          "name": "環境科學",
+          "name_en": "Environmental Science",
+          "industry": "能源/環境"
+        },
+        {
+          "id": "105c1041",
+          "name": "石油化工",
+          "name_en": "Petroleum",
+          "industry": "能源/環境"
+        }
+      ]
+    },
+    {
+      "id": 106,
+      "name": "醫療/健康",
+      "name_en": "Healthcare & Wellness",
+      "sub_count": 2,
+      "children": [
+        {
+          "id": "106c1022",
+          "name": "保健美容護理",
+          "name_en": "Health & Beauty Care",
+          "industry": "醫療/健康"
+        },
+        {
+          "id": "106c1036",
+          "name": "醫療/製藥",
+          "name_en": "Medical / Pharmaceutical",
+          "industry": "醫療/健康"
+        }
+      ]
+    },
+    {
+      "id": 107,
+      "name": "教育/研究",
+      "name_en": "Education & Research",
+      "sub_count": 3,
+      "children": [
+        {
+          "id": "107c1010",
+          "name": "教育/培訓",
+          "name_en": "Education / Training",
+          "industry": "教育/研究"
+        },
+        {
+          "id": "107c1030",
+          "name": "實驗室",
+          "name_en": "Testing Lab",
+          "industry": "教育/研究"
+        },
+        {
+          "id": "107c1045",
+          "name": "研究/調查",
+          "name_en": "Research / Survey",
+          "industry": "教育/研究"
+        }
+      ]
+    },
+    {
+      "id": 108,
+      "name": "零售/消費品",
+      "name_en": "Retail & Consumer Goods",
+      "sub_count": 5,
+      "children": [
+        {
+          "id": "108c1009",
+          "name": "服裝/成衣/紡織",
+          "name_en": "Clothing / Garment / Textile",
+          "industry": "零售/消費品"
+        },
+        {
+          "id": "108c1029",
+          "name": "鐘錶/珠寶",
+          "name_en": "Watch / Jewellery",
+          "industry": "零售/消費品"
+        },
+        {
+          "id": "108c1050",
+          "name": "玩具業",
+          "name_en": "Toys",
+          "industry": "零售/消費品"
+        },
+        {
+          "id": "108c1051",
+          "name": "消費品/貿易/分銷",
+          "name_en": "FMCG / Trading / Distribution",
+          "industry": "零售/消費品"
+        },
+        {
+          "id": "108c1052",
+          "name": "批發/零售",
+          "name_en": "Wholesale / Retail",
+          "industry": "零售/消費品"
+        }
+      ]
+    },
+    {
+      "id": 109,
+      "name": "餐飲/旅遊/酒店",
+      "name_en": "Food Travel & Hospitality",
+      "sub_count": 3,
+      "children": [
+        {
+          "id": "109c1019",
+          "name": "餐飲業",
+          "name_en": "Food and Beverage / Catering",
+          "industry": "餐飲/旅遊/酒店"
+        },
+        {
+          "id": "109c1023",
+          "name": "接待業",
+          "name_en": "Hospitality",
+          "industry": "餐飲/旅遊/酒店"
+        },
+        {
+          "id": "109c1049",
+          "name": "旅遊業/旅行社",
+          "name_en": "Tourism / Travel Agency",
+          "industry": "餐飲/旅遊/酒店"
+        }
+      ]
+    },
+    {
+      "id": 110,
+      "name": "文化/娛樂",
+      "name_en": "Culture & Entertainment",
+      "sub_count": 4,
+      "children": [
+        {
+          "id": "110c1016",
+          "name": "娛樂/康樂",
+          "name_en": "Entertainment / Recreation",
+          "industry": "文化/娛樂"
+        },
+        {
+          "id": "110c1028",
+          "name": "設計",
+          "name_en": "Design",
+          "industry": "文化/娛樂"
+        },
+        {
+          "id": "110c1035",
+          "name": "媒體/出版",
+          "name_en": "Media / Publishing",
+          "industry": "文化/娛樂"
+        },
+        {
+          "id": "110c1040",
+          "name": "表演/音樂/藝術",
+          "name_en": "Performance / Musical / Artistic",
+          "industry": "文化/娛樂"
+        }
+      ]
+    },
+    {
+      "id": 111,
+      "name": "交通/物流",
+      "name_en": "Transportation & Logistics",
+      "sub_count": 2,
+      "children": [
+        {
+          "id": "111c1020",
+          "name": "貨運/速遞/航運",
+          "name_en": "Freight Forwarding / Logistics / Delivery",
+          "industry": "交通/物流"
+        },
+        {
+          "id": "111c1034",
+          "name": "大眾運輸",
+          "name_en": "Transportation",
+          "industry": "交通/物流"
+        }
+      ]
+    },
+    {
+      "id": 112,
+      "name": "房地產/公共事業",
+      "name_en": "Real Estate & Utilities",
+      "sub_count": 4,
+      "children": [
+        {
+          "id": "112c1008",
+          "name": "政府/公共部門/公用事業",
+          "name_en": "Government / Public Sector / Public Utilities",
+          "industry": "房地產/公共事業"
+        },
+        {
+          "id": "112c1042",
+          "name": "物業/地産",
+          "name_en": "Property Development",
+          "industry": "房地產/公共事業"
+        },
+        {
+          "id": "112c1043",
+          "name": "物業管理/顧問",
+          "name_en": "Property Management / Consultancy",
+          "industry": "房地產/公共事業"
+        },
+        {
+          "id": "112c1044",
+          "name": "公用事業",
+          "name_en": "Public Utilities",
+          "industry": "房地產/公共事業"
+        }
+      ]
+    },
+    {
+      "id": 113,
+      "name": "社會服務/安全",
+      "name_en": "Social Services & Security",
+      "sub_count": 3,
+      "children": [
+        {
+          "id": "113c1006",
+          "name": "慈善/社會服務/非營利組織",
+          "name_en": "Charity / NGO / Social Services",
+          "industry": "社會服務/安全"
+        },
+        {
+          "id": "113c1046",
+          "name": "保安/消防/電子/門禁系統",
+          "name_en": "Security / Fire / Electronic / Access Controls",
+          "industry": "社會服務/安全"
+        },
+        {
+          "id": "113c1047",
+          "name": "保安護送",
+          "name_en": "Security Escort",
+          "industry": "社會服務/安全"
+        }
+      ]
+    },
+    {
+      "id": 114,
+      "name": "體育/綜合",
+      "name_en": "Sports & Others",
+      "sub_count": 2,
+      "children": [
+        {
+          "id": "114c1004",
+          "name": "體育運動",
+          "name_en": "Athletics / Sports",
+          "industry": "體育/綜合"
+        },
+        {
+          "id": "114c1037",
+          "name": "綜合行業",
+          "name_en": "Mixed Industry Group",
+          "industry": "體育/綜合"
+        }
+      ]
+    },
+    {
+      "id": 999,
+      "name": "其他",
+      "name_en": "Others",
+      "sub_count": 1,
+      "children": [
+        {
+          "id": "999c9999",
+          "name": "其他",
+          "name_en": "Others",
+          "industry": "其他"
+        }
+      ]
+    }
+  ],
+  "enums": {
+    "job_publish_time": [
+      {
+        "code": 0,
+        "name": "今天"
+      },
+      {
+        "code": 1,
+        "name": "過去3天"
+      },
+      {
+        "code": 2,
+        "name": "過去7天"
+      },
+      {
+        "code": 3,
+        "name": "過去14天"
+      }
+    ],
+    "edu_level": [
+      {
+        "code": 450,
+        "name": "博士及以上"
+      },
+      {
+        "code": 400,
+        "name": "碩士"
+      },
+      {
+        "code": 350,
+        "name": "學士"
+      },
+      {
+        "code": 300,
+        "name": "高級文憑或副學士"
+      },
+      {
+        "code": 265,
+        "name": "中學"
+      },
+      {
+        "code": 200,
+        "name": "中三"
+      },
+      {
+        "code": 20,
+        "name": "小學或以下"
+      }
+    ],
+    "employment_type": [
+      {
+        "code": 1,
+        "name": "全職"
+      },
+      {
+        "code": 2,
+        "name": "兼職"
+      },
+      {
+        "code": 5,
+        "name": "合約"
+      },
+      {
+        "code": 6,
+        "name": "實習"
+      }
+    ],
+    "salary_type": [
+      {
+        "code": 0,
+        "name": "月薪"
+      },
+      {
+        "code": 1,
+        "name": "時薪"
+      }
+    ],
+    "work_experience": [
+      {
+        "code": 220002,
+        "name": "少於1年"
+      },
+      {
+        "code": 220003,
+        "name": "1至3年"
+      },
+      {
+        "code": 220004,
+        "name": "3至5年"
+      },
+      {
+        "code": 220005,
+        "name": "5至10年"
+      },
+      {
+        "code": 220006,
+        "name": "10年以上"
+      }
+    ],
+    "work_permit": [
+      {
+        "code": 4,
+        "name": "僅香港永久居民"
+      },
+      {
+        "code": 2,
+        "name": "需有香港工作許可"
+      },
+      {
+        "code": 3,
+        "name": "可提供香港工作簽證"
+      }
+    ]
+  }
+}
