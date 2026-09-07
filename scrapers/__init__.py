@@ -10,6 +10,7 @@ from .foundit import FounditScraper
 from .efc import EfcScraper
 from .liepin import LiepinScraper
 from .zhipin import ZhipinScraper
+from .offertoday import OfferTodayScraper
 
 SCRAPERS = {
     "moovup": MoovupScraper,
@@ -23,6 +24,7 @@ SCRAPERS = {
     "efc": EfcScraper,
     "liepin": LiepinScraper,
     "zhipin": ZhipinScraper,
+    "offertoday": OfferTodayScraper,
 }
 
 __all__ = [
@@ -38,4 +40,5 @@ __all__ = [
     "EfcScraper",
     "LiepinScraper",
     "ZhipinScraper",
+    "OfferTodayScraper",
 ]

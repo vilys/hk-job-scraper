@@ -118,6 +118,9 @@ SITE_CONFIG = {
     # Wave 5 受限站：反爬極兇 + robots 限制，間隔拉長（行為保守）
     "liepin": {"needs_browser": True, "request_delay": 5.0},
     "zhipin": {"needs_browser": True, "request_delay": 5.0},
+    # OfferToday（原 HKGoodJobs）：免瀏覽器，純 JSON API；
+    # 但為表禮節（推薦池 API 較敏感）間隔拉到 3 秒
+    "offertoday": {"needs_browser": False, "request_delay": 3.0},
 }
 
 

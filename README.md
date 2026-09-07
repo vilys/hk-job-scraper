@@ -228,18 +228,18 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 > 任一站新增 / 修改某功能（如排序選項、地區解析）**不會影響其他站**。
 > 不支援的功能一律 `logger.warning` 後忽略並提示，絕不報錯中斷或改變他站輸出。
 
-| 功能 / 參數 | Moovup | 勞工處 gov.hk | JobsDB | LinkedIn | Indeed | Recruit | JobMarket | foundit | eFinancialCareers | 獵聘 ⚠️ | BOSS直聘 ⚠️ |
-|------|------|------|------|------|------|------|------|------|------|------|------|
-| 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援 | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） | ✅ 支援（可留空→地區瀏覽頁） | ✅ 支援（可留空） | ⚠️ 機制已驗證但極易觸發驗證碼 | ⚠️ 全站安全驗證攔下 |
-| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選） | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼直傳（900 是否香港未確認） | ❌ 不適用（香港不在站方城市體系） |
-| 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 |
-| 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 |
-| 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 |
-| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌 pubDate 瞬時（~9s，不點擊） | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 |
-| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ⚠️ best-effort | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） |
-| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） |
-| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（Cloudflare） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） |
-| 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 |
+| 功能 / 參數 | Moovup | 勞工處 gov.hk | JobsDB | LinkedIn | Indeed | Recruit | JobMarket | foundit | eFinancialCareers | 獵聘 ⚠️ | BOSS直聘 ⚠️ | OfferToday |
+|------|------|------|------|------|------|------|------|------|------|------|------| ------ |
+| 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援 | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） | ✅ 支援（可留空→地區瀏覽頁） | ✅ 支援（可留空） | ⚠️ 機制已驗證但極易觸發驗證碼 | ⚠️ 全站安全驗證攔下 | ✅ 支援（可留空） |
+| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選） | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼直傳（900 是否香港未確認） | ❌ 不適用（香港不在站方城市體系） | ✅ 純 code 18 區 + 129 子區（中英文皆可，逗號多選） |
+| 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 | ✅ POSITION level-2 code（31 大類 + 431 細類） |
+| 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
+| 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
+| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌 pubDate 瞬時（~9s，不點擊） | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
+| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ⚠️ best-effort | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ⚠️ best-effort（端點形狀待實測；列表欄位已完整） |
+| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
+| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（Cloudflare） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
+| 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
 
 > 圖例：✅ 完全支援　⚠️ 部分 / 有限支援　❌ 不適用（傳入會警告並忽略）
 
@@ -1059,6 +1059,64 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 - **全站安全驗證**：普通 requests 與 Playwright（本機 Chrome 指紋、zh-CN locale）開**任何路徑**一律落在「安全验证 - BOSS直聘」頁（無 title、需人機互動滑塊），無法取得任何職位資料——比獵聘更徹底的封鎖。
 - **模組策略**：導航 `/web/geek/job?query=<kw>` → 標題/內容含「安全验证」即**警告後回 0 筆**；若某日能過驗證則解析 `.job-card-wrapper` 卡（`.job-name` 的 `/job_detail/<encryptId>.html`、`.company-name`、`.job-area`、`.salary`）。
 - **不支援項**：`--district`（香港不在城市體系）/ `--category` / `--industry` / `--sort` / `--days` / `--detail` / `--pages > 1`（分頁依賴查詢串 = robots 禁區）→ 全部警告後忽略或回空。
+
+---
+
+## 🧭 技術筆記（OfferToday 逆向要點）
+
+> **前身 HKGoodJobs**（舊域 `hkgoodjobs.com` 全面 403，2026-09 止損）於 2026 年更名 **OfferToday** 重新上線，本據點為「Wave 3′ 復活賽」成果（R1–R10 低速偵察，2026-09）。
+
+- **身世之謎**：入口 `https://www.offertoday.com/hk/recommend`。SPA（Vue）＋ 頁面載 `static.zhipin.com/assets/sdk/apm/patas.2.1.0.min.js`（**BOSS直聘 APM SDK**）→ **疑為 BOSS直聘的香港站**，但**未繼承其全站安全驗證**，目前對自動化友善；另有 `/web/security/entry/index.js` 需持續觀察是否升級防護。
+- **🚀 免瀏覽器**：R8/R9 實測 **冷 `requests`（無 cookie、無瀏覽器指紋）直打列表 API 回 `code=0`**，且關鍵字／地區／職能／行業／翻頁**全數生效** → `use_browser=False`，與 JobMarket、eFinancialCareers 同級輕量。
+- **列表 API**：`POST /wapi/geek/recommend/search/list`
+  payload：`keyword` / `page` / `pageSize`（**上限 10**）/ `salaryType`（0 月薪、1 時薪）/ `publishTime`（0 今天、1 三天、2 七天、3 十四天）/ `employmentTypes` / `experiences` / `educationLevels` / `benefits` / `workPermits` / `rcdType`（固定 7）/ `jobFunctionCodes` / `industries` / `subDistrictCodes` / `searchSource`。回應在 `data.resultList`。
+- **🎴 `cardType` 過濾（模組必守，否則會拿到假結果）**
+
+  | cardType | `suppleCard` | 意義 | 處理 |
+  |---|---|---|---|
+  | 0 | `false` | **真命中** | ✅ 收錄 |
+  | 0 | `true` | 推薦遞補（湊數用，與查詢無關） | ❌ 丟棄 |
+  | 1 | – | 橫幅廣告（無 `jobId`） | ❌ 丟棄 |
+  | 2 | – | 空結果插圖 | ❌ 丟棄 |
+  | 3 | – | 「No more results」分隔線 | ❌ 無結果訊號，停止翻頁 |
+
+- **🔑 編碼規則（⚠️ 字典 JSON 裡的複合鍵要拆前綴才能送 API）**
+  - 地區 `subDistrictCodes` → **純 code**：區級 `HK101304`（元朗全區）、子區級 `HK101304104`（天水圍）。
+    字典中子區的 `id` 是 `s<區碼>c<子區碼>`（`getHomePopWords` 的 **SEO slug**）——誤用會得到 `total=0` + 全數遞補（R6 血淚）。
+  - 職能 `jobFunctionCodes` → POSITION **level-2 code**：`118000`＝所有資訊科技、`118001`＝架構師、`118006`＝開發者。level-1 與「所有」level-2 剛好同碼，故大類碼可直接送。
+  - 行業 `industries` → INDUSTRY **level-2 code**：`1001`＝會計/審計/稅務、`1005`＝銀行、`1018`＝金融服務、`1027`＝保險。
+    ⚠️ **level-1（`101` 財務/金融）只是群組標題，不是有效值**（送它 `total=0`）→ 要篩整個大類，**模組會自動展開成其全部細類**。
+- **🕐 刊登日 `jobPostTime`（三種格式）**
+
+  | 格式 | 範例 | 可否算天數 |
+  |---|---|---|
+  | `... on MM-DD` | `Updated on 09-03`、`Posted on 08-28` | ✅ 可（假設當年，跨年 -1 年） |
+  | `... within 3 months` | `Updated within 3 months` | ❌ 太舊 |
+  | `... N months ago` | `Posted 3 months ago` | ❌ 太舊 |
+
+  → `publishTime` 是**軟篩選**（只讓推薦池偏向近期，仍會夾帶舊職位），
+  故 `--days` 採**雙保險**：送 `publishTime` 參數 **＋** 客戶端再篩（後兩種格式一律淘汰）。
+- **⚠️ `data.total` 不可信**：每次回傳都不同（475 / 800 / 353…），是**推薦池規模**而非命中數 → **分頁只能靠 `hasMore`**。
+- **欄位來源（列表卡一次到位，多數情況不需 `--detail`）**：`jobName` / `companyName` / `locationDesc` / `salaryDesc` / `jobTypeDesc` / `experience` / `educationDesc` / `skills` / `benefits` / `workPermitDesc` / `jobPostTime`。`jobId` 是加密字串（如 `XKouaVdubvupuJ3bljVhsg==`），職位網址 `/hk/job/<urlquote(id)>`。
+- **⚠️ 待實測**：`--detail` 的 `GET /wapi/geek/recommend/jobDetail?id=..&sessionId=` 端點形狀尚未線上驗證；解析失敗僅 warning 並回傳 None，不中斷流程。列表欄位已相當完整（僅缺完整描述文字）。
+- **禮節**：`request_delay` 設為 3 秒（推薦池 API 較敏感），`pageSize` 上限 10 → 每頁 1 支請求。
+
+## 🗺️ 按地區篩選（OfferToday）
+
+- OfferToday 的地區走 API 的 **`subDistrictCodes`** 參數，吃**純 code**：
+  - 區級　→ `HK101304`（元朗全區）
+  - 子區級 → `HK101304104`（天水圍）
+- 字典 `scrapers/offertoday_areas.json` 共 **18 行政區 + 129 子區**（中英文皆可輸入，逗號多選），
+  與其他站（Moovup shortCode／gov_hk 數字 ID／JobsDB slug／JobMarket AreaID…）**完全獨立，不可混用**。
+  18 區：中西區、灣仔、東區、南區、油尖旺、深水埗、九龍城、黃大仙、觀塘、葵青、荃灣、屯門、元朗、北區、大埔、沙田、西貢、離島。
+- 範例：
+  ```bash
+  python main.py --source offertoday --district 元朗 --pages 3
+  python main.py --source offertoday --district "元朗,屯門" --keyword engineer
+  python main.py --source offertoday --category 資訊科技 --district 元朗
+  python main.py --source offertoday --industry 銀行 --pages 2
+  ```
+- ⚠️ 未收錄的地區名稱會 `logger.warning` 後忽略，不報錯中斷。
 
 ---
 

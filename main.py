@@ -40,7 +40,9 @@ logger = logging.getLogger("main")
 def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="香港求職網站自動搜尋程式")
     p.add_argument("--source", default="moovup",
-                   help="爬蟲來源：moovup | gov_hk | jobsdb | linkedin | all")
+                   help="爬蟲來源：moovup | gov_hk | jobsdb | linkedin | indeed | "
+                        "recruit | jobmarket | foundit | efc | liepin | zhipin | "
+                        "offertoday | all")
     p.add_argument("--keyword", default="",
                    help="搜尋關鍵字（留空 = 不限定關鍵字，僅依地區/類別瀏覽；"
                         "gov_hk 支援，moovup 建議仍給關鍵字）")
@@ -56,14 +58,21 @@ def build_argparser() -> argparse.ArgumentParser:
                         "gov_hk 用數字 ID / 中文（如 屯門=188）；"
                         "JobsDB 用中文名或 slug（如 荃灣 | tsuen-wan，見 scrapers/jobsdb_districts.json）；"
                         "moovup 用 shortCode；"
-                        "LinkedIn 用自由文字（如 Hong Kong | Tsuen Wan，預設 Hong Kong）。各站體系獨立，不可混用。")
+                        "LinkedIn 用自由文字（如 Hong Kong | Tsuen Wan，預設 Hong Kong）；"
+                        "offertoday 用中文/英文區名或子區名（如 元朗 | 天水圍 | Yuen Long）。"
+                        "各站體系獨立，不可混用。")
     p.add_argument("--category", default=None,
                    help="工作種類 / 職能過濾："
                         "gov_hk 用中文名（如 會計 | 文員 | 司機 | 清潔）；"
                         "JobsDB 用中文名或英文或 slug（如 資訊及通訊科技 | Information & Communication "
-                        "Technology，見 scrapers/jobsdb_classifications.json）。兩站字典獨立。")
+                        "Technology，見 scrapers/jobsdb_classifications.json）；"
+                        "offertoday 用中文/英文職能名（如 資訊科技 | 開發者，見 scrapers/offertoday_categories.json）。"
+                        "兩站字典獨立。")
     p.add_argument("--industry", default=None,
-                   help="行業過濾：僅 gov_hk 支援（中文名，如 飲食業 | 建造業 | 零售業 | 金融業）。"
+                   help="行業過濾：僅 gov_hk 與 JobMarket 與 offertoday 支援"
+                        "（gov_hk / JobMarket 用中文名，如 飲食業 | 建造業 | 零售業 | 金融業；"
+                        "offertoday 用中英文行業名，如 銀行 | 財務/金融，見 scrapers/offertoday_industries.json；"
+                        "注意大類會自動展開為細類）。"
                         "JobsDB 無獨立行業維度（職能分類已涵蓋），傳入會被忽略並提示。")
     p.add_argument("--sort", default=None,
                    choices=["post_dt_desc", "post_dt_asc",
@@ -80,7 +89,10 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--days", type=int, default=None,
                    help="只保留最近 N 天內刊登的職位："
                         "gov_hk 自動抓詳情取日期；JobsDB 與 LinkedIn 直接用列表相對刊登日過濾（不抓詳情）；"
-                        "moovup 不支援（傳入會警告並忽略）。預設按刊登日期由近至遠排序。")
+                        "moovup 不支援（傳入會警告並忽略）；"
+                        "offertoday 支援：送站方 publishTime 參數 + 客戶端再篩"
+                        "（只有「on MM-DD」格式能算天數，其餘視為過舊淘汰）。"
+                        "預設按刊登日期由近至遠排序。")
     return p
 
 
