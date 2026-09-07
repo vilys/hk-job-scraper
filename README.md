@@ -236,7 +236,7 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
 | 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
 | 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌 pubDate 瞬時（~9s，不點擊） | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
-| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ⚠️ best-effort | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ⚠️ best-effort（端點形狀待實測；列表欄位已完整） |
+| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ⚠️ best-effort | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
 | 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
 | 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（Cloudflare） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
 | 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
@@ -1097,8 +1097,21 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
   → `publishTime` 是**軟篩選**（只讓推薦池偏向近期，仍會夾帶舊職位），
   故 `--days` 採**雙保險**：送 `publishTime` 參數 **＋** 客戶端再篩（後兩種格式一律淘汰）。
 - **⚠️ `data.total` 不可信**：每次回傳都不同（475 / 800 / 353…），是**推薦池規模**而非命中數 → **分頁只能靠 `hasMore`**。
+- **⚠️ 深翻頁會重疊**：推薦池以 `page` 遞增時會重複吐出相同職位——實測 `--category 資訊科技 --pages 5`
+  抓回 50 筆、`job_id` 去重後為 **23 筆**（約 54% 重複）→ 深翻頁邊際效益遞減，
+  重複由 `exporter` 的 `job_id` 去重吸收（增量寫入時亦同）。
 - **欄位來源（列表卡一次到位，多數情況不需 `--detail`）**：`jobName` / `companyName` / `locationDesc` / `salaryDesc` / `jobTypeDesc` / `experience` / `educationDesc` / `skills` / `benefits` / `workPermitDesc` / `jobPostTime`。`jobId` 是加密字串（如 `XKouaVdubvupuJ3bljVhsg==`），職位網址 `/hk/job/<urlquote(id)>`。
-- **⚠️ 待實測**：`--detail` 的 `GET /wapi/geek/recommend/jobDetail?id=..&sessionId=` 端點形狀尚未線上驗證；解析失敗僅 warning 並回傳 None，不中斷流程。列表欄位已相當完整（僅缺完整描述文字）。
+- **✅ 詳情 API（R10 實測通過）**：`GET /wapi/geek/recommend/jobDetail`
+  ⚠️ **參數一個都不能少**（只給 `id` + `sessionId` 會回 `code=2 Invalid param`）：
+  ```
+  id=<加密 jobId>&sessionId=<UUID>&lid=<UUID>.offer_today_hk_search_visitor_grcd:common.<UUID>.1
+    &encryptExpectId=<取自列表卡>&markId=&curIndex=0&encryptJobId=<加密 jobId>
+  ```
+  - `sessionId` 不見於任何回應 → 是**前端自產的 UUID**，本模組自行 `uuid4()` 產生即可。
+  - `lid` / `encryptExpectId` 取自列表卡（模組於列表階段暫存原始卡片）。
+  - 🎁 回應獨有欄位：**`jobDesc`**（HTML 完整描述，模組轉純文字）、
+    **`industryDesc`**（**列表沒有的行業**）、**`postDaysAgo`**（站方已算好的天數）、
+    `salaryDesc` / `workExperienceDesc` / `educationDesc` / `brandIntroduce` / `addressVO`。
 - **禮節**：`request_delay` 設為 3 秒（推薦池 API 較敏感），`pageSize` 上限 10 → 每頁 1 支請求。
 
 ## 🗺️ 按地區篩選（OfferToday）

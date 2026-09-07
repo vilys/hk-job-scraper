@@ -56,6 +56,15 @@ R8/R9 實測：冷請求（無 cookie、無瀏覽器指紋）直打列表 API �
   → `publishTime` 參數是**軟篩選**（只讓推薦池偏向近期，仍會夾帶舊職位），
     故 `--days` 採**雙保險**：送 `publishTime` 參數 + 客戶端再篩（淘汰後兩種格式）。
 
+詳情 API（`--detail`）
+--------
+  GET /wapi/geek/recommend/jobDetail
+      ⚠️ **參數一個都不能少**（只給 `id`+`sessionId` 會回 `code=2 Invalid param`）：
+      `id` / `sessionId`（前端自產 UUID）/ `lid`（列表卡的）/ `encryptExpectId`（列表卡的）/
+      `markId`（空）/ `curIndex` / `encryptJobId`。
+  🎁 回應獨有欄位：`jobDesc`（HTML 完整描述）、**`industryDesc`（列表沒有的行業）**、
+     **`postDaysAgo`（站方已算好的天數）**、`brandIntroduce`、`addressVO`。
+
 字典（本站專屬，與其他站互不混用）
 --------
 - `offertoday_areas.json`：18 區 / 129 子區
@@ -64,14 +73,16 @@ R8/R9 實測：冷請求（無 cookie、無瀏覽器指紋）直打列表 API �
 """
 from __future__ import annotations
 
+import html as _html
 import json
 import logging
 import re
 import time
+import uuid
 from datetime import date, datetime
 from pathlib import Path
 from typing import Optional
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 import requests
 
@@ -95,6 +106,18 @@ _DAYS_TO_PUBLISH_TIME = ((1, 0), (3, 1), (7, 2), (14, 3))
 
 # 「on MM-DD」→ 可算天數；其餘一律視為過舊
 _RE_ON_MMDD = re.compile(r"(?:Updated|Posted)\s+on\s+(\d{1,2})-(\d{1,2})", re.I)
+
+
+def _strip_html(s: str) -> str:
+    """把站方回傳的 HTML 描述轉成純文字（<p>/<br> → 換行）。"""
+    if not s:
+        return ""
+    s = re.sub(r"(?i)<br\s*/?>|</?p[^>]*>|</?div[^>]*>", "\n", s)
+    s = re.sub(r"<[^>]+>", "", s)
+    s = _html.unescape(s)
+    s = re.sub(r"[ \t\u3000]+", " ", s)
+    s = re.sub(r"\n\s*\n\s*\n+", "\n\n", s)
+    return "\n".join(line.strip() for line in s.split("\n")).strip()
 
 
 def _load_dict(name: str) -> dict:
@@ -251,6 +274,8 @@ class OfferTodayScraper(BaseScraper):
         super().__init__(headers)
         self.session = requests.Session()
         self._days: Optional[int] = None   # 由 scrape_all 注入，供 publishTime 使用
+        # 原始卡片暫存（職位網址 → 卡片），供 get_detail 取 lid / encryptExpectId
+        self._cards: dict[str, dict] = {}
 
     # ---------- 搜尋 ----------
     def search(
@@ -380,6 +405,9 @@ class OfferTodayScraper(BaseScraper):
         if j.get("workPermitDesc"):
             bits.append(f"工作簽證：{j['workPermitDesc']}")
 
+        url = job_url(jid)
+        # 保留原始卡片：get_detail 需要其中的 lid / encryptExpectId
+        self._cards[url] = j
         return JobRecord(
             job_id=f"offertoday::{jid}",
             source=self.source,
@@ -391,28 +419,53 @@ class OfferTodayScraper(BaseScraper):
             industry="",                       # 列表卡無行業欄（--detail 才有機會補）
             description="",
             requirements="\n".join(bits),
-            url=job_url(jid),
+            url=url,
             posted_date=str(j.get("jobPostTime") or "").strip(),
             scraped_at=datetime.now().isoformat(timespec="seconds"),
-            raw={"encryptExpectId": j.get("encryptExpectId") or ""},
+            raw={"encryptExpectId": j.get("encryptExpectId") or "",
+                 "lid": j.get("lid") or ""},
         )
 
     # ---------- 詳情 ----------
     def get_detail(self, job_url_: str) -> Optional[JobRecord]:
-        """抓單筆詳情（描述文字）。
+        """抓單筆詳情（完整描述 + 行業）。
 
-        ⚠️ 端點形狀為依 R5 錄得的流量推導，**待實測微調**；
-        解析失敗時僅 warning 並回傳 None，不中斷整體流程。
+        端點：`GET /wapi/geek/recommend/jobDetail`
+        ⚠️ **參數一個都不能少**（R10 實測：只給 `id`+`sessionId` 會回 `code=2 Invalid param`）：
+
+            id=<加密 jobId>&sessionId=<UUID>&lid=<UUID>.offer_today_hk_search_visitor_grcd:common.<UUID>.1
+              &encryptExpectId=<取自列表卡>&markId=&curIndex=0&encryptJobId=<加密 jobId>
+
+        `sessionId` 不見於任何回應 → 是**前端自產的 UUID**，本模組自行產生即可；
+        `lid` / `encryptExpectId` 優先用列表卡的值（存在 `self._cards`）。
+
+        回應有用的欄位：`jobDesc`（HTML 描述）、`industryDesc`（**列表沒有的行業**）、
+        `postDateDesc` / **`postDaysAgo`（站方已算好的天數）**、`salaryDesc`、
+        `workExperienceDesc`、`educationDesc`、`brandIntroduce`、`addressVO`。
         """
         m = re.search(r"/hk/job/(.+?)(?:\?|$)", job_url_ or "")
-        jid = m.group(1) if m else ""
+        jid = unquote(m.group(1)) if m else ""
         if not jid:
             return None
+        card = self._cards.get(job_url_) or {}
+        session = str(uuid.uuid4())
+        params = {
+            "id": jid,
+            "sessionId": session,
+            "lid": (card.get("lid")
+                    or f"{session}.offer_today_hk_search_visitor_grcd:"
+                       f"common.{uuid.uuid4()}.1"),
+            "encryptExpectId": card.get("encryptExpectId") or "",
+            "markId": "",
+            "curIndex": 0,
+            "encryptJobId": jid,
+        }
         try:
             r = self.session.get(
-                API_DETAIL,
-                params={"id": jid, "sessionId": ""},
-                headers={**DEFAULT_HEADERS, **(self.headers or {})},
+                API_DETAIL, params=params,
+                headers={**DEFAULT_HEADERS, **(self.headers or {}),
+                         "Accept": "application/json, text/plain, */*",
+                         "Origin": BASE, "Referer": BASE + "/hk/search"},
                 timeout=REQUEST_TIMEOUT,
             )
             if r.status_code != 200:
@@ -423,29 +476,45 @@ class OfferTodayScraper(BaseScraper):
             logger.warning("[offertoday] 詳情請求失敗 %s：%s", job_url_, e)
             return None
         if body.get("code") != 0:
-            logger.warning("[offertoday] 詳情 code=%s", body.get("code"))
+            logger.warning("[offertoday] 詳情 code=%s msg=%s",
+                           body.get("code"), body.get("msg"))
             return None
-        d = (body.get("data") or {}).get("jobInfo") or body.get("data") or {}
-        desc = str(d.get("jobDesc") or d.get("description") or "").strip()
+        d = body.get("data") or {}
+        desc = _strip_html(str(d.get("jobDesc") or ""))
         if not desc:
-            logger.warning("[offertoday] 詳情無描述欄位（端點形狀可能已變）：%s",
-                           list(d)[:10])
+            logger.warning("[offertoday] 詳情無描述（欄位：%s）", list(d)[:12])
             return None
+        ind = str(d.get("industryDesc") or "").strip()
+        bits: list[str] = []
+        if d.get("workExperienceDesc"):
+            bits.append(f"經驗：{d['workExperienceDesc']}")
+        if d.get("educationDesc"):
+            bits.append(f"學歷：{d['educationDesc']}")
+        skills = [str(s.get("name") or s).strip()
+                  for s in (d.get("skillList") or []) if str(s).strip()]
+        if skills:
+            bits.append(f"技能：{'、'.join(skills)}")
+        kws = [str(k).strip() for k in (d.get("keywords") or []) if str(k).strip()]
+        if kws:
+            bits.append("；".join(kws))
         now = datetime.now().isoformat(timespec="seconds")
         return JobRecord(
             job_id=f"offertoday::{jid}",
             source=self.source,
             title=str(d.get("jobName") or "").strip(),
-            company="",
-            location="",
-            salary="",
+            company=str(d.get("companyName") or d.get("brandName") or "").strip(),
+            location=str(d.get("locationDesc") or "").strip(),
+            salary=str(d.get("salaryDesc") or "").strip(),
             job_type="",
-            industry="",
+            industry=ind,                      # 🎁 列表沒有的行業，只有詳情才有
             description=desc,
-            requirements=str(d.get("requirement") or "").strip(),
+            requirements="\n".join(bits),
             url=job_url_,
-            posted_date="",
+            posted_date=str(d.get("postDateDesc") or "").strip(),
             scraped_at=now,
+            raw={"encryptExpectId": card.get("encryptExpectId") or "",
+                 "lid": card.get("lid") or "",
+                 "postDaysAgo": d.get("postDaysAgo")},
         )
 
     # ---------- --days 雙保險 ----------
