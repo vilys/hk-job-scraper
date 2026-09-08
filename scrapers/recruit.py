@@ -133,15 +133,32 @@ def _build_lookup(entries: list[dict]) -> dict[str, dict]:
 _DISTRICT_LUT = _build_lookup(_DISTRICTS)
 _CATEGORY_LUT = _build_lookup(_CATEGORIES)
 
+# JSON-LD address 裡可能出現的「假值」——站方沒資料時會塞 N/A 之類的字串，
+# 直接當地區寫入會污染資料（實測 25 筆中有 2 筆是 N/A）。
+_BAD_LOC = {"", "n/a", "na", "--", "-", "none", "null", "nil", "not specified"}
 
-def resolve_districts(district_input: Optional[str]) -> list[str]:
-    """把使用者輸入解析為 Recruit 地區 ID 清單。
+
+def _addr_to_location(addr: dict) -> str:
+    """把 JSON-LD 的 address 物件轉成地區字串（過濾假值、去重）。"""
+    parts: list[str] = []
+    for k in ("streetAddress", "addressLocality", "addressRegion"):
+        v = str(addr.get(k) or "").strip()
+        if v and v.lower() not in _BAD_LOC:
+            parts.append(v)
+    return " / ".join(dict.fromkeys(parts))
+
+
+def resolve_districts_named(district_input: Optional[str]) -> tuple[list[str], list[str]]:
+    """把使用者輸入解析為 (地區 ID 清單, 地區英文名稱清單)。
 
     支援中英文（元朗 / Yuen Long）、逗號分隔多區；未知地區警告後忽略。
+    名稱用途：列表頁本身**沒有地區欄**，若使用者明確篩選了地區，
+    站方保證結果皆屬該區 → 可零請求回填 location（見 `search()`）。
     """
     if not district_input:
-        return []
+        return [], []
     ids: list[str] = []
+    names: list[str] = []
     for item in str(district_input).split(","):
         item = item.strip()
         if not item:
@@ -149,11 +166,19 @@ def resolve_districts(district_input: Optional[str]) -> list[str]:
         hit = _DISTRICT_LUT.get(item.lower())
         if hit:
             ids.append(hit["id"])
+            nm = (hit.get("name") or "").strip()
+            if nm:
+                names.append(nm)
         else:
             logger.warning("[recruit] 未知地區：%s（已忽略）", item)
     if ids:
         logger.info("[recruit] 地區過濾：%s（%d 區）", ", ".join(ids), len(ids))
-    return ids
+    return ids, names
+
+
+def resolve_districts(district_input: Optional[str]) -> list[str]:
+    """同 `resolve_districts_named`，但只回傳 ID 清單（舊介面，保留相容）。"""
+    return resolve_districts_named(district_input)[0]
 
 
 def resolve_category(category_input: Optional[str]) -> tuple[str, str]:
@@ -213,6 +238,7 @@ class RecruitScraper(BaseScraper):
         self._sig: tuple | None = None
         self._page_no = 0
         self._session = requests.Session()
+        self._loc_names: list[str] = []   # --district 解析出的地區名，供列表回填 location
 
     # ---------- 瀏覽器 ----------
     def _ensure_browser(self):
@@ -243,7 +269,9 @@ class RecruitScraper(BaseScraper):
         if industry:
             logger.warning("[recruit] 不支援 --industry（該站無行業篩選），已忽略")
 
-        loc_ids = resolve_districts(district)
+        loc_ids, loc_names = resolve_districts_named(district)
+        # 列表頁無地區欄：把「使用者明確篩選的地區」記下來，供 _build_record 零請求回填
+        self._loc_names = loc_names
         cat_id, func_id = resolve_category(category)
         sort_val = resolve_sort(sort)
 
@@ -405,7 +433,10 @@ class RecruitScraper(BaseScraper):
             source=self.source,
             title=(r.get("title") or "").strip(),
             company=(r.get("company") or "").strip(),
-            location="",           # 列表無地區，需 --detail（JSON-LD 才有）
+            # 列表頁本身無地區欄。若使用者只篩了**單一地區**，站方保證結果屬於該區
+            # → 零請求回填；多地區聯集時無法判斷各筆歸屬，寧可留空（不猜），
+            #   改用 --fill-location（逐筆 AJAX）或 --detail 取得精確值。
+            location=(self._loc_names[0] if len(self._loc_names) == 1 else ""),
             salary=salary,
             job_type="",
             industry="",
@@ -511,6 +542,63 @@ class RecruitScraper(BaseScraper):
         return None
 
     # ---------- 收尾 ----------
+    # ---------- 列表補地區（AJAX 詳情端點，純 requests） ----------
+    # 列表卡（tr.JobGrid）確實沒有地區欄（實測只有 title-company / edu / salary /
+    # exp / post-date / relevance）。但點卡片時前端會打
+    # `/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`（見 N_common.js 的
+    # getAjaxJobDetailUrl），回傳約 35KB 且含 JSON-LD address → **純 requests 可拿**，
+    # 不必開瀏覽器。故提供「逐筆補地區」的選項。
+    AJAX_DETAIL_URL = BASE + "/jobseeker/JobDetail.aspx"
+
+    def _fetch_location(self, jid: str) -> str:
+        """用輕量 AJAX 端點取單筆地區；失敗或無值回空字串（不拋出）。"""
+        if not jid:
+            return ""
+        try:
+            r = self._session.get(
+                self.AJAX_DETAIL_URL,
+                params={"jobOrder": jid, "ajax": "Y"},
+                headers={**DEFAULT_HEADERS, **(self.headers or {})},
+                timeout=REQUEST_TIMEOUT,
+            )
+            if r.status_code != 200:
+                logger.warning("[recruit] AJAX 地區 HTTP %s：%s", r.status_code, jid)
+                return ""
+        except Exception as e:  # noqa: BLE001
+            logger.warning("[recruit] AJAX 地區請求失敗 %s：%s", jid, e)
+            return ""
+        m = re.search(
+            r'<script type="application/ld\+json">(.*?)</script>', r.text, re.S)
+        if not m:
+            return ""
+        try:
+            data = json.loads(re.sub(r"[\x00-\x1f\x7f]", " ", m.group(1)), strict=False)
+        except Exception:  # noqa: BLE001
+            return ""
+        jl = data.get("jobLocation")
+        if isinstance(jl, list):
+            jl = jl[0] if jl else {}
+        return _addr_to_location((jl or {}).get("address") or {})
+
+    def fill_locations(self, records: list[JobRecord]) -> int:
+        """對整批紀錄補地區（列表階段專用）。回傳成功補上的筆數。
+
+        ⚠️ 每筆會多打 1 支請求（25 筆/頁 → 25 支），故**預設關閉**，
+        需由 `--fill-location` 明確啟用；內建 `self._sleep()` 節流。
+        """
+        n = 0
+        for rec in records or []:
+            if rec.location:          # 已有值（如單區 --district 回填）就不再打
+                continue
+            jid = (rec.job_id or "").split("::")[-1]
+            loc = self._fetch_location(jid)
+            if loc:
+                rec.location = loc
+                n += 1
+            self._sleep()
+        logger.info("[recruit] 列表補地區：%d/%d 筆取得地區", n, len(records or []))
+        return n
+
     def close(self) -> None:
         for attr in ("_context", "_browser"):
             obj = getattr(self, attr, None)

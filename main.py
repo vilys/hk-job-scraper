@@ -51,6 +51,11 @@ def build_argparser() -> argparse.ArgumentParser:
                    choices=["json", "csv", "both"], help="輸出格式")
     p.add_argument("--detail", action="store_true",
                    help="同時抓取職位詳情（職責/要求/發佈時間/刊登日期）")
+    p.add_argument("--fill-location", action="store_true",
+                   help="列表階段補地區：僅 recruit 需要並支援（該站列表頁沒有地區欄）。"
+                        "會對每筆多打 1 支輕量 AJAX 請求（25 筆/頁 → 25 支，含節流），故預設關閉。"
+                        "若只用 --district 篩選單一地區，recruit 會零請求直接回填，不必開此選項。"
+                        "其餘來源（列表已含地區）傳入會警告並忽略。")
     p.add_argument("--outfile", default=None,
                    help="自訂輸出檔名（不含副檔名）")
     p.add_argument("--district", default=None,
@@ -134,6 +139,7 @@ def main() -> None:
                 sort=args.sort,
                 days=args.days,
                 with_detail=args.detail,
+                fill_location=args.fill_location,
                 output=str(out_path),
                 fmt=args.output,
             )

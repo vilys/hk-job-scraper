@@ -231,12 +231,12 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 | 功能 / 參數 | Moovup | 勞工處 gov.hk | JobsDB | LinkedIn | Indeed | Recruit | JobMarket | foundit | eFinancialCareers | 獵聘 ⚠️ | BOSS直聘 ⚠️ | OfferToday |
 |------|------|------|------|------|------|------|------|------|------|------|------| ------ |
 | 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援（⚠️ **必給關鍵字**——空 `q=` 站方回 `did not match any jobs` / 0 筆） | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） | ✅ 支援（可留空→地區瀏覽頁） | ✅ 支援（可留空） | ⚠️ 機制已驗證但極易觸發驗證碼 | ⚠️ 全站安全驗證攔下 | ✅ 支援（可留空） |
-| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選） | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼直傳（900 是否香港未確認） | ❌ 不適用（香港不在站方城市體系） | ✅ 純 code 18 區 + 129 子區（中英文皆可，逗號多選） |
+| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選）⚠️ **列表本身無地區欄**：單區篩選時**零請求回填**該區；多區／未篩選 → 用 `--fill-location`（AJAX 逐筆，25 筆/頁 = 25 支請求）或 `--detail` | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼直傳（900 是否香港未確認） | ❌ 不適用（香港不在站方城市體系） | ✅ 純 code 18 區 + 129 子區（中英文皆可，逗號多選） |
 | 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 | ✅ POSITION level-2 code（31 大類 + 431 細類） |
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
 | 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
 | 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌 pubDate 瞬時（~9s，不點擊） | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
-| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
+| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
 | 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
 | 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
 | 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
@@ -357,6 +357,10 @@ python main.py --source recruit --district 元朗 --category "資訊科技" --da
 
 # 31) Recruit：要地區 / 行業 / 職缺類型 / 描述時加 --detail（詳情頁 JSON-LD，~0.2s/筆；列表無地區欄）
 python main.py --source recruit --keyword "engineer" --pages 2 --detail --outfile recruit_eng_detail
+
+# 31b) Recruit：只想補地區、不想抓整份詳情 → --fill-location（AJAX 端點，比 --detail 輕）
+#      （若 --district 只給單一地區，連這個都不必加：會零請求直接回填）
+python main.py --source recruit --keyword "engineer" --pages 1 --fill-location --outfile recruit_eng_loc
 
 # 32) Recruit：排序（post_dt_desc / salary_desc / exp / edu / relevance → 結果頁 sortByDDL）
 python main.py --source recruit --keyword "engineer" --sort salary_desc --pages 2
@@ -893,7 +897,16 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 - **排序**：結果頁 `select[name=sortByDDL]`（`POST_DATE` / `SALARY_FROM` / `WORK_EXP_FROM` / `EDU_LEVEL_ID` / `RELEVANCE_PRIORITY`），改值後派發 change 事件。
 - **職位卡（`tr.JobGrid`，每頁 25 張）**：`tr` 的 `id` 即 jobOrder（job_id = `recruit::<jobOrder>`）；職稱/網址 `a.title`、公司 `a.company`、薪資 `td.salary-col`、學歷 `td.edu-col`、年資 `td.exp-col`、**刊登日 `td.post-date-col`（`YYYY-MM-DD`）**。列表卡另有隱藏 `input[id$="_expiryDate"]`（截止日）。
   - 學歷 / 年資在列表層無專屬 JobRecord 欄位，合併寫入 `requirements`（`學歷：…；年資：…`）以免資訊遺失。
-  - ⚠️ **列表無地區欄**：`location` 預設為空，需 `--detail` 才補得到（詳情 JSON-LD 才有）。
+  - ⚠️ **列表無地區欄**（2026-09-08 實測確認：`tr.JobGrid` 只有 `saved-job-col`／`title-company-col`／`edu-col`／`salary-col`／`exp-col`／`post-date-col`／`relevance-col`，**確實沒有地區**）。三種填法，依成本由低到高：
+    1. **零請求**：`--district` 只篩**單一地區**時，站方保證結果屬於該區 → 直接回填該區英文名（如 `Yuen Long`）。多區聯集時無法判斷各筆歸屬，**寧可留空不猜**。
+    2. **`--fill-location`（推薦）**：走列表卡片 `onclick` 背後的 AJAX 端點
+       `/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`（見 `N_common.js` 的 `getAjaxJobDetailUrl`）→
+       回傳約 **35KB**、含 JSON-LD `address`，**純 `requests` 即可**（不必開瀏覽器）。
+       實測 25 筆全數可補（Kowloon Bay / Tseung Kwan O / Mong Kok…）。
+       ⚠️ 每筆多 1 支請求（25 筆/頁 → 25 支），故**預設關閉**，內建節流。
+    3. **`--detail`**：抓完整詳情頁 JSON-LD（最重，但同時補描述／行業等全部欄位）。
+  - ⚠️ 站方 `address` 三欄**可能是 `N/A` 假值**（實測 25 筆中 2 筆）→ 已過濾
+    （`n/a`、`--`、`-`、`none`、`null` 等），全為假值時 `location` 留空而非寫入 `N/A`。
 - **詳情頁**：內含 **JSON-LD `JobPosting` 結構化資料**（地區 / 行業 / 僱傭類型 / 薪資區間 / 完整描述 / `datePosted`）。注意站方 JSON-LD 內含未跳脫的控制字元，需先清 `\x00–\x1f` 再 `json.loads`。地區取 `jobLocation.address` 的 streetAddress / addressLocality / addressRegion 三欄**去重後**合併（三欄常重複如 New Territories / Hong Kong / Hong Kong）。
   - 詳情用普通 `requests` 即可（無反爬），~0.2 秒/筆。
 - **`--days` 行為**：`list_has_date=True`，列表卡已含刊登日（`YYYY-MM-DD`），由列表直接過濾，**不必抓詳情（瞬時）**；`days_since_posted()` 支援 `%Y-%m-%d` 與 `%d/%m/%Y` 兩種格式。
@@ -925,6 +938,18 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
   - `python main.py --source recruit --keyword "engineer" --district "Yuen Long"`（英文原名，效果相同）
   - `python main.py --source recruit --keyword "engineer" --district "元朗,屯門"`（逗號分隔多區）
 - 未知地區會 `logger.warning` 後忽略，不會報錯。
+- ⚠️ **列表本身沒有地區欄**（與 JobMarket 不同——JobMarket 有批次 API 可補，Recruit 沒有）。因此 `location` 的來源依使用方式而定：
+
+  | 用法 | location 結果 | 額外請求 |
+  |------|--------------|---------|
+  | `--district 元朗`（**單一地區**） | 直接回填 `Yuen Long`（站方篩選保證） | **0** |
+  | `--district "元朗,屯門"`（多區） | 留空（無法判斷各筆歸屬，不猜） | 0 |
+  | `--fill-location` | AJAX 端點逐筆補真實地區 | 每筆 1 支（25 筆/頁 → 25 支，含節流） |
+  | `--detail` | 完整詳情 JSON-LD（連描述／行業一起補） | 每筆 1 支（完整頁，較重） |
+
+  範例：`python main.py --source recruit --keyword engineer --fill-location --pages 1`
+  （實測 25 筆全數補上：Kowloon Bay / Tseung Kwan O / Mong Kok / Tai Po District…；站方缺值時留空，不寫 `N/A`）
+- ⚠️ `--fill-location` 目前**僅 recruit 支援**；傳給其他來源會 `logger.warning` 後忽略（那些站列表已含地區），不會中斷。
 - 職能篩選（`--category`）同理由 `recruit_categories.json`（34 大類 + 290 細類，中英雙語）解析成 `jobCatSearchHidden` / `jobFuncSearchHidden`；給細類時會**自動補上所屬大類**（站方要求 jobFunc 必須搭配 jobCat 才生效），如 `--category "DBA"` → 細類 56121 + 大類「資訊科技」26000。
 
 ## 🧭 技術筆記（JobMarket 逆向要點）

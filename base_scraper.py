@@ -37,6 +37,7 @@ class BaseScraper(ABC):
             self.headers.update(headers)
         self.session = None      # 由子類（requests / playwright）自行管理
         self._stats = {"success": 0, "failed": 0, "skipped": 0}
+        self._warned_fill_location = False   # --fill-location 不支援時只警告一次
 
     # ---------- 通用工具 ----------
     def _sleep(self, extra: float = 0.0) -> None:
@@ -97,6 +98,7 @@ class BaseScraper(ABC):
         sort: str | None = None,
         days: int | None = None,
         with_detail: bool = False,
+        fill_location: bool = False,
         output: str | None = None,
         fmt: str = "json",
     ) -> list[JobRecord]:
@@ -111,6 +113,8 @@ class BaseScraper(ABC):
             sort:         排序方式（依來源而定，如 gov_hk 的 post_dt_desc）
             days:         只保留最近 N 天內刊登的職位（需抓詳情以取得日期）
             with_detail:  True 時對每筆結果再抓詳情頁
+            fill_location: True 時對列表結果補地區（僅實作了 `fill_locations()` 的
+                           來源支援，如 recruit；其餘來源警告後忽略，不中斷）
             output:       輸出檔案路徑（None 表示不匯出）
             fmt:          json / csv / both
         """
@@ -139,6 +143,20 @@ class BaseScraper(ABC):
 
             logger.info("[%s] 第 %d 頁取得 %d 筆。", self.source, page, len(jobs))
             self._stats["success"] += len(jobs)
+
+            # 列表補地區：僅有實作 fill_locations() 的來源支援（目前 recruit）；
+            # 其餘來源警告一次後忽略，絕不中斷——跨站隔離鐵律。
+            if fill_location:
+                if hasattr(self, "fill_locations"):
+                    try:
+                        self.fill_locations(jobs)
+                    except Exception as e:  # noqa: BLE001
+                        logger.warning("[%s] 補地區失敗：%s", self.source, e)
+                elif not self._warned_fill_location:
+                    logger.warning(
+                        "[%s] 不支援 --fill-location（此來源列表已含地區，或無補充機制），"
+                        "已忽略", self.source)
+                    self._warned_fill_location = True
 
             if with_detail:
                 for j in jobs:
