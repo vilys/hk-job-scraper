@@ -268,7 +268,18 @@ class JobsDBScraper(BaseScraper):
             industry=industry,
         )
 
-    # ---------- 詳情（best-effort，v1 待實測微調） ----------
+    # ---------- 詳情（2026-09-08 實測修正 selector） ----------
+    # ⚠️ 舊版用的是 jobCompany / jobLocation / jobClassification / jobDescription，
+    #    實測頁面上根本不存在這些 data-automation 值 → 只有標題抓得到，其餘全空。
+    #    正確對照（實測列舉）：
+    #      job-detail-title          → 職位名稱
+    #      advertiser-name           → 公司（不是 jobCompany）
+    #      job-detail-location       → 地區（不是 jobLocation）
+    #      job-detail-classifications→ 職能／行業「細類 (大類)」
+    #      job-detail-work-type      → 僱傭類型（Contract/Temp、Full Time…）
+    #      jobAdDetails              → 完整描述
+    #    薪資無穩定 data-automation（job-detail-add-expected-salary 是「登入查看」提示，
+    #    非實際薪資）→ 留空，不硬湊。
     def get_detail(self, job_url: str) -> Optional[JobRecord]:
         self._ensure_browser()
         self._page.goto(job_url, wait_until="domcontentloaded", timeout=30000)
@@ -280,21 +291,21 @@ class JobsDBScraper(BaseScraper):
 
         jid = re.search(r"/job/(\d+)", job_url)
         jid = jid.group(1) if jid else job_url
-        classification = _txt("jobClassification").strip("() ").strip()
         now = datetime.now().isoformat(timespec="seconds")
         return JobRecord(
             job_id=f"jobsdb_{jid}",
             source="jobsdb",
             title=_txt("job-detail-title") or _txt("jobTitle"),
-            company=_txt("jobCompany"),
-            location=_txt("jobLocation") or _txt("jobCardLocation"),
-            salary=_txt("jobSalary"),
-            description=_txt("jobDescription") or _txt("jobShortDescription"),
-            requirements=_txt("jobRequirements"),
+            company=_txt("advertiser-name"),
+            location=_txt("job-detail-location"),
+            salary=_txt("job-detail-salary") or _txt("jobSalary"),
+            job_type=_txt("job-detail-work-type"),
+            description=_txt("jobAdDetails"),
+            requirements="",
             url=job_url,
             posted_date=_txt("jobListingDate"),
             scraped_at=now,
-            industry=classification or _txt("jobSubClassification"),
+            industry=_txt("job-detail-classifications"),
         )
 
     # ---------- 相對時間解析（"7d ago" -> 7；"13h ago"/"Just now" -> 0） ----------

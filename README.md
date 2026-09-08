@@ -162,7 +162,7 @@ hk-job-scraper/
 ## ⚙️ 環境要求與安裝
 
 - Python 3.10+
-- 需要 Playwright Chromium 的據點：**Moovup**（Cloudflare Turnstile）、**JobsDB**（Cloudflare）、**Indeed**（Cloudflare）、**Recruit**（WebForms 翻頁需真瀏覽器）。**JobMarket / eFinancialCareers** 不需要（全程普通 requests）。
+- 需要 Playwright 的據點：**Moovup**（Cloudflare Turnstile）、**JobsDB**（Cloudflare）、**Indeed**（Cloudflare，⚠️ **須本機 `channel="chrome"`**）、**Recruit**（WebForms 翻頁需真瀏覽器）、**foundit**（⚠️ **須本機 `channel="chrome"`**，內建 Chromium 被 WAF 403）。**JobMarket / eFinancialCareers / OfferToday** 不需要（全程普通 requests）。
 - ⚠️ **foundit / 獵聘 / BOSS直聘 需要本機安裝 Google Chrome**：foundit 的 WAF 與獵聘、BOSS直聘的反爬均以指紋區分瀏覽器，模組以 `channel="chrome"`（系統 Chrome）headless 開啟；未安裝 Chrome 時會啟動失敗並提示。
 - 只需 `requests` + `beautifulsoup4`、不需瀏覽器的據點：**勞工處 gov.hk**、**LinkedIn**（訪客模式）。
 
@@ -230,15 +230,15 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 
 | 功能 / 參數 | Moovup | 勞工處 gov.hk | JobsDB | LinkedIn | Indeed | Recruit | JobMarket | foundit | eFinancialCareers | 獵聘 ⚠️ | BOSS直聘 ⚠️ | OfferToday |
 |------|------|------|------|------|------|------|------|------|------|------|------| ------ |
-| 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援 | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） | ✅ 支援（可留空→地區瀏覽頁） | ✅ 支援（可留空） | ⚠️ 機制已驗證但極易觸發驗證碼 | ⚠️ 全站安全驗證攔下 | ✅ 支援（可留空） |
+| 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援（⚠️ **必給關鍵字**——空 `q=` 站方回 `did not match any jobs` / 0 筆） | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） | ✅ 支援（可留空→地區瀏覽頁） | ✅ 支援（可留空） | ⚠️ 機制已驗證但極易觸發驗證碼 | ⚠️ 全站安全驗證攔下 | ✅ 支援（可留空） |
 | 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選） | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼直傳（900 是否香港未確認） | ❌ 不適用（香港不在站方城市體系） | ✅ 純 code 18 區 + 129 子區（中英文皆可，逗號多選） |
 | 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 | ✅ POSITION level-2 code（31 大類 + 431 細類） |
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
 | 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
 | 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌 pubDate 瞬時（~9s，不點擊） | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
-| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ⚠️ best-effort | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
+| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆，地區僅此取得） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
 | 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
-| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（Cloudflare） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
+| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
 | 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
 
 > 圖例：✅ 完全支援　⚠️ 部分 / 有限支援　❌ 不適用（傳入會警告並忽略）
@@ -812,10 +812,21 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 
 - **真實網域**：`https://hk.indeed.com`（香港鏡像；職位搜尋 `/jobs`、單筆詳情 `/viewjob`）。
 - **反爬保護（Cloudflare「Just a moment...」）**：
-  - plain `requests` → **403 被擋**；必須用 **Playwright headless Chromium**（本爬蟲 `use_browser=True`）。
+  - plain `requests` → **403 被擋**；必須用 **Playwright**（本爬蟲 `use_browser=True`）。
+  - ⚠️ **必須用本機 Google Chrome（`channel="chrome"`），不能用內建 Chromium（2026-09-08 修復）**：
+    實測內建 Chromium 已完全被 CF 擋下——頁面標題停在 `Just a moment...`，內文為
+    `Additional Verification Required` + `Your Ray ID for this request is …`，
+    輪詢 45 秒也不會過關（舊筆記寫「幾秒內即過關」已失效）。
+    改用 `channel="chrome"` 後**立即正常**（beacon 16 張）。與 **foundit** 是同一類型的指紋坑。
+    程式內已做降級：無本機 Chrome 時退回內建 Chromium 並 `logger.warning` 預告會被擋。
   - **關鍵坑（重要）**：Indeed 的 Cloudflare 在「首頁 → 搜尋頁」的跳轉上特別頑固（實測偶發 45 秒仍過不了）；
     但**直接 goto 搜尋頁**（`/jobs?q=…&l=…`）幾秒內即過關。故本爬蟲**不先做首頁預熱**，而是直接在 `search()` 跳搜尋頁並輪詢 `.job_seen_beacon` 出現（最多 ~45 秒）。
   - 共用同一 `BrowserContext`，cf_clearance cookie 取得後續翻頁沿用（不重建不重挑戰）。
+  - ⚠️ **空關鍵字一律 0 筆（2026-09-08 實測）**：`q=` 為空時站方回傳
+    `headerMsg: "The search Jobs in Hong Kong did not match any jobs."`、
+    `originalResultCount: 0`，頁面上**一張職位卡都沒有**（`.job_seen_beacon` = 0、`[data-jk]` = 0）。
+    這是**站方行為，不是爬蟲故障**；程式會明確 `logger.warning` 提醒補 `--keyword`。
+    （註：HTML 中 `viewjob` 字串會出現數十次，但那是 JS 內的 token 名如 `"viewjob":"mobvjtk"`，**不是職位連結**，勿據此誤判。）
 - **搜尋機制：SSR + 客戶端渲染 HTML**。網址
   `https://hk.indeed.com/jobs?q=KEYWORD&l=LOCATION&start=N`（`start` 步長 10，首頁不加 `start`）。
 - **職位卡（`.job_seen_beacon`，每頁 ~16 張，表格佈局）**：
@@ -1141,7 +1152,7 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 | 4 | 勞工處 gov.hk | 低（無反爬） | ✅ 已完成並實測 |
 | 5 | JobsDB | 中高（需 Playwright） | ✅ 已完成並實測（關鍵字 + 翻頁 + --days + 職能/地區篩選 + --sort post_dt_desc；--industry 不適用） |
 | 6 | LinkedIn | 高（強反爬） | ✅ 已完成並實測（訪客模式：關鍵字 + 地點 + --days + --sort post_dt_desc；深翻頁不穩定，填 li_at cookie 可解鎖；--category/--industry 不適用） |
-| 7 | Indeed | 高（Cloudflare） | ✅ 已完成並實測（Playwright 過 CF；關鍵字 + 地區自由文字；**--days 經內嵌 pubDate 瞬時篩選 ~9s**；--detail 用 JS 點擊面板取描述 ~1s/張；--category/--industry/--sort 不適用） |
+| 7 | Indeed | 高（Cloudflare） | ✅ 已完成並實測（⚠️ 2026-09-08 修復：**必須本機 Chrome**——內建 Chromium 指紋已被 CF 擋下；**必須給 --keyword**——空 `q=` 站方回 0 筆。關鍵字 + 地區自由文字；**--days 經內嵌 pubDate 瞬時篩選 ~9s**；--detail 用 JS 點擊面板取描述 ~1s/張；--category/--industry/--sort 不適用） |
 | 8 | Recruit（擴充八站 Wave 1） | 中（WebForms） | ✅ 已完成並實測（hidden 欄位三維篩選：關鍵字 + 94 區地區 + 34 大類/290 細類職能；--days 列表瞬時；--sort 五種；--detail 走 JSON-LD；列表無地區欄需 --detail；--industry 不適用） |
 | 9 | JobMarket（擴充八站 Wave 1） | 低–中（JSP） | ✅ 已完成並實測（純 requests 免瀏覽器；四維篩選：關鍵字 Searchtext + 5 大區/75 子區 + 28 大類/195 細類 + 30 行業；批次 API 列表階段補地區/職缺類型；--days 列表瞬時；--sort 不適用） |
 | 10 | foundit 原 Monster HK（擴充八站 Wave 2） | 中–高（指紋 WAF） | ✅ 已完成並實測（⚠️ 需本機 Google Chrome——WAF 封鎖 Chromium 指紋；關鍵字走 SEO SSR 瀏覽頁〔站方 API 故障 404〕；路徑後綴翻頁；46 地區 slug 中英雙語；--days 列表相對日期瞬時；--detail 走 JSON-LD〔requests 直達〕；--category/--industry/--sort 不適用；sitemap 8,799 職位保底） |

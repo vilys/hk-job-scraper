@@ -69,7 +69,17 @@ class IndeedScraper(BaseScraper):
         if self._browser is not None:
             return
         self._pw = sync_playwright().start()
-        self._browser = self._pw.chromium.launch(headless=True)
+        # ⚠️ 必須用本機 Google Chrome（channel="chrome"），不能用內建 Chromium。
+        # 2026-09-08 實測：內建 Chromium 指紋被 Cloudflare 攔下（標題 "Just a moment..."、
+        # 內文 "Additional Verification Required" / Ray ID），且輪詢 45s 都不會過關；
+        # 改 chrome channel 後立即正常（beacon 16 張）。與 foundit 是同一類型的坑。
+        try:
+            self._browser = self._pw.chromium.launch(channel="chrome", headless=True)
+        except Exception as e:  # noqa: BLE001
+            logger.warning(
+                "[indeed] 本機 Google Chrome 不可用（%s），退回內建 Chromium——"
+                "極可能被 Cloudflare 擋下而回 0 筆", e)
+            self._browser = self._pw.chromium.launch(headless=True)
         self._context = self._browser.new_context(
             user_agent=DEFAULT_HEADERS["User-Agent"],
             locale="en-US",
@@ -105,6 +115,13 @@ class IndeedScraper(BaseScraper):
         sort: Optional[str] = None,
     ) -> list[JobRecord]:
         self._ensure_browser()
+        # 2026-09-08 實測：Indeed 空關鍵字（q=）+ 地區的搜尋，站方會回
+        # `headerMsg: "The search ... did not match any jobs."` / `originalResultCount: 0`
+        # → 這是站方行為，不是爬蟲故障；明確警告，避免被誤判為「卡住 / 壞掉」。
+        if not (keyword or "").strip():
+            logger.warning(
+                "[indeed] 未給 --keyword：Indeed 空關鍵字搜尋站方一律回 0 筆"
+                "（did not match any jobs），請指定關鍵字")
         # Indeed 無職能/行業/排序（訪客）對應維度，忽略並提示（跨站隔離：不影響他站）
         if category:
             logger.warning("[indeed] --category 不適用 Indeed（無對應維度），已忽略")
