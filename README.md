@@ -235,8 +235,8 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 | 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 | ✅ POSITION level-2 code（31 大類 + 431 細類） |
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
 | 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
-| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌 pubDate 瞬時（~9s，不點擊） | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
-| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 詳情面板（JS 點擊，~1s/張） | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
+| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌職位陣列瞬時（~9s，不點擊）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
+| 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 已實測修正（2026-09-08）：描述原只抓到 17 字（`(.*?)</div>` 撞上巢狀 div）→ 改 DOM `inner_text` + 巢狀配對，實測 934–2476 字；另加點擊重試與 🐢 熔斷（連續 2 筆失敗即停止），16 筆由 **9 分鐘 / 剩 1 筆** → **~1 分鐘 / 完整** | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
 | 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
 | 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
 | 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
@@ -840,18 +840,48 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
   - 薪資：卡片**無專屬元素**，為卡片內文文字（如「$18,000 - $30,000 a month」），以正則從 `inner_text` 抓取
 - **刊登日（重要）**：列表卡可見 HTML（inner_text）雖然**不含日期**（只有 title/company/location/salary），
   Indeed 卻在**內嵌的 mosaic provider JSON**（`window.mosaic.providerData["mosaic-provider-jobcards"]`）
-  中為每個職位提供 `pubDate`（毫秒戳，原始的實際刊登時間）。故 `search()` 解析完卡片後，
-  直接從 `page.content()` 以正則抽 `pubDate`→`jk` 對照表（`_build_pubdate_map`），折算為「N day ago」寫入
-  `posted_date`。**`list_has_date=True` → `--days` 篩選瞬時完成，無需逐張點擊（優化前需 ~11 分鐘，優化後 ~9 秒）。**
-  ⚠️ 注意：`pubDate` 是**原始刊登日**；Indeed 對「轉貼 / 刷新」的職位會在 UI 顯示較新的「X days ago」，
-  因此 `--days` 以 `pubDate` 判斷會比 Indeed 網站 UI 略保守（可能少收幾筆轉貼職位），但絕不會誤把舊職位當新職位。
+  中為每個職位提供日期欄位。**`list_has_date=True` → `--days` 篩選瞬時完成，無需逐張點擊
+  （優化前需 ~11 分鐘，優化後 ~9 秒）。**
+- **⚠️ 刊登日欄位陷阱（2026-09-08 修復，原實作為 bug）**：職位物件裡有三種日期，**不能用錯**：
+
+  | 欄位 | 意義 | 實測值（同一頁 15 筆） |
+  |------|------|------------------------|
+  | `jobkey`（**全小寫 k**） | 職位 ID 的正確鍵名 | — |
+  | `formattedRelativeTime` | 站方 UI 顯示的相對時間 | `"3 days ago"` / `"30+ days ago"` |
+  | `createDate` | Indeed 建檔時間（毫秒戳） | 4～193 天前 |
+  | `pubDate` | **雇主 feed 的原始刊登日** | ⚠️ 947～2811 天前，長期職缺會是**數年前** |
+
+  舊實作的兩個錯誤：① 用 `"jobKey"`（大寫 K）配對——那個鍵位於 `mouseDownHandlerOption`
+  追蹤物件裡，導致日期**張冠李戴**；② 直接用 `pubDate` 當刊登日——把「3 天前」的職缺報成
+  **1880 天前**。修正後的策略是：**優先用 `formattedRelativeTime`**；若它只給下限
+  （`"30+ days ago"`）則改用 `createDate` 折算天數；兩者都缺才退回 `pubDate`。
+  修正前後對照：同一職位由 `1879 day ago` → `0 day ago`，且描述內文自帶
+  `Posting Date: 2026-09-07`，交叉驗證一致。
+  解析方式也從「位置掃描 9KB 視窗」改為 `JSONDecoder.raw_decode` 直接解析
+  `"results":[...]` 陣列（能正確處理字串內的括號，也不再依賴位置猜測）。
 - **詳情頁（僅 `--detail` 顯式要描述時才用）**：
   - ⚠️ **直連 `/viewjob?jk=<id>` 會重觸發 Cloudflare（40 秒仍被擋）**，不可行。
   - ✅ **從搜尋頁「點擊職位連結」開側面板（SPA）則不重觸發 CF**（cf_clearance 沿用），2–3 秒內載入，
     詳情 HTML 含 `datePublished` 毫秒戳與 `age:"X days ago"`。故 `get_detail()` 實作為「在當前搜尋頁點擊對應 `a[data-jk]`」而非直連 viewjob。
   - **點擊改用 JS `element.click()` 直接派發事件**（繞過「面板遮住卡片 → Playwright 判定 `element is not visible`」的坑），
-    單張詳情 ~1 秒（優化前因 re-goto 回退每張可達 8–60 秒）。失敗時仍回退：重新 goto 搜尋頁（cf_clearance 已種、很快）再 JS 點該卡。
-  - 日期解析優先取 `age` 文字（「10 days ago」），回退 `datePublished` 毫秒戳轉相對天數；`days_since_posted()` 解析「N day(s) ago」。
+    單張詳情 ~0.4–0.9 秒。
+  - ⚠️ **兩個會讓 `--detail` 慢到爆的坑（2026-09-08 實測修復）**：
+    1. **卡片出現後立刻點擊有機會點不開**（SPA 事件尚未綁定）→ 現在 `search()` 收尾多等 1.5 秒，
+       且 `_open_card()` 內建「失敗重試一次」。
+    2. **面板開了但描述抓到空字串時，舊碼會掉進「重新 goto 整頁」的回退**（每次輪詢 45 秒）
+       ——16 筆的 `--detail` 曾被拖到 **8 分鐘**。現在改為「原地再讀一次」就回傳，
+       不再動輒整頁重載；回退輪詢也從 15×3s 縮到 10×2s。
+  - **描述抽取**：優先用 DOM `#jobDescriptionText` 的 `inner_text()`；純 HTML 回退則做
+    `<div>` **巢狀配對**後去標籤。⚠️ 不能用 `(.*?)</div>`——描述內含巢狀 `div`/`ul`，
+    非貪婪只會抓到第一層（實測整段描述只剩 `Client Description` 17 字）。
+    修正後單筆描述 934 / 2034 / 2476 字。
+  - 日期解析：優先用 `search()` 時建立的 `{jk: 相對時間}` 對照表（最準）；
+    獨立呼叫時才從 HTML 抓，且**必須優先匹配 `Posted`／`Date Posted`**
+    ——「Employer Active 1 day ago」是雇主活躍度，會把 30+ 天的職缺誤報成 1 天內。
+    `days_since_posted()` 解析「N day(s) ago」。
+  - 🐢 **熔斷機制**：連續 2 筆點不開面板就停止後續抓取（保留刊登日、只丟描述），
+    不再逐筆整頁重載。修復前後：16 筆 `--detail` 由 **9 分鐘 / 剩 1 筆** → 約 **1 分鐘 / 描述完整**。
+  - 每個 `get_detail()` 都會 log 耗時，方便日後再定位效能瓶頸。
 - **地區篩選體系**：Indeed 用 `l=` **自由文字**（與 Moovup 的 shortCode、勞工處數字 ID、JobsDB 的 slug、LinkedIn 的 location 文字**各自獨立**，不可混用）。`--district` 直接作為 `l=` 文字（預設 `Hong Kong`）；LinkedIn 的 18 區字典不適用於此。
 - **不支援項**：`--category` / `--industry`（Indeed HK 搜尋無對應乾淨維度，傳入會 `logger.warning` 並忽略）；`--sort`（訪客模式排序需登入態 facet，忽略並提示）。均不影響其他據點。
 - **各欄位資料來源總表（Indeed → JobRecord）**：

@@ -26,6 +26,7 @@
 """
 from __future__ import annotations
 
+import json
 import logging
 import re
 import time
@@ -63,6 +64,9 @@ class IndeedScraper(BaseScraper):
         self._context = None
         self._page = None
         self._last_search_url = None   # 供 get_detail 點擊失敗時重新 goto
+        self._date_map: dict[str, str] = {}   # {jk: 'N day ago'}，最近一次 search 的刊登日
+        self._detail_fail_streak = 0          # 連續點不開詳情面板的次數（熔斷用）
+        self._warned_detail_break = False
 
     # ---------- 瀏覽器（共用一個 session） ----------
     def _ensure_browser(self) -> None:
@@ -151,51 +155,93 @@ class IndeedScraper(BaseScraper):
         # 從內嵌 mosaic provider JSON 抽 pubDate→jk，寫入 posted_date（--days 用，瞬時）
         try:
             html = self._page.content()
-            date_map = self._build_pubdate_map(html)
-            if date_map:
+            self._date_map = self._build_date_map(html)
+            if self._date_map:
                 for rec in records:
                     jk = self._jk_from_url(rec.url)
-                    if jk and jk in date_map:
-                        rec.posted_date = self._pubdate_to_rel(date_map[jk])
+                    if jk and jk in self._date_map:
+                        rec.posted_date = self._date_map[jk]
                 logger.info("[indeed] 第 %d 頁已從內嵌 JSON 取得 %d/%d 筆刊登日",
                             page, sum(1 for r in records if r.posted_date), len(records))
+            else:
+                logger.warning("[indeed] 第 %d 頁未能解析內嵌刊登日（--days 將無資料可篩）", page)
         except Exception as e:  # noqa: BLE001
             logger.warning("[indeed] 內嵌刊登日解析失敗（--days 將退化为抓詳情）：%s", e)
 
         logger.info("[indeed] 第 %d 頁卡片數：%d", page, len(records))
+        # 卡片出現後再緩一口氣：Indeed 是 SPA，DOM 渲染與事件綁定有時間差，
+        # 立刻點擊有機會點不開側面板（實測 CLI 首筆常 timeout，程式化呼叫卻正常）。
+        time.sleep(1.5)
         return records
 
-    # ---------- 內嵌刊登日（mosaic provider pubDate） ----------
+    # ---------- 內嵌刊登日（mosaic provider 職位陣列） ----------
+    # ⚠️ 2026-09-08 修正（原實作有 bug）：
+    #   1. 職位物件裡的鍵是 **jobkey（全小寫 k）**；`jobKey`（大寫 K）是
+    #      mouseDownHandlerOption 裡的另一份追蹤用值，拿它配對會張冠李戴。
+    #   2. `pubDate` 是**雇主 feed 的原始刊登日**，長期未更新的職缺會是數年前
+    #      （實測 947～2811 天前），**不可當作刊登日**。
+    #   正確做法：以站方顯示的 `formattedRelativeTime`（如 "3 days ago"）為準；
+    #   若它是 "30+ days ago"（站方只給下限），改用 `createDate`（Indeed 建檔時間）
+    #   折算天數，比 pubDate 可靠得多。
     @staticmethod
-    def _build_pubdate_map(html: str) -> dict:
-        """從 page.content() 抽 pubDate（毫秒戳）→ jk 對照表。
+    def _extract_results_json(html: str) -> list:
+        """取出內嵌的 mosaic 職位陣列（`"results":[...]`），失敗回空 list。
 
-        Indeed 把每個職位的 pubDate 放在內嵌的 mosaic provider JSON 裡，
-        與 jobKey 位於同一職位物件（前後 ~9KB 範圍內）。以 pubDate 位置為錨點，
-        往前掃描最近的一個 jobKey / jk=，即為該職位的 jk。
+        用 JSONDecoder.raw_decode 由 `[` 起掃，能正確處理字串內的括號，
+        比手動數括號穩健。
         """
-        pubs = [m.start() for m in re.finditer(r'"pubDate":(\d{13})', html)]
-        out = {}
-        for pos in pubs:
-            window = html[max(0, pos - 9000):pos]
-            jks = re.findall(r'"jobKey":"([a-f0-9]{16,32})"', window)
-            jk2 = re.findall(r'jk=([a-f0-9]{16,32})', window)
-            jk = jks[-1] if jks else (jk2[-1] if jk2 else None)
+        i = html.find('"results":[')
+        if i < 0:
+            return []
+        start = html.index("[", i)
+        try:
+            arr, _ = json.JSONDecoder().raw_decode(html[start:start + 4_000_000])
+        except Exception:  # noqa: BLE001
+            return []
+        return arr if isinstance(arr, list) else []
+
+    @staticmethod
+    def _norm_rel(text: str) -> str:
+        """相對時間文字 → 統一格式「N day ago」（與 days_since_posted 相容）。"""
+        s = (text or "").strip().lower()
+        if not s:
+            return ""
+        if any(k in s for k in ("just posted", "today", "just now", "posted today")):
+            return "0 day ago"
+        m = re.search(r"(\d+)\s*\+?\s*(hour|day|week|month)s?", s)
+        if m:
+            n, unit = int(m.group(1)), m.group(2)
+            return "0 day ago" if unit == "hour" else f"{n * _DATE_UNIT_DAYS.get(unit, 1)} day ago"
+        return s
+
+    @classmethod
+    def _rel_from_result(cls, r: dict) -> str:
+        """單筆職位物件 → 刊登日相對文字。"""
+        rel = str(r.get("formattedRelativeTime") or "").strip()
+        # "30+ days ago" 只是下限 → 改用 createDate 折算
+        if rel and "30+" not in rel:
+            return cls._norm_rel(rel)
+        now_ms = time.time() * 1000
+        for key in ("createDate", "pubDate"):
+            ts = r.get(key)
+            if isinstance(ts, (int, float)) and ts > 0:
+                return f"{int(max(0, now_ms - ts) // 86400000)} day ago"
+        return cls._norm_rel(rel)
+
+    @classmethod
+    def _build_date_map(cls, html: str) -> dict:
+        """{jobkey: 'N day ago'} 對照表（供 --days 篩選）。"""
+        out: dict[str, str] = {}
+        for r in cls._extract_results_json(html):
+            if not isinstance(r, dict):
+                continue
+            jk = r.get("jobkey") or r.get("jobKey")
             if not jk:
                 continue
-            mm = re.search(r'"pubDate":(\d{13})', html[pos:pos + 30])
-            if mm:
-                out[jk] = int(mm.group(1))
+            rel = cls._rel_from_result(r)
+            if rel:
+                out[str(jk)] = rel
         return out
-
-    @staticmethod
-    def _pubdate_to_rel(pubdate_ms: int) -> str:
-        """pubDate 毫秒戳 → 'N day ago'（與 days_since_posted 解析相容）。"""
-        diff = time.time() * 1000 - pubdate_ms
-        if diff < 0:
-            diff = 0
-        days = int(diff // 86400000)
-        return f"{days} day ago"
 
     @staticmethod
     def _parse_card(card) -> JobRecord:
@@ -238,61 +284,95 @@ class IndeedScraper(BaseScraper):
 
     # ---------- 詳情（點擊開側面板，避開 viewjob 直連的 CF） ----------
     def get_detail(self, job_url: str) -> Optional[JobRecord]:
+        """外層：只負責計時（供排查「--detail 很慢」時定位瓶頸）。"""
+        t0 = time.time()
+        try:
+            return self._get_detail(job_url)
+        finally:
+            logger.info("[indeed] get_detail 耗時 %.1fs：%s", time.time() - t0, job_url)
+
+    def _get_detail(self, job_url: str) -> Optional[JobRecord]:
         self._ensure_browser()
         jk = self._jk_from_url(job_url)
         if not jk:
             return None
 
-        # 嘗試在當前搜尋頁點擊對應卡片（不重觸發 CF）。
-        # 用 JS element.click() 直接派發點擊事件，繞過「面板遮住卡片導致
-        # Playwright .click() 判定 element is not visible」的問題，避免逐張 re-goto。
-        if self._page.query_selector(f'a[data-jk="{jk}"]'):
-            try:
-                self._js_click_card(jk)
-                self._page.wait_for_selector(
-                    "#jobDescriptionText, .jobsearch-jobDescriptionText", timeout=15000)
-                html = self._page.content()
-                posted = self._extract_date(html)
-                description = self._extract_description(html)
-                if posted or description:
-                    return self._build_detail_record(jk, posted, description, job_url)
-            except Exception as e:  # noqa: BLE001
-                logger.warning("[indeed] 點擊開詳情失敗（%s），重新 goto 搜尋頁再點", e)
+        # 🐢 熔斷（2026-09-08 實測）：一旦連續 2 筆點不開面板，就不再操作頁面。
+        # 實測若不熔斷，第 7 筆失敗觸發整頁重載後，之後每筆都退化成 ~50s
+        # （重載後再也點不開，又掉進 viewjob 直連），16 筆的 --detail 要跑 9 分鐘，
+        # 最後只剩 1 筆——既慢又對站方不友善。熔斷後保留已取得的刊登日，只丟描述。
+        if self._detail_fail_streak >= 2:
+            if not self._warned_detail_break:
+                logger.warning(
+                    "[indeed] 已連續 %d 筆點不開詳情面板，停止抓取後續描述"
+                    "（刊登日照常保留）", self._detail_fail_streak)
+                self._warned_detail_break = True
+            return self._build_detail_record(jk, self._date_map.get(jk, ""), "", job_url)
 
-        # 回退：重新 goto 搜尋頁（cf_clearance 已種，很快），再 JS 點該卡。
-        if self._last_search_url:
+        # 卡片連結不存在（廣告 / 佔位卡，實測有 jk=890abcdef0123456 這種）→
+        # 直接跳過，不整頁重載。
+        if not self._page.query_selector(f'a[data-jk="{jk}"]'):
+            logger.warning("[indeed] 頁面上找不到卡片連結 %s（可能為廣告/佔位卡），跳過", jk)
+            self._detail_fail_streak += 1
+            return self._build_detail_record(jk, self._date_map.get(jk, ""), "", job_url)
+
+        # 主要路徑：在當前搜尋頁點擊對應卡片（不重觸發 CF）。
+        # 用 JS element.click() 直接派發點擊事件，繞過「面板遮住卡片導致
+        # Playwright .click() 判定 element is not visible」的問題。
+        if self._open_card(jk):
+            posted, description = self._read_detail(jk)
+            if not (posted or description):
+                # 面板開了但內容還沒渲染：原地再讀一次即可，
+                # 千萬別掉進「整頁重載」——那才是把 --detail 拖到分鐘級的元凶。
+                time.sleep(1.0)
+                posted, description = self._read_detail(jk)
+            if posted or description:
+                self._detail_fail_streak = 0
+            else:
+                self._detail_fail_streak += 1
+            return self._build_detail_record(jk, posted, description, job_url)
+        self._detail_fail_streak += 1
+
+        # 回退（僅限「當前頁根本不是搜尋結果頁」時，例如單獨呼叫 get_detail）：
+        # 重新 goto 搜尋頁一次，再點該卡。
+        if self._last_search_url and not self._page.query_selector_all(".job_seen_beacon"):
             try:
                 self._page.goto(self._last_search_url, wait_until="domcontentloaded", timeout=30000)
-                for _ in range(15):
-                    time.sleep(3)
+                for _ in range(10):          # 最多 ~20s（原為 15×3s=45s，太重）
+                    time.sleep(2)
                     if self._page.query_selector_all(".job_seen_beacon"):
                         break
-                if self._page.query_selector(f'a[data-jk="{jk}"]'):
-                    self._js_click_card(jk)
-                    self._page.wait_for_selector(
-                        "#jobDescriptionText, .jobsearch-jobDescriptionText", timeout=15000)
-                    html = self._page.content()
-                    posted = self._extract_date(html)
-                    description = self._extract_description(html)
+                time.sleep(1.5)              # 等 SPA 綁定事件（同上）
+                if self._page.query_selector(f'a[data-jk="{jk}"]') and self._open_card(jk):
+                    posted, description = self._read_detail(jk)
+                    if posted or description:
+                        self._detail_fail_streak = 0
                     return self._build_detail_record(jk, posted, description, job_url)
             except Exception as e:  # noqa: BLE001
                 logger.warning("[indeed] 重新 goto 後點擊仍失敗 %s：%s", job_url, e)
 
-        # 最後回退：直連 viewjob（可能觸發 CF，盡力而為）
-        try:
-            self._page.goto(f"{DETAIL_URL}?jk={jk}", wait_until="domcontentloaded", timeout=30000)
-            for _ in range(10):
-                time.sleep(3)
-                if "jobDescriptionText" in self._page.content():
-                    break
-            html = self._page.content()
-            posted = self._extract_date(html)
-            description = self._extract_description(html)
-        except Exception as e:  # noqa: BLE001
-            logger.warning("[indeed] 直連 viewjob 失敗 %s：%s", job_url, e)
-        return self._build_detail_record(jk, posted, description, job_url)
+        # ⚠️ 不再直連 viewjob：實測會重觸發 Cloudflare，拿不到內容又拖慢流程。
+        return self._build_detail_record(jk, self._date_map.get(jk, ""), "", job_url)
 
     # ---------- 詳情輔助 ----------
+    def _open_card(self, jk: str, timeout: int = 8000) -> bool:
+        """點擊卡片開側面板；失敗重試一次再放棄。
+
+        實測：DOM 剛出現就點擊，有機會點不開（SPA 事件尚未綁定），
+        故第一次失敗先等一下再點一次，兩次都不開才交回 get_detail 走回退。
+        """
+        for attempt in (1, 2):
+            self._js_click_card(jk)
+            try:
+                self._page.wait_for_selector(
+                    "#jobDescriptionText, .jobsearch-jobDescriptionText", timeout=timeout)
+                return True
+            except Exception:  # noqa: BLE001
+                if attempt == 1:
+                    logger.warning("[indeed] 第 1 次點擊未開面板（%s），重試一次", jk)
+                    time.sleep(1.5)
+        return False
+
     def _js_click_card(self, jk: str) -> None:
         """以 JS element.click() 直接派發點擊，觸發 Indeed SPA 開側面板。
         比 Playwright .click() 更穩健：不受面板遮罩造成的 visibility 判定影響。"""
@@ -309,11 +389,16 @@ class IndeedScraper(BaseScraper):
 
     @staticmethod
     def _extract_date(html: str) -> str:
-        """從詳情 HTML 抓刊登日：優先 age 文字（'10 days ago'），
-        回退 datePublished 毫秒戳轉相對。"""
-        m = re.search(r"(?:Employer\s*Active|Posted|Active)\s+(\d+)\s*(day|hour|week|month)s?\s+ago", html)
+        """從詳情 HTML 抓刊登日。
+
+        ⚠️ 必須優先匹配站方的「Posted / Date posted」字樣。實測「Employer Active
+        1 day ago」是**雇主活躍度**而非刊登日，會把 30+ 天的職缺誤報成 1 天內，
+        因此只當最後回退。
+        """
+        m = re.search(r"(?:Date\s*Posted|Posted)\s*[·:\-]?\s*(\d+)\s*(day|hour|week|month)s?\s+ago",
+                      html, re.I)
         if m:
-            return f"{m.group(1)} {m.group(2)} ago"
+            return f"{m.group(1)} {m.group(2).lower()} ago"
         ts = re.search(r'"datePublished"\s*:\s*(\d{13})', html)
         if ts:
             try:
@@ -324,17 +409,57 @@ class IndeedScraper(BaseScraper):
                 return f"{int(days)} day ago"
             except Exception:  # noqa: BLE001
                 pass
+        m = re.search(r"(\d+)\s*(day|hour|week|month)s?\s+ago", html, re.I)
+        if m:
+            return f"{m.group(1)} {m.group(2).lower()} ago"
         return ""
 
     @staticmethod
     def _extract_description(html: str) -> str:
-        m = re.search(r'id="jobDescriptionText"[^>]*>(.*?)</div>', html, re.S)
-        if m:
-            raw = m.group(1)
-            # 去標籤
-            text = re.sub(r"<[^>]+>", " ", raw)
-            return re.sub(r"\s+", " ", text).strip()
-        return ""
+        """純 HTML 回退：從 id="jobDescriptionText" 起做 div 巢狀配對後去標籤。
+
+        ⚠️ 不能用 `(.*?)</div>`——描述內含巢狀 div／ul，非貪婪只會抓到第一層
+        （實測整段描述只剩 "Client Description"）。
+        """
+        m = re.search(r'id="jobDescriptionText"[^>]*>', html)
+        if not m:
+            return ""
+        start = m.end()
+        depth, i = 1, start
+        tag_re = re.compile(r"</?div\b", re.I)
+        while i < len(html):
+            t = tag_re.search(html, i)
+            if not t:
+                i = len(html)
+                break
+            depth += -1 if t.group(0).startswith("</") else 1
+            if depth == 0:          # 遇到配對的結尾 div → 切在它之前
+                i = t.start()
+                break
+            i = t.end()
+        raw = html[start:i]
+        text = re.sub(r"<[^>]+>", " ", raw)
+        return re.sub(r"\s+", " ", text).strip()
+
+    def _read_description(self, html: str = "") -> str:
+        """優先用 DOM inner_text（最準），失敗才退回 HTML 正則。"""
+        for sel in ("#jobDescriptionText", ".jobsearch-jobDescriptionText"):
+            el = self._page.query_selector(sel)
+            if not el:
+                continue
+            try:
+                t = (el.inner_text() or "").strip()
+            except Exception:  # noqa: BLE001
+                t = ""
+            if t:
+                return re.sub(r"\s+", " ", t)
+        return self._extract_description(html or self._page.content())
+
+    def _read_detail(self, jk: str) -> tuple[str, str]:
+        """回傳 (posted_date, description)；刊登日優先用 search 時的對照表。"""
+        html = self._page.content()
+        posted = self._date_map.get(jk) or self._extract_date(html)
+        return posted, self._read_description(html)
 
     @staticmethod
     def _build_detail_record(jk: str, posted: str, description: str, url: str) -> JobRecord:
