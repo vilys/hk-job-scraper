@@ -17,7 +17,7 @@
 >
 > ⚠️ **受限模組說明**：獵聘與 BOSS直聘 的 robots.txt 明文禁止搜尋路徑抓取、且反爬極兇（IP 驗證碼 / 全站安全驗證），兩站亦無香港站。模組依用戶明確要求提供，**預期多數情況回 0 筆**（附明確警告，非程式故障）。
 
-模組化、可擴充的香港求職網站爬蟲。已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Indeed**、**Recruit**、**JobMarket**、**foundit**、**eFinancialCareers** 九座可用據點，另含 **獵聘**、**BOSS直聘** 兩座受限模組（見文末路線圖）。
+模組化、可擴充的香港求職網站爬蟲。已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Indeed**、**Recruit**、**JobMarket**、**foundit**、**eFinancialCareers**、**OfferToday** 十座可用據點，另含 **獵聘**、**BOSS直聘** 兩座受限模組（見文末路線圖）。
 
 ---
 
@@ -1146,6 +1146,7 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 | 9 | JobMarket（擴充八站 Wave 1） | 低–中（JSP） | ✅ 已完成並實測（純 requests 免瀏覽器；四維篩選：關鍵字 Searchtext + 5 大區/75 子區 + 28 大類/195 細類 + 30 行業；批次 API 列表階段補地區/職缺類型；--days 列表瞬時；--sort 不適用） |
 | 10 | foundit 原 Monster HK（擴充八站 Wave 2） | 中–高（指紋 WAF） | ✅ 已完成並實測（⚠️ 需本機 Google Chrome——WAF 封鎖 Chromium 指紋；關鍵字走 SEO SSR 瀏覽頁〔站方 API 故障 404〕；路徑後綴翻頁；46 地區 slug 中英雙語；--days 列表相對日期瞬時；--detail 走 JSON-LD〔requests 直達〕；--category/--industry/--sort 不適用；sitemap 8,799 職位保底） |
 | 11 | eFinancialCareers（擴充八站 Wave 2） | 中（JSON API） | ✅ 已完成並實測（純 JSON API 免瀏覽器 `job-search-ui…/v3/efc/jobs/search`；關鍵字可空；--district 僅 3 大區〔站方細分區回 0 筆〕；--days API ISO 瞬時；--detail 走 JSON-LD；--category/--industry/--sort 不適用；香港 ~2,900 筆） |
+| — | ~~HKGoodJobs~~ → **OfferToday**（擴充八站 Wave 3′ 復活賽） | 低（純 JSON API） | ✅ **已完成並實測**（2026-09-07 落地，第十座可用據點。🚀 **免瀏覽器純 requests**——冷請求無 cookie 亦可；關鍵字 + 18 區/129 子區 + 31 大類/431 細類職能 + 15 大類/53 細類行業；`cardType` 過濾防假結果；`--days` 送 `publishTime` + 客戶端再篩；`--detail` 已實測（補描述/行業/`postDaysAgo`）；`--sort` 不適用；`pageSize` 上限 10，翻頁靠 `hasMore`） |
 | — | HKGoodJobs（擴充八站 Wave 3） | 判定 | ❌ **判定不可行，止損**（裸域全面真 403——Apache 伺服器端拒絕所有路徑，HTTP/HTTPS、真 Chrome 指紋、忽略憑證錯誤皆同；TLS 憑證另錯置錯誤網域。站方配置即拒所有自動/人工存取） |
 | — | Glassdoor HK（擴充八站 Wave 4） | 高（CF + 誘餌） | ❌ **判定不可行，止損**（CF 挑戰不穩；首次可 200 但回**位置污染頁**——geoId 被無視、按資料中心 IP 定位到印度小頁鎮「Ambahta Rindān」，`Hong Kong` 僅 2 次 / `Ambahta` 37 次、0 個真職位連結。抓到也是錯資料） |
 | 12 | 獵聘 Liepin（擴充八站 Wave 5） | 🔴 高（robots 禁抓 + IP 驗證碼） | ⚠️ **受限模組落地**（robots `Disallow: /*?*`；香港站不存在、`city=900` 未確認；機制已驗證——首次導航可攔 `pc-search-job` 回應，隨即 IP 驗證碼；命中即警告回 0 筆；--days/--detail/--pages>1 等不支援） |
@@ -1154,3 +1155,5 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 > 路線圖前五站全數達標 ✅：Moovup / 勞工處 / JobsDB / LinkedIn / Indeed 五座據點皆已落地並實測。LinkedIn 現以訪客模式落地——功能可用但單次約 ~25–60 筆天花板；提供 `li_at` cookie（config.LINKEDIN_LI_AT / 環境變數）後深翻頁趨穩、可抓更深。Indeed 的 `--days` 現已由內嵌 `pubDate` 瞬時篩選（~9 秒，不再逐張點擊）；`--detail` 取描述改用 JS 點擊面板（~1 秒/張）；直連 viewjob 因 Cloudflare 不可行。
 >
 > **擴充八站計畫全數收官**（見 `docs/擴充八站開發計畫.md`）：Wave 1（Recruit、JobMarket）與 Wave 2（foundit、eFinancialCareers）**已完成** ✅✅✅✅（第六至九座可用據點）；Wave 3 HKGoodJobs ❌ 判定不可行（伺服器端全面 403）、Wave 4 Glassdoor ❌ 判定不可行（位置污染誘餌頁）；Wave 5 獵聘 + BOSS直聘 ⚠️ 受限模組依用戶要求落地（robots 禁抓 + 反爬極兇，行為可預期但不產資料）。
+>
+> 🆕 **Wave 3′ 復活賽收官（2026-09-07）**：HKGoodJobs 更名為 **OfferToday**（`www.offertoday.com`）後重啟偵察，R1–R10 十輪低速實測全數 `code=0`、**未觸發任何驗證碼或限速**，已落地為第十座可用據點。疑為 BOSS直聘香港站技術底（載 `static.zhipin.com` APM SDK）但**未繼承其全站安全驗證**——是目前成本最低的據點之一（免瀏覽器、純 JSON API）。
