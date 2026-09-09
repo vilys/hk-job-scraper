@@ -2,8 +2,11 @@
 
 逆向要點（詳見 README「🧭 技術筆記（Indeed）」）：
 - 反爬：Cloudflare「Just a moment...」挑戰頁。plain requests → 403；
-  用 Playwright headless Chromium 可過（約 4 秒自動通過，輪詢 job_seen_beacon 出現）。
-  全程共用同一 BrowserContext，先取 cf_clearance 再翻頁（不重建不重挑戰）。
+  用 Playwright + 本機 Chrome（channel="chrome"）可過，輪詢 job_seen_beacon 出現。
+- 持久化 profile（2026-09-09）：用 launch_persistent_context 讓 cf_clearance 跨執行沿用，
+  並注入自刻隱身腳本。⚠️⚠️ **切勿覆寫 user_agent**——config.DEFAULT_HEADERS 是
+  Chrome/124 而本機已是 15x，UA 與 Client Hints 版本不一致會被 CF 直接判為機器人
+  （實測：改回原生 UA 後即通過挑戰）。
 - 搜尋機制：SSR + 客戶端渲染。搜尋網址
   https://hk.indeed.com/jobs?q=KEYWORD&l=LOCATION&start=N （start 步長 10，首頁不加）。
 - 職位卡：.job_seen_beacon（每頁 ~16 張，表格佈局）。
@@ -28,16 +31,17 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 from urllib.parse import quote
 
 from playwright.sync_api import sync_playwright
 
 from base_scraper import BaseScraper
-from config import DEFAULT_HEADERS
 from job_model import JobRecord
 
 logger = logging.getLogger(__name__)
@@ -48,6 +52,39 @@ DETAIL_URL = BASE + "/viewjob"
 
 # 日期單位 → 天數倍率（用於 age 文字與 timestamp 計算）
 _DATE_UNIT_DAYS = {"hour": 0, "day": 1, "week": 7, "month": 30}
+
+# 持久化 profile 目錄：跨執行沿用 cf_clearance cookie 與瀏覽器指紋。
+# ⚠️ 2026-09-09 關鍵修復：舊碼每次 new_context() 都開一個全新 context，
+#    Cloudflare 每次都當成全新訪客 → managed challenge 重來一次且過不了。
+#   改用 launch_persistent_context 後，首次過關的 cf_clearance 會留在磁碟上。
+PROFILE_DIR = Path(__file__).resolve().parent.parent / ".chrome_profiles" / "indeed"
+
+# 啟動參數：抹掉最明顯的 automation 痕跡
+_LAUNCH_ARGS = [
+    "--disable-blink-features=AutomationControlled",
+    "--disable-dev-shm-usage",
+    "--no-first-run",
+    "--no-default-browser-check",
+]
+
+# 隱身腳本：CF 的 managed challenge 會讀 navigator.webdriver 等訊號。
+# 本專案未安裝 playwright-stealth，故自行注入等效的最小集合。
+_STEALTH_JS = """
+Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});
+Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+Object.defineProperty(navigator, 'hardwareConcurrency', {get: () => 8});
+window.chrome = window.chrome || {runtime: {}, loadTimes: function(){}, csi: function(){}};
+if (!window.outerWidth)  { Object.defineProperty(window, 'outerWidth',  {get: () => window.innerWidth}); }
+if (!window.outerHeight) { Object.defineProperty(window, 'outerHeight', {get: () => window.innerHeight}); }
+try {
+  const origQuery = navigator.permissions && navigator.permissions.query;
+  if (origQuery) {
+    navigator.permissions.query = (p) => (p && p.name === 'notifications')
+      ? Promise.resolve({state: Notification.permission}) : origQuery(p);
+  }
+} catch (e) {}
+"""
 
 
 class IndeedScraper(BaseScraper):
@@ -71,26 +108,58 @@ class IndeedScraper(BaseScraper):
 
     # ---------- 瀏覽器（共用一個 session） ----------
     def _ensure_browser(self) -> None:
-        if self._browser is not None:
+        """啟動持久化 Chrome profile（沿用 cf_clearance，避免每次重新過 CF）。
+
+        環境變數：
+          INDEED_HEADLESS=0  → 開有頭模式（首次「暖機」用，成功率最高，
+                               通過後 cf_clearance 存進 profile，之後仍可 headless 沿用）
+          INDEED_RESET_PROFILE=1 → 刪除既有 profile 重新開始（懷疑 cookie 已污染時用）
+        """
+        if self._context is not None:
             return
         self._pw = sync_playwright().start()
+        if os.environ.get("INDEED_RESET_PROFILE") == "1" and PROFILE_DIR.exists():
+            import shutil
+            shutil.rmtree(PROFILE_DIR, ignore_errors=True)
+            logger.warning("[indeed] 已清除既有 profile（INDEED_RESET_PROFILE=1）")
+        PROFILE_DIR.mkdir(parents=True, exist_ok=True)
+
+        headless = os.environ.get("INDEED_HEADLESS", "1") != "0"
+        # ⚠️⚠️ 2026-09-09 關鍵：不要覆寫 user_agent！
+        # config.DEFAULT_HEADERS 的 UA 是 Chrome/124，但本機 Chrome 已是 15x。
+        # Cloudflare 會比對 UA 與 Client Hints（sec-ch-ua）的真實版本，
+        # 「嘴巴說 124、身體是 152」是極經典的機器人訊號 → managed challenge 過不了。
+        # 故 Indeed 一律用瀏覽器原生 UA（除非用 INDEED_UA 明確指定）。
+        # 只改 indeed 模組，DEFAULT_HEADERS 供其他來源沿用，不影響他站（跨站隔離）。
+        ua = os.environ.get("INDEED_UA") or None
+        common = dict(
+            user_data_dir=str(PROFILE_DIR),
+            headless=headless,
+            args=_LAUNCH_ARGS,
+            locale="en-US",
+            viewport={"width": 1440, "height": 900},
+        )
+        if ua:
+            common["user_agent"] = ua
+        logger.info("[indeed] UA 策略：%s", ua or "使用瀏覽器原生 UA（Client Hints 一致）")
         # ⚠️ 必須用本機 Google Chrome（channel="chrome"），不能用內建 Chromium。
-        # 2026-09-08 實測：內建 Chromium 指紋被 Cloudflare 攔下（標題 "Just a moment..."、
-        # 內文 "Additional Verification Required" / Ray ID），且輪詢 45s 都不會過關；
-        # 改 chrome channel 後立即正常（beacon 16 張）。與 foundit 是同一類型的坑。
+        # 2026-09-08 實測：內建 Chromium 指紋被 CF 攔下（標題 "Just a moment..."），
+        # 輪詢 45s 不過關；改 chrome channel 後正常。與 foundit 是同一類型的坑。
         try:
-            self._browser = self._pw.chromium.launch(channel="chrome", headless=True)
+            self._context = self._pw.chromium.launch_persistent_context(
+                channel="chrome", **common)
         except Exception as e:  # noqa: BLE001
             logger.warning(
                 "[indeed] 本機 Google Chrome 不可用（%s），退回內建 Chromium——"
                 "極可能被 Cloudflare 擋下而回 0 筆", e)
-            self._browser = self._pw.chromium.launch(headless=True)
-        self._context = self._browser.new_context(
-            user_agent=DEFAULT_HEADERS["User-Agent"],
-            locale="en-US",
-        )
-        self._page = self._context.new_page()
-        logger.info("[indeed] 瀏覽器就緒（首次訪問搜尋頁時取得 cf clearance）")
+            self._context = self._pw.chromium.launch_persistent_context(**common)
+
+        self._context.add_init_script(_STEALTH_JS)
+        self._browser = self._context.browser
+        self._page = (self._context.pages[0] if self._context.pages
+                      else self._context.new_page())
+        logger.info("[indeed] 瀏覽器就緒（profile=%s，headless=%s）",
+                    PROFILE_DIR.name, headless)
 
     # ---------- 網址組裝（Indeed 自有體系） ----------
     @staticmethod
@@ -160,14 +229,8 @@ class IndeedScraper(BaseScraper):
         self._page.goto(url, wait_until="domcontentloaded", timeout=45000)
 
         # 輪詢等待 Cloudflare 過關 + 職位卡渲染（最多 ~45 秒）
-        beacons = []
-        for _ in range(15):
-            time.sleep(3)
-            beacons = self._page.query_selector_all(".job_seen_beacon")
-            if beacons:
-                break
+        beacons = self._wait_for_cards(page)
         if not beacons:
-            logger.warning("[indeed] 第 %d 頁無職位卡（可能被 Cloudflare 擋或已無結果）", page)
             return []
 
         records = [self._parse_card(b) for b in beacons]
@@ -192,6 +255,74 @@ class IndeedScraper(BaseScraper):
         # 立刻點擊有機會點不開側面板（實測 CLI 首筆常 timeout，程式化呼叫卻正常）。
         time.sleep(1.5)
         return records
+
+    def _wait_for_cards(self, page: int, rounds: int = 15, gap: float = 3.0) -> list:
+        """輪詢等待職位卡出現；順便判讀是否被 Cloudflare 攔下。
+
+        CF managed challenge 是「背景自動解題」——只要指紋夠像人，Turnstile 會
+        自己完成並導向真實頁面。故這裡只做等待與判讀，不嘗試點擊任何驗證元件
+        （點擊反而會被當成自動化行為）。
+        """
+        for i in range(rounds):
+            time.sleep(gap)
+            try:
+                beacons = self._page.query_selector_all(".job_seen_beacon")
+            except Exception:  # noqa: BLE001  頁面導航中，下一輪再試
+                continue
+            if beacons:
+                return beacons
+            if i == 1:
+                # 等了 ~6 秒還沒卡片 → 判讀目前卡在哪一關，及早給可行動的線索
+                state, detail = self._block_state()
+                if state == "challenge":
+                    logger.warning(
+                        "[indeed] 卡在 Cloudflare 挑戰頁（%s）。"
+                        "可試 INDEED_HEADLESS=0 以有頭模式暖機一次，"
+                        "讓 cf_clearance 存進 profile 後再回 headless", detail)
+                elif state == "blocked":
+                    # IP 層級封鎖：再怎麼重試都只會加深黑名單 → 立即停手
+                    logger.error(
+                        "[indeed] ⛔ 遭 Cloudflare / Indeed IP 層級封鎖（%s）。"
+                        "這不是程式能繞過的：請讓 IP 冷靜數小時後再試，"
+                        "本輪立即停手以免加深封鎖", detail)
+                    return []
+        logger.warning("[indeed] 第 %d 頁無職位卡（可能被 Cloudflare 擋或已無結果）", page)
+        return []
+
+    def _block_state(self) -> tuple[str, str]:
+        """判讀目前頁面狀態，回傳 ("ok"|"challenge"|"blocked", 說明)。
+
+        2026-09-09 實測三種結局：
+          - challenge：title `Just a moment...`（managed challenge，指紋問題，可救）
+          - blocked  ：title `Blocked - Indeed.com` + 內文「You have been blocked」+
+                       Ray ID 與來源 IP（**IP 層級封鎖**，只能等）
+          - ok       ：沒擋，只是卡片尚未渲染
+        """
+        # ⚠️ 只信標題會漏判：挑戰頁載入後標題會被 JS 改寫成
+        #    「Security Check - Indeed.com」（2026-09-09 實測），故標題與內文雙重判讀。
+        try:
+            title = (self._page.title() or "").strip()
+        except Exception:  # noqa: BLE001
+            title = ""
+        try:
+            html = self._page.content()
+        except Exception:  # noqa: BLE001
+            html = ""
+        low_t, low_h = title.lower(), html.lower()
+
+        if ("blocked" in low_t or "access denied" in low_t
+                or "you have been blocked" in low_h):
+            import re as _re
+            m = _re.search(r"IP for this request is ([\d.]+)", html)
+            ip = f"，來源 IP {m.group(1)}" if m else ""
+            return "blocked", f"title={title!r}{ip}"
+
+        if (any(k in low_t for k in ("just a moment", "security check",
+                                     "attention required", "additional verification"))
+                or any(k in low_h for k in ("cf-chl-widget", "challenge-platform",
+                                            "__cf_chl_f_tk"))):
+            return "challenge", f"title={title!r}"
+        return "ok", title
 
     # ---------- 內嵌刊登日（mosaic provider 職位陣列） ----------
     # ⚠️ 2026-09-08 修正（原實作有 bug）：

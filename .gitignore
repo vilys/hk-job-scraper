@@ -9,6 +9,9 @@ envs/
 # ---- 爬蟲產物（可重生，不進版本庫）----
 output/
 
+# ---- 瀏覽器持久化 profile（含 cf_clearance cookie，因機密性不進版本庫）----
+.chrome_profiles/
+
 # ---- 工具 / AI 暫存 ----
 .workbuddy/
 
