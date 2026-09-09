@@ -126,6 +126,15 @@ class BaseScraper(ABC):
             if sort is None:
                 sort = "post_dt_desc"
 
+        # 站方端日期過濾掛載點：有實作 set_days() 的來源（如 linkedin 的 f_TPR）可把
+        # --days 直接下推到搜尋請求，省下「抓一堆再丟掉」的請求數。
+        # 其餘來源沒有此方法 → 整段跳過，行為完全不變（跨站隔離鐵律）。
+        if days is not None and hasattr(self, "set_days"):
+            try:
+                self.set_days(days)
+            except Exception as e:  # noqa: BLE001
+                logger.warning("[%s] 站方端日期過濾設定失敗：%s", self.source, e)
+
         all_jobs: list[JobRecord] = []
         for page in range(1, max_pages + 1):
             try:

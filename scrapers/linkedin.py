@@ -5,11 +5,19 @@
   關鍵字搜尋 /jobs/search/?keywords=K&location=Hong%20Kong 直接回傳 ~25–60 張職位卡。
 - **免登入詳情 API**：單筆職位詳情可用
   https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/<id> 取得（含完整 description）。
-- **反爬與限制**：LinkedIn 對訪客模式有速率上限，且深翻頁（start 參數）行為不穩定——
-  會隨機化/AB 測試，同一 start 可能回傳不同批次。故本爬蟲：
+- **翻頁策略（2026-09-09 實測改版）**：
+  - 第 1 頁走 `/jobs/search/`（一次可取數十張卡，CP 值最高，行為與舊版一致）；
+  - 第 2 頁起改走訪客分頁端點 `/jobs-guest/jobs/api/seeMoreJobPostings/search`
+    （`start` 為索引、每頁固定 **10** 張），可突破訪客 ~60 筆天花板——實測
+    `start=10` / `20` 回傳的卡皆落在首頁結果池之外。
+    ⚠️ 訪客結果會「漂移」：同一 start 每次取樣可能不同（實測 `start=25` 曾整頁落回
+    首頁池），故仍以 job_id 去重累積，整頁皆已見即停止翻頁。
+- **站方端日期過濾**：`--days` 會下推為 `f_TPR=r<秒數>`（經 base_scraper 的 `set_days()`
+  掛載點），讓 LinkedIn 只回傳該時間窗內的職缺；未帶時會混入一年以上的舊職缺。
+- **反爬與限制**：LinkedIn 對訪客模式有速率上限，故本爬蟲：
   (1) 請求間隔拉高到 3 秒（config.SITE_CONFIG['linkedin']）；
   (2) 跨頁用 job_id 去重，整頁皆為已見職位即停止翻頁（避免無限迴圈）；
-  (3) 提供 li_at cookie（config.LINKEDIN_LI_AT / 環境變數）可解鎖穩定翻頁（登入態）。
+  (3) 提供 li_at cookie（config.LINKEDIN_LI_AT / 環境變數）可解鎖最穩定翻頁（登入態）。
 - **地區**：LinkedIn 的 location 是「自由文字」，與 Moovup 的 shortCode、勞工處數字 ID、
   JobsDB 的 slug 三者皆不同，不可混用。本爬蟲已逆向出香港 18 區字典
   (scrapers/linkedin_geo.json，含中文區名 / 英文 / geoUrn / 別名)。
@@ -43,6 +51,11 @@ logger = logging.getLogger(__name__)
 
 BASE = "https://www.linkedin.com"
 SEARCH_URL = BASE + "/jobs/search/"
+# 訪客專用分頁端點（無須登入）：/jobs/search/?start=N 在訪客身分下會被隨機化/AB，
+# 深翻頁不可靠；此端點是 LinkedIn 給搜尋引擎與訪客用的，start 為索引、每頁固定 10 張，
+# 且卡片 <time datetime="YYYY-MM-DD"> 帶絕對刊登日。詳見 README 技術筆記。
+GUEST_SEARCH_URL = BASE + "/jobs-guest/jobs/api/seeMoreJobPostings/search"
+GUEST_PAGE_SIZE = 10
 DETAIL_API = BASE + "/jobs-guest/jobs/api/jobPosting/"
 
 # LinkedIn 相對刊登日單位 → 天數倍率
@@ -83,6 +96,25 @@ class LinkedInScraper(BaseScraper):
             logger.info("[linkedin] 未提供 li_at cookie，使用訪客模式（深翻頁可能受限）")
         # 跨頁去重：記錄已見 job_id，整頁皆已見即停止翻頁
         self._seen: set[str] = set()
+        # 站方端日期過濾（f_TPR），由 base_scraper 的 set_days() 掛載點注入
+        self._f_tpr: str = ""
+
+    # ---------- 站方端日期過濾掛載點（base_scraper.scrape_all 呼叫） ----------
+    def set_days(self, days: int) -> None:
+        """把 --days 下推成 LinkedIn 的 f_TPR（站方端過濾），省下客戶端丟棄的請求。
+
+        f_TPR 格式為 r + 秒數：r86400=24h、r604800=7 天、r2592000=30 天。
+        實測（2026-09-09）：帶 f_TPR=r604800 時回傳卡片全數落於 7 天內；
+        未帶時會混入一年以上的舊職缺（如 2025-04-30）。"""
+        try:
+            n = int(days)
+        except (TypeError, ValueError):
+            logger.warning("[linkedin] --days %r 無法轉為整數，已忽略站方端過濾", days)
+            return
+        if n <= 0:
+            return
+        self._f_tpr = f"r{n * 86400}"
+        logger.info("[linkedin] 已啟用站方端日期過濾 f_TPR=%s（%d 天內）", self._f_tpr, n)
 
     # ---------- 參數解析（LinkedIn 自有體系） ----------
     @staticmethod
@@ -148,13 +180,26 @@ class LinkedInScraper(BaseScraper):
         params = [
             f"keywords={quote(keyword)}" if keyword else "",
             f"location={quote(location)}",
-            f"start={(page - 1) * 25}",   # 每頁 25；訪客模式 start 可能不穩定，靠去重兜底
         ]
         sortmode = self._resolve_sort(sort)
         if sortmode:
             params.append(f"sortBy={sortmode}")
+        if self._f_tpr:
+            params.append(f"f_TPR={self._f_tpr}")
         params = [p for p in params if p]
-        return SEARCH_URL + "?" + "&".join(params)
+
+        if page <= 1:
+            # 首頁走 /jobs/search/：一次可取數十張卡（實測空關鍵字約 59 張），CP 值最高
+            return SEARCH_URL + "?" + "&".join(params + ["start=0"])
+        # 第 2 頁起改走訪客分頁端點：/jobs/search/?start=N 在訪客身分下會被隨機化，
+        # 而此端點每頁固定 10 張、start 為索引，可持續吐出新卡（實測 start=10/20 皆為
+        # 首頁結果池以外的職缺）。靠 _seen 去重累積，突破訪客 ~60 筆天花板。
+        start = (page - 1) * GUEST_PAGE_SIZE
+        # ⚠️ 實測（2026-09-09）：帶相同 f_TPR + sortBy 時，此端點與首頁是同一個結果池，
+        # 若 start 從 10 起算會整頁落在首頁已取的 58 筆內、被去重擋掉而停止翻頁。
+        # 故 start 一律從「已累積筆數」接著往下走，才能真正翻到首頁以外的職缺。
+        start = max(start, len(self._seen))
+        return GUEST_SEARCH_URL + "?" + "&".join(params + [f"start={start}"])
 
     # ---------- 搜尋 ----------
     def search(
@@ -181,7 +226,12 @@ class LinkedInScraper(BaseScraper):
         soup = BeautifulSoup(r.text, "lxml")
 
         jobs: list[JobRecord] = []
-        for li in soup.select(SELECT.get("result_list", ".jobs-search__results-list li")):
+        cards = soup.select(SELECT.get("result_list", ".jobs-search__results-list li"))
+        if not cards:
+            # 訪客分頁端點回傳的是裸 HTML 片段（無 .jobs-search__results-list 外層容器），
+            # 退回直接取所有 li，卡片內部結構與 /jobs/search/ 完全相同。
+            cards = soup.select("li")
+        for li in cards:
             link = li.select_one(SELECT.get("card_link", "a.base-card__full-link"))
             if not link:
                 continue
@@ -200,7 +250,7 @@ class LinkedInScraper(BaseScraper):
                 meta = self._txt(li, SELECT.get("metadata", ".base-search-card__metadata"))
                 if meta:
                     loc = meta.split("\n")[0].strip()
-            posted = self._txt(li, SELECT.get("date", "time"))
+            posted = self._posted_of(li)
             abs_url = urljoin(BASE, href) if href else ""
 
             now = datetime.now().isoformat(timespec="seconds")
@@ -231,6 +281,17 @@ class LinkedInScraper(BaseScraper):
     def _txt(scope, sel: str) -> str:
         el = scope.select_one(sel)
         return el.get_text(" ", strip=True) if el else ""
+
+    @staticmethod
+    def _posted_of(scope) -> str:
+        """刊登日：優先用 <time datetime="YYYY-MM-DD"> 的絕對日期（訪客分頁端點提供，
+        且較精確——相對時間會把 3 小時與 23 小時都當成同一天），
+        否則退回卡片上的相對時間文字（"4 days ago"）。"""
+        tm = scope.select_one("time")
+        if tm is None:
+            return ""
+        dt = (tm.get("datetime") or "").strip()
+        return dt or tm.get_text(" ", strip=True)
 
     # ---------- 詳情（免登入 guest API） ----------
     def get_detail(self, job_url: str) -> Optional[JobRecord]:
@@ -290,6 +351,17 @@ class LinkedInScraper(BaseScraper):
             return None
         if "just now" in raw or "剛剛" in raw or "最近" in raw:
             return 0
+        # 絕對日期（訪客分頁端點 / 首頁 <time datetime>）：YYYY-MM-DD
+        # ⚠️ 必須用 group(0)（完整匹配）而非 group(1)——後者只是「年」，
+        #    會讓 strptime("2026", "%Y-%m-%d") 拋錯、56 筆以上職缺被誤判為逾期。
+        # 不加結尾錨點，以容忍 ISO 帶時間格式（2026-09-07T12:34:56Z）。
+        m = re.match(r"(\d{4})-(\d{2})-(\d{2})", raw)
+        if m:
+            try:
+                d = datetime.strptime(m.group(0), "%Y-%m-%d")
+            except ValueError:
+                return None
+            return max(0, (datetime.now() - d).days)
         # 英文單位
         m = re.search(r"(\d+)\s*(hour|day|week|month)s?", raw)
         if m:

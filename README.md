@@ -71,11 +71,11 @@
 - **LinkedIn 據點已實戰驗證（訪客模式）**：
   - **無須登入、無須 Playwright**：職位搜尋結果為**伺服器渲染 HTML**（plain `requests` + `BeautifulSoup` 即可），詳情另有**免登入 guest API** `jobs-guest/jobs/api/jobPosting/<id>`。比前幾站更輕量。
   - **支援關鍵字搜尋 + 地點**：`/jobs/search/?keywords=K&location=Hong%20Kong`；`--district` 經 18 區字典（`scrapers/linkedin_geo.json`）翻譯成英文區名餵給 `location=`（中文「元朗」→`Yuen Long`，含旺角/銅鑼灣等別名）。⚠️ 訪客模式 `geoUrn=` 無效，故走 `location=` 文字。
-  - **支援近期篩選 `--days N`**：列表卡已含相對刊登日（`4 days ago` / `1 week ago`，強制英文語系以利解析），直接由列表過濾，不必抓詳情。
+  - **支援近期篩選 `--days N`**：列表卡已含刊登日（2026-09-09 起**優先取 `<time datetime="YYYY-MM-DD">` 絕對日期**；無該屬性才用相對文字 `4 days ago`，強制英文語系以利解析），直接由列表過濾，不必抓詳情。此外 `--days` 會**下推為站方端 `f_TPR=r<N×86400>`**，讓 LinkedIn 只回傳該時間窗內的職缺（實測 `--days 7` 回傳 80 筆全數落於 7 天內）。
   - **支援排序 `--sort post_dt_desc`**：對應網址 `sortBy=DD`（最新優先），並讓 `--days` 提早停翻；其餘選項為 gov_hk 專有，傳入會警告並回退預設。
-  - **跨頁去重 + 提早停翻**：LinkedIn 訪客模式深翻頁（`start`）行為不穩定（會隨機化/AB 測試），故以 `job_id` 去重，整頁皆已見即停，避免無限迴圈。穩定深翻頁需登入態 `li_at` cookie（見下方技術筆記）。
+  - **雙軌翻頁（2026-09-09 改版）**：第 1 頁走 `/jobs/search/`（一次 ~58 張），第 2 頁起改走訪客分頁端點 `/jobs-guest/jobs/api/seeMoreJobPostings/search`（`start` 為索引、每頁 10 張，且 `start` 從已累積筆數接續，避開「兩個端點共用結果池」的陷阱）。全程以 `job_id` 去重，整頁皆已見即停，避免無限迴圈。實測 `--pages 4 --days 7` 可累積 **80 筆全數有效**（改版前第 2 頁即停）。
   - **不支援項**：`--category` / `--industry`（LinkedIn 簡易搜尋無乾淨對應維度，傳入會忽略並提示）。
-  - ⚠️ **訪客模式天花板**：未登入時單次執行約可拿 ~25–60 筆獨特職位（受隨機化翻頁限制）；提供 `li_at` cookie 後翻頁趨於穩定、可抓更深。
+  - ✅ **天花板已上修（2026-09-09）**：改用訪客分頁端點後，實測 `--pages 4 --days 7` 可累積 80 筆（58→66→73→80）且全數符合時間窗，不再受限於 ~60 筆。訪客結果仍會「漂移」（同一 `start` 每次取樣可能不同），故以去重累積、邊際效益遞減；提供 `li_at` cookie 後為登入態，翻頁最穩定。
 - **Recruit 據點已實戰驗證（擴充八站 Wave 1）**：
   - **ASP.NET WebForms + Vue 3 混合站**，無 Cloudflare、無 CAPTCHA，但篩選值藏在 hidden 欄位（不是 checkbox），搜尋鈕被 CSS 藏住，翻頁只能在真瀏覽器內跑 `__doPostBack`。
   - **支援關鍵字 + 地區 + 職能三維篩選**：`--district`（94 區，中英文皆可，如 `元朗`/`Yuen Long`）、`--category`（34 大類 + 290 細類，中英雙語）。實測 engineer 全站 820 筆 → 元朗 15 筆、資訊科技大類 204 筆、元朗+資訊科技 1 筆。
@@ -235,11 +235,11 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 | 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 | ✅ POSITION level-2 code（31 大類 + 431 細類） |
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
 | 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
-| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含日期 | ✅ 內嵌職位陣列瞬時（~9s，不點擊）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
+| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ✅ 內嵌職位陣列瞬時（~9s，不點擊）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
 | 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 已實測修正（2026-09-08）：描述原只抓到 17 字（`(.*?)</div>` 撞上巢狀 div）→ 改 DOM `inner_text` + 巢狀配對，實測 934–2476 字；另加點擊重試與 🐢 熔斷（連續 2 筆失敗即停止），16 筆由 **9 分鐘 / 剩 1 筆** → **~1 分鐘 / 完整** | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
-| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | ~25 | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
+| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | 首頁 ~58／續頁 10（guest 端點） | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
 | 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
-| 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ⚠️ 訪客 ~60 筆；`li_at` cookie 解鎖 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
+| 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ✅ 雙軌（2026-09-09）：首頁 `/jobs/search/` + 續頁 guest 端點，`start` 從已累積筆數接續；實測 4 頁 80 筆，`li_at` 更穩 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
 
 > 圖例：✅ 完全支援　⚠️ 部分 / 有限支援　❌ 不適用（傳入會警告並忽略）
 
@@ -313,7 +313,8 @@ python main.py --source linkedin --keyword "data engineer" --district "Hong Kong
 # 22) LinkedIn：依刊登日期由近至遠排序（post_dt_desc → 網址 sortBy=DD，並讓 --days 提早停翻）
 python main.py --source linkedin --keyword "software engineer" --sort post_dt_desc --pages 3
 
-# 23) LinkedIn：啟用登入態深翻頁（需先設 li_at cookie；未設則退訪客模式 ~60 筆天花板）
+# 23) LinkedIn：訪客模式深翻頁（2026-09-09 起第 2 頁起自動走 guest 分頁端點，
+#     實測 --pages 4 --days 7 可累積 80 筆；設 li_at cookie 則為登入態，翻頁最穩）
 #    Windows (PowerShell):  $env:LINKEDIN_LI_AT="你的cookie"
 #    macOS / Linux:         export LINKEDIN_LI_AT="你的cookie"
 python main.py --source linkedin --keyword "data engineer" --pages 10
@@ -758,16 +759,34 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 - **真實網域**：`https://www.linkedin.com`（職位搜尋在 `/jobs/search/`；單筆詳情免登入 API 在 `/jobs-guest/jobs/api/jobPosting/<id>`）。站台會依訪客 IP 把網域導向地區鏡像（如 `hk.linkedin.com`），但路徑不變，不影響爬取。
 - **反爬保護**：
   - LinkedIn 有強反爬（PerimeterX / HUMAN + 自研指紋、速率限制），但**職位搜尋（訪客模式）與職位詳情（guest API）對未登入使用者開放**，不需 `li_at` cookie 也能抓。
-  - 關鍵限制：**訪客模式深翻頁不穩定**——`start` 參數會被隨機化 / AB 測試，同一 `start` 可能回傳不同批次（實測 `start=0/50` 同批、`start=10/25` 另批、`total` 數 265↔478 跳動）。故單次執行約能穩定拿 ~25–60 筆獨特職位。
-  - **解鎖穩定深翻頁**：在 `config.LINKEDIN_LI_AT`（或環境變數 `LINKEDIN_LI_AT`）填入自己的 `li_at` cookie 即可切到登入態，此時 `start` 翻頁趨於穩定、可抓更深。cookie 取得：瀏覽器登入 linkedin.com → DevTools → Application → Cookies → 複製 `li_at` 值。⚠️ cookie 等同帳號憑證，僅供個人使用、切勿外洩，且請遵守 LinkedIn 服務條款、維持禮貌爬取頻率。
-- **搜尋機制：伺服器渲染 HTML**（非 GraphQL、非 JSON API）。`GET /jobs/search/?keywords=K&location=L&start=N[&sortBy=DD]` 直接回傳含職位卡的完整 HTML，用 `BeautifulSoup` 解析即可（每頁約 25 張職位卡，訪客模式實測回傳 ~60 個 `li`，含少量推廣 / 重複）。
-- **翻頁機制**：URL `start=N`（N 從 0 起，每頁 25）。**訪客模式 `start` 不可靠**（見上），故實作以 `job_id` 跨頁去重，整頁皆為已見職位即停止翻頁（避免無限迴圈）；提供 `li_at` 後可正常深翻。
+  - ⚠️ **舊認知（2026-09-09 已突破）**：`/jobs/search/?start=N` 在訪客模式下會被隨機化 / AB 測試，同一 `start` 可能回傳不同批次（實測 `start=0/50` 同批、`start=10/25` 另批、`total` 數 265↔478 跳動），單次約 ~25–60 筆即撞天花板。**改用訪客分頁端點後可持續突破**（見下方「翻頁機制」）。
+  - **解鎖最穩定翻頁**：在 `config.LINKEDIN_LI_AT`（或環境變數 `LINKEDIN_LI_AT`）填入自己的 `li_at` cookie 即可切到登入態，此時 `start` 翻頁趨於穩定、可抓更深。cookie 取得：瀏覽器登入 linkedin.com → DevTools → Application → Cookies → 複製 `li_at` 值。⚠️ cookie 等同帳號憑證，僅供個人使用、切勿外洩，且請遵守 LinkedIn 服務條款、維持禮貌爬取頻率。
+- **搜尋機制：伺服器渲染 HTML**（非 GraphQL、非 JSON API）。`GET /jobs/search/?keywords=K&location=L&start=N[&sortBy=DD]` 直接回傳含職位卡的完整 HTML，用 `BeautifulSoup` 解析即可（訪客模式實測回傳 ~58 張職位卡）。
+- **翻頁機制（2026-09-09 改版：雙軌）**：
+
+  | 頁數 | 端點 | 行為 |
+  |------|------|------|
+  | 第 1 頁 | `/jobs/search/` | 一次取數十張卡（實測 58），CP 值最高 |
+  | 第 2 頁起 | `/jobs-guest/jobs/api/seeMoreJobPostings/search` | `start` 為索引、**每頁固定 10 張** |
+
+  - 後者是 LinkedIn 給搜尋引擎 / 未登入訪客用的分頁端點，回傳**裸 HTML 片段**（無
+    `.jobs-search__results-list` 外層容器），但卡片內部結構與 `/jobs/search/` 完全相同，
+    故解析邏輯共用（程式碼在 selector 落空時自動退回 `li`）。
+  - ⚠️ **兩個陷阱（皆為實測踩坑，勿重蹈）**：
+    1. **每頁是 10 張、不是 25 張**——沿用舊步長 25 會直接吃掉 15 張卡。
+    2. **帶相同 `f_TPR` + `sortBy` 時，兩個端點共用同一個結果池**。若第 2 頁從
+       `start=10` 起算，會整頁落在首頁已取的 58 筆內、被去重擋掉而「假性停止翻頁」。
+       故 `start` 一律從**已累積筆數**接著往下走：`max((page-1)*10, len(_seen))`。
+  - **實測戰果**（`--pages 4 --days 7`）：58 → 66 → 73 → **80 筆，且全數落在 7 天內**；
+    改版前同一條件下第 2 頁即停，且多數舊職缺還會被客戶端日期篩選丟棄。
+  - 訪客結果仍會「漂移」（同一 `start` 每次取樣可能不同），故以 `job_id` 跨頁去重累積，
+    整頁皆已見即停止翻頁（避免無限迴圈）；提供 `li_at` 後為登入態，翻頁最穩定。
 - **職位卡解析（`.jobs-search__results-list li` 內）**：
   - `a.base-card__full-link` → 連結 `…/jobs/view/<slug>-<id>`，取網址 slug 尾段數字作 `job_id`（標準鍵 `linkedin::<id>`）
   - `.base-search-card__title` → 職位名
   - `.base-search-card__subtitle` → 公司
   - `.job-search-card__location`（或 `.base-search-card__metadata` 第一行）→ 地點
-  - `time` → 相對刊登日（如 `4 days ago`）
+  - `time` → 刊登日。**優先取 `datetime` 屬性**（`datetime="2026-09-07"`，絕對日期、較精確）；無該屬性才退回文字（如 `4 days ago`）
   - 訪客卡通常**不含薪資**（留空）
 - **詳情頁（免登入 guest API）**：`GET /jobs-guest/jobs/api/jobPosting/<id>` 回傳公開職位頁 HTML 片段（status 200，含完整 `description`）。解析：
   - `.top-card-layout__title` → 職位名
@@ -776,6 +795,18 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
   - `.description__text` / `.show-more-less-html__markup` → 描述（最長可達數千字）
   - 刊登日：詳情頂部文字抓相對時間（與列表同源）
 - **語系處理**：強制 `Accept-Language: en-US`，確保刊登日為英文（`4 days ago`）便於 `days_since_posted()` 解析；同時備援中文單位（`4 天前` / `3 個月前`）解析，雙語皆可用。地點也因此為 `Hong Kong, Hong Kong SAR` 而非中文本地化。
+- **站方端日期過濾（`--days` → `f_TPR`，2026-09-09 新增）**：`--days N` 會經 `base_scraper`
+  的 `set_days()` 掛載點下推為 `f_TPR=r<N×86400>`（7 天 = `r604800`；24h = `r86400`；
+  30 天 = `r2592000`），讓 LinkedIn **只回傳該時間窗內的職缺**，不必再抓一堆然後丟掉。
+  實測：帶 `r604800` 時回傳卡片全數落於 7 天內；未帶時會混入一年以上的舊職缺
+  （如 `2025-04-30`）。
+  ⚠️ 此掛載點為 LinkedIn 專用：其他據點未實作 `set_days()`，`base_scraper` 會整段跳過、
+  行為完全不變（已回歸驗證 OfferToday 10→8、JobMarket 25→20 無異）。
+- **刊登日絕對日期解析（踩坑）**：卡片 `<time>` 的 `datetime` 是 `YYYY-MM-DD`。
+  解析正則 `(\d{4})-(\d{2})-(\d{2})` 有**三個捕獲組**，`m.group(1)` 只是「年」——
+  誤用會讓 `strptime("2026", "%Y-%m-%d")` 拋錯、全部職缺被誤判為逾期（實測 58 筆全滅）。
+  **必須用 `m.group(0)`**（完整匹配）；且不加結尾錨點，以容忍 ISO 帶時間格式
+  （`2026-09-07T12:34:56Z`）。這與 Indeed 的 `jobkey`／`jobKey` 是同一類「張冠李戴」坑。
 - **排序（--sort）**：`--sort post_dt_desc` → 網址 `sortBy=DD`（最新優先，實測有效）；其餘選項（`post_dt_asc` / `salary_*` / `yr_exp_*` / `edu_lvl_*`）為 gov_hk 專有，LinkedIn 無對應，傳入會 `logger.warning` 並回退網站預設（相關性）。
 - **地區篩選體系（重要）**：LinkedIn 地區為**自由文字 `location=`**（無像 JobsDB slug / 勞工處數字 ID 的編碼體系）。2026-07-30 逆向發現訪客可達的 `jobs-guest/api/typeaheadHits?typeaheadType=GEO&geoTypes=POPULATED_PLACE,...` API 會回傳香港 18 區的 geoUrn（如元朗=`102989568`），**但訪客搜尋用 `geoUrn=<數字>` 參數完全無效**（實測回非目標區甚至美國職位）。有效機制是 `location=<英文區名>` 文字（LinkedIn 顯示「N jobs in Yuen Long」）。故本爬蟲以 `scrapers/linkedin_geo.json`（18 區 zh/英文/別名/geoUrn）把 `--district` 翻譯成標準英文區名餵給 `location=`。詳見上方「🗺️ 按地區篩選（LinkedIn）」。
 - **各欄位資料來源總表（LinkedIn → JobRecord）**：
@@ -793,7 +824,7 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
   | `description` | 詳情 `.description__text` |
   | `requirements` | 併入 description（訪客無獨立欄位） |
   | `url` | `https://www.linkedin.com/jobs/view/…-<id>` |
-  | `posted_date` | `time`（列表）/ 詳情頂部相對時間 |
+  | `posted_date` | 列表 `<time datetime="YYYY-MM-DD">`（優先）／相對時間文字（備援）／詳情頂部相對時間；`days_since_posted()` 三種格式皆可解析 |
   | `scraped_at` | 抓取當下 `datetime.now()` |
 
 ## 🗺️ 按地區篩選（LinkedIn）

@@ -107,7 +107,9 @@ SITE_CONFIG = {
         "request_delay": 2.0,
     },
     "jobsdb": {"needs_browser": True, "request_delay": 2.0},
-    "linkedin": {"needs_browser": False, "request_delay": 3.0,
+    # 訪客模式對速率敏感（429 / 登入牆），且第 2 頁起每頁僅 10 張卡（翻頁請求數較多），
+    # 故間隔拉高到 5 秒以符合爬蟲禮節（「不要太狠、一步一步、不要被封」）。
+    "linkedin": {"needs_browser": False, "request_delay": 5.0,
                  "supports_logged_out": True},
     "indeed": {"needs_browser": True, "request_delay": 3.0},
     # ASP.NET WebForms：翻頁須在真瀏覽器內執行 __doPostBack，故 needs_browser
