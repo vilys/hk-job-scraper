@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urljoin
@@ -172,6 +172,46 @@ class GovHkScraper(BaseScraper):
         self._last_category: str = ""
         self._last_industry: str = ""
         self._last_sort: str = ""
+        # 站方端日期過濾（criteria.postedDtFr / postedDtTo，格式 DD/MM/YYYY），
+        # 由 base_scraper 的 set_days() 掛載點注入
+        self._posted_dt_fr: str = ""
+        self._posted_dt_to: str = ""
+        self._last_days_sig: str = ""
+
+    # ---------- 站方端日期過濾掛載點（base_scraper.scrape_all 呼叫） ----------
+    def set_days(self, days: int) -> None:
+        """把 --days 下推成勞工處表單的 `criteria.postedDtFr` / `postedDtTo`。
+
+        表單格式為 **DD/MM/YYYY**（input placeholder 為「日日/月月/年年年年」）。
+        啟用後：
+          (1) 站方只回傳該日期區間內刊登的職缺，省下「抓一堆再丟掉」的請求；
+          (2) `list_has_date` 暫時視為 True——列表本身無刊登日，但站方已篩過，
+              不必再逐筆抓詳情取日期（原本 --days 會強制 N 支詳情請求）；
+          (3) `_within_days()` 直接信任站方結果，不再做客戶端二度篩選。"""
+        try:
+            n = int(days)
+        except (TypeError, ValueError):
+            logger.warning("[gov_hk] --days %r 無法轉為整數，已忽略站方端過濾", days)
+            return
+        if n <= 0:
+            return
+        today = date.today()
+        self._posted_dt_fr = (today - timedelta(days=n)).strftime("%d/%m/%Y")
+        self._posted_dt_to = today.strftime("%d/%m/%Y")
+        # 站方已過濾 → 視同「列表已含日期」，避免 base 為了取日期而逐筆抓詳情
+        self.list_has_date = True
+        logger.info("[gov_hk] 已啟用站方端日期過濾 postedDtFr=%s ~ postedDtTo=%s（%d 天內）",
+                    self._posted_dt_fr, self._posted_dt_to, n)
+
+    def _within_days(self, job: JobRecord, days: int) -> bool:
+        """啟用站方端過濾後直接信任站方結果（列表無刊登日，客戶端無從二度篩選）。"""
+        if self._posted_dt_fr:
+            return True
+        return super()._within_days(job, days)
+
+    def _days_sig(self) -> str:
+        """日期區間簽章（供 need_post 判斷是否需要重新 POST）。"""
+        return f"{self._posted_dt_fr}|{self._posted_dt_to}"
 
     # ---------- 搜尋 ----------
     def search(
@@ -186,7 +226,7 @@ class GovHkScraper(BaseScraper):
         district_ids = resolve_districts(district)
         cat_id = resolve_category(category)
         ind_id = resolve_industry(industry)
-        # 關鍵字 / 地區 / 工作種類 / 行業 / 排序 任一變動時需重新 POST；否則直接翻頁
+        # 關鍵字 / 地區 / 工作種類 / 行業 / 排序 / 日期區間 任一變動時需重新 POST
         need_post = (
             page == 1
             or not self._posted
@@ -195,10 +235,15 @@ class GovHkScraper(BaseScraper):
             or self._last_category != cat_id
             or self._last_industry != ind_id
             or self._last_sort != (sort or "")
+            or self._last_days_sig != self._days_sig()
         )
         if need_post:
             soup = self._get_search_page()
             data = self._build_form(soup, keyword, district_ids, cat_id, ind_id, sort)
+            # 站方端日期過濾（--days 下推）：表單格式 DD/MM/YYYY
+            if self._posted_dt_fr:
+                data["criteria.postedDtFr"] = self._posted_dt_fr
+                data["criteria.postedDtTo"] = self._posted_dt_to
             r = self.session.post(
                 SEARCH_URL,
                 headers={**self.headers, "Referer": SEARCH_URL},
@@ -211,6 +256,7 @@ class GovHkScraper(BaseScraper):
             self._last_category = cat_id
             self._last_industry = ind_id
             self._last_sort = sort or ""
+            self._last_days_sig = self._days_sig()
             html = r.text
         else:
             r = self.session.get(

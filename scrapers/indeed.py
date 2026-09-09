@@ -67,6 +67,7 @@ class IndeedScraper(BaseScraper):
         self._date_map: dict[str, str] = {}   # {jk: 'N day ago'}，最近一次 search 的刊登日
         self._detail_fail_streak = 0          # 連續點不開詳情面板的次數（熔斷用）
         self._warned_detail_break = False
+        self._fromage: str = ""               # 站方端日期過濾（fromage=N），由 set_days() 注入
 
     # ---------- 瀏覽器（共用一個 session） ----------
     def _ensure_browser(self) -> None:
@@ -98,15 +99,33 @@ class IndeedScraper(BaseScraper):
         v = (district or "").strip()
         return v or "Hong Kong"
 
-    @staticmethod
-    def _build_url(keyword: str, district: Optional[str], page: int) -> str:
-        loc = IndeedScraper._location_of(district)
+    def _build_url(self, keyword: str, district: Optional[str], page: int) -> str:
+        loc = self._location_of(district)
         params = [f"q={quote(keyword)}" if keyword else "",
                   f"l={quote(loc)}"]
         if page and page > 1:
             params.append(f"start={(page - 1) * 10}")   # 每頁 10 筆
+        if self._fromage:
+            # 站方端日期過濾：fromage=N 讓 Indeed 只回傳 N 天內的職缺
+            params.append(f"fromage={self._fromage}")
         params = [p for p in params if p]
         return SEARCH_URL + "?" + "&".join(params)
+
+    # ---------- 站方端日期過濾掛載點（base_scraper.scrape_all 呼叫） ----------
+    def set_days(self, days: int) -> None:
+        """把 --days 下推成 Indeed 的 `fromage=N`（站方端只回傳 N 天內的職缺）。
+
+        客戶端仍會以內嵌 mosaic 的 `formattedRelativeTime` 二度篩選（雙保險），
+        但站方端先篩過可避免「一整頁都是幾十天前的舊職缺、濾完剩沒幾筆」。"""
+        try:
+            n = int(days)
+        except (TypeError, ValueError):
+            logger.warning("[indeed] --days %r 無法轉為整數，已忽略站方端過濾", days)
+            return
+        if n <= 0:
+            return
+        self._fromage = str(n)
+        logger.info("[indeed] 已啟用站方端日期過濾 fromage=%s（%d 天內）", self._fromage, n)
 
     # ---------- 搜尋 ----------
     def search(

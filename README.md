@@ -235,7 +235,7 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 | 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 | ✅ POSITION level-2 code（31 大類 + 431 細類） |
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
 | 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
-| 近期 `--days` | ❌ 不適用 | ✅ 抓詳情取日期 | ✅ 列表含日期 | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ✅ 內嵌職位陣列瞬時（~9s，不點擊）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時 | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
+| 近期 `--days` | ❌ 不適用 | ✅ **站方端 `criteria.postedDtFr/To`**（2026-09-09 新增，格式 DD/MM/YYYY：列表無日期，舊流程須逐筆抓詳情取 `#postedDt`，改為站方端後 20 筆僅 2 支請求） | ✅ 列表含日期 | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ✅ 內嵌職位陣列瞬時（~9s，不點擊）+ **站方端 `fromage=N`**（2026-09-09 加入，⚠️ **尚未實測驗證**——該站當日遭 Cloudflare 攔截，見 Indeed 章節）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時（⚠️ 2026-09-09 實測 `postedDate` / `datePosted` / `daysSincePosted` 三種參數名皆無效，站方端無日期過濾；因列表已含 ISO 日期、客戶端零成本篩選，影響極小） | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
 | 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 已實測修正（2026-09-08）：描述原只抓到 17 字（`(.*?)</div>` 撞上巢狀 div）→ 改 DOM `inner_text` + 巢狀配對，實測 934–2476 字；另加點擊重試與 🐢 熔斷（連續 2 筆失敗即停止），16 筆由 **9 分鐘 / 剩 1 筆** → **~1 分鐘 / 完整** | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
 | 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | 首頁 ~58／續頁 10（guest 端點） | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
 | 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
@@ -686,6 +686,16 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 - **排序（時間排列）** = `criteria.sortBy`，下拉可選值：`post_dt_desc`(刊登日期新→舊) /
   `post_dt_asc`(舊→新) / `salary_desc`·`salary_asc`(月薪) / `yr_exp_asc`·`yr_exp_desc`(經驗) /
   `edu_lvl_asc`·`edu_lvl_desc`(學歷)。未送則用網站預設順序。
+- **站方端日期過濾（`--days` → `criteria.postedDtFr/To`，2026-09-09 新增）**：
+  搜尋表單其實內建刊登日期區間欄位，格式 **DD/MM/YYYY**（input placeholder 為
+  「日日/月月/年年年年」）：`criteria.postedDtFr`=起日、`criteria.postedDtTo`=迄日。
+  `--days N` 會經 `base_scraper` 的 `set_days()` 掛載點下推為 `(今天-N) ~ 今天`。
+  - ⭐ **效益最大**：列表本身**沒有**刊登日，舊流程為了 `--days` 必須**逐筆抓詳情**
+    取 `#postedDt`（20 筆 = 20 支額外請求）；改為站方端過濾後**完全不必抓詳情**，
+    整輪只需 2 支請求（GET 表單 + POST 搜尋）。
+  - 啟用後 `_within_days()` 直接信任站方結果（列表無日期，客戶端無從二度篩選）。
+  - **實測驗證**：`--days 1` 抓前三筆詳情，刊登日皆為 `09/09/2026`（當天，天數 = 0）—
+    站方職缺存量上萬，隨機三筆不可能全為同一天，證實過濾確實生效。
 - **工作種類 / 行業篩選（兩套獨立維度）**：
   - **工作種類（空缺類別）** = `criteria.jobType`，**單選**下拉，29 類數字 ID（會計=1…物業管理/保安員=31，24/29 兩碼網頁未列出）。空值 = 所有類別。
   - **行業** = `criteria.industry`，**單選**下拉，27 業數字 ID（含負號：飲食業=-1、零售業=-2）。
@@ -845,6 +855,12 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 
 ## 🧭 技術筆記（Indeed 逆向要點）
 
+  - 🐢 **2026-09-09 狀態更新：CF 再次升級，連本機 Chrome 也過不了 → 據點目前 0 筆。**
+    實測 `channel="chrome"` 開 `hk.indeed.com/jobs?q=...` 仍停在 `Just a moment...`
+    （內文 `Additional Verification`，beacon 數 0），等待逾 45 秒無效；
+    不帶任何新參數的對照組同樣 0 筆，故**不是**當日新增的 `fromage` 參數所致。
+    下一步待辦：重跑健康檢查、評估是否需要改用持久化 profile／cf_clearance 複用
+    （目前每次執行都是全新 context，指紋未延續）。**尚未修復，如實揭露。**
 - **真實網域**：`https://hk.indeed.com`（香港鏡像；職位搜尋 `/jobs`、單筆詳情 `/viewjob`）。
 - **反爬保護（Cloudflare「Just a moment...」）**：
   - plain `requests` → **403 被擋**；必須用 **Playwright**（本爬蟲 `use_browser=True`）。

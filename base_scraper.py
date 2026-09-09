@@ -118,6 +118,17 @@ class BaseScraper(ABC):
             output:       輸出檔案路徑（None 表示不匯出）
             fmt:          json / csv / both
         """
+        # 站方端日期過濾掛載點：有實作 set_days() 的來源可把 --days 直接下推到搜尋請求
+        # （linkedin 的 f_TPR、gov_hk 的 criteria.postedDtFr/To…）。
+        # ⚠️ 必須在下方 with_detail 判斷「之前」執行：否則 list_has_date=False 的來源
+        # （如 gov_hk）會先被強制成「逐筆抓詳情取日期」，站方端過濾就白做了。
+        # 其餘來源沒有此方法 → 整段跳過，行為完全不變（跨站隔離鐵律）。
+        if days is not None and hasattr(self, "set_days"):
+            try:
+                self.set_days(days)
+            except Exception as e:  # noqa: BLE001
+                logger.warning("[%s] 站方端日期過濾設定失敗：%s", self.source, e)
+
         # 按日期篩選：若列表頁已含日期（list_has_date），直接以列表資料過濾；
         # 否則必須抓詳情以取得 posted_date。預設按刊登日期由近至遠排序。
         if days is not None:
@@ -125,15 +136,6 @@ class BaseScraper(ABC):
                 with_detail = True
             if sort is None:
                 sort = "post_dt_desc"
-
-        # 站方端日期過濾掛載點：有實作 set_days() 的來源（如 linkedin 的 f_TPR）可把
-        # --days 直接下推到搜尋請求，省下「抓一堆再丟掉」的請求數。
-        # 其餘來源沒有此方法 → 整段跳過，行為完全不變（跨站隔離鐵律）。
-        if days is not None and hasattr(self, "set_days"):
-            try:
-                self.set_days(days)
-            except Exception as e:  # noqa: BLE001
-                logger.warning("[%s] 站方端日期過濾設定失敗：%s", self.source, e)
 
         all_jobs: list[JobRecord] = []
         for page in range(1, max_pages + 1):
