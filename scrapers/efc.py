@@ -77,11 +77,7 @@ class EfcScraper(BaseScraper):
         self._session = requests.Session()
         self._session.headers.update(
             {
-                "User-Agent": self.headers.get(
-                    "User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-                ),
+                "User-Agent": self.headers["User-Agent"],
                 "Accept": "application/json",
                 "Accept-Language": "en-HK,en;q=0.9",
                 "Referer": _SITE + "/",

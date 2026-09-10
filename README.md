@@ -652,6 +652,13 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 - **JobsDB 功能邊界**：`--district` / `--category` / `--sort` **已生效**（透過瀏覽網址與 `?sortmode=ListedDate`）；`--industry` 不適用（JobsDB 無此維度，忽略並提示）；`--detail` 詳情頁解析為 best-effort。
   詳見上方「🗺️ 按地區篩選（JobsDB）」與下方「🧭 技術筆記（JobsDB）」。
 - **gov.hk 無反爬但請禮貌**：勞工處網站無 Cloudflare，但仍建議保持預設 2 秒間隔，避免對政府伺服器造成壓力。
+- **⚠️ User-Agent 必須與本機 Chrome 同版本（2026-09-10 血淚教訓）**：
+  Cloudflare 會比對 UA 與 Client Hints（`sec-ch-ua`）回報的真實版本。UA 說 `Chrome/124`
+  但瀏覽器實為 152，這種落差是極經典的機器人訊號，會直接卡在 managed challenge
+  （Indeed 據點即因此陣亡，詳見其技術筆記）。
+  本專案已改為**開機自動量測**本機 Chrome 版本（`config.CHROME_VERSION`），
+  不會再腐化；可用環境變數 `CHROME_UA_VERSION` 手動覆寫。
+  👉 **若你換了瀏覽器或在沒有 Chrome 的機器上執行，請確認這個值是否合理。**
 - **反爬禮貌**：預設已加入請求間隔與隨機抖動，請勿惡意高併發爬取。
 
 ---
@@ -875,11 +882,13 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
       → 證明 IP 並未全面陣亡，是 **Indeed 這一區把我們拉黑**（很可能是當日反覆嘗試累積所致）。
     - **結論與建議**：程式面已無可著力處，讓 IP 冷靜數小時至數天再試。
       `fromage=N` 仍標註為**尚未實測驗證**。
-    - ⚠️ **延伸風險（未一併更動，刻意保留）**：`config.DEFAULT_HEADERS` 的 UA 仍是
-      `Chrome/124.0.0.0`，而 `foundit` / `jobsdb` / `liepin` / `recruit` / `zhipin`
-      五個來源都沿用它。目前這些站都能正常運作，但一旦他們的 CF / WAF 也開始比對
-      Client Hints，就會踩到同一顆地雷。未一次改動五站是為了避免未經驗證的跨站影響
-      （鐵律 #4）；建議逐站驗證後再更新 UA。
+    - ✅ **延伸風險已拆除（2026-09-10）**：`config.DEFAULT_HEADERS` 原本寫死
+      `Chrome/124.0.0.0`，而 foundit / jobsdb / liepin / recruit / zhipin 都沿用同一份
+      UA —— 等於五顆未爆彈共用一根引線。已改為**開機自動量測本機 Chrome 版本**
+      （`config._detect_chrome_version()`，實測抓到 `152.0.7977.83`），
+      從此 UA 與 Client Hints 永遠一致，不會再腐化。
+      可用環境變數 `CHROME_UA_VERSION` 覆寫。實測六站回歸全數正常：
+      jobsdb 30 / recruit 25 / foundit 20 / moovup 12 / efc 50 / offertoday 10。
 - **真實網域**：`https://hk.indeed.com`（香港鏡像；職位搜尋 `/jobs`、單筆詳情 `/viewjob`）。
 - **反爬保護（Cloudflare「Just a moment...」）**：
   - plain `requests` → **403 被擋**；必須用 **Playwright**（本爬蟲 `use_browser=True`）。

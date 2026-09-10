@@ -89,11 +89,7 @@ class FounditScraper(BaseScraper):
         self._session = requests.Session()
         self._session.headers.update(
             {
-                "User-Agent": DEFAULT_HEADERS.get(
-                    "User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-                ),
+                "User-Agent": DEFAULT_HEADERS["User-Agent"],
                 "Accept-Language": "en-US,en;q=0.9",
             }
         )
@@ -118,11 +114,7 @@ class FounditScraper(BaseScraper):
         self._context = self._browser.new_context(
             locale="en-US",
             viewport={"width": 1440, "height": 900},
-            user_agent=DEFAULT_HEADERS.get(
-                "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-            ),
+            user_agent=DEFAULT_HEADERS["User-Agent"],
         )
         self._page = self._context.new_page()
         return self._page

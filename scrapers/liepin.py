@@ -86,11 +86,7 @@ class LiepinScraper(BaseScraper):
         self._context = self._browser.new_context(
             locale="zh-CN",
             viewport={"width": 1440, "height": 900},
-            user_agent=DEFAULT_HEADERS.get(
-                "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-            ),
+            user_agent=DEFAULT_HEADERS["User-Agent"],
         )
         self._page = self._context.new_page()
         return self._page

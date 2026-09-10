@@ -33,10 +33,58 @@ REQUEST_TIMEOUT = 20
 MAX_RETRIES = 3
 
 # ---- 預設請求標頭 ----
+# ⚠️⚠️ User-Agent 必須與本機 Chrome 的實際版本一致（2026-09-10 重大修正）
+# Cloudflare 會比對 UA 與 Client Hints（`sec-ch-ua`）回報的真實版本。
+# 若 UA 寫 Chrome/124 而瀏覽器實為 152，這個落差就是極經典的機器人訊號——
+# Indeed 據點正是因此卡在 managed challenge（見 README「🧭 技術筆記（Indeed）」）。
+# 故改為**開機自動量測**本機 Chrome 版本，不再寫死，杜絕再次腐化。
+_CHROME_VERSION_FALLBACK = "152.0.0.0"   # 偵測失敗時的退路（僅影響 UA 字串，不影響功能）
+
+
+def _detect_chrome_version() -> str:
+    """量測本機 Google Chrome 的完整版本號（如 `152.0.7977.83`）。
+
+    搜尋順序：環境變數 CHROME_UA_VERSION → 常見安裝路徑下的版本目錄。
+    找不到則回退 `_CHROME_VERSION_FALLBACK` 並保持程式可運作。
+    """
+    override = os.getenv("CHROME_UA_VERSION", "").strip()
+    if override and override[0].isdigit():
+        return override
+
+    import re
+    roots: list[Path] = []
+    if os.name == "nt":
+        for base in (os.environ.get("PROGRAMFILES", r"C:\Program Files"),
+                     os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"),
+                     os.environ.get("LOCALAPPDATA", "")):
+            if base:
+                roots.append(Path(base) / "Google" / "Chrome" / "Application")
+    else:
+        roots.append(Path("/Applications/Google Chrome.app/Contents"))
+
+    pat = re.compile(r"^\d+\.\d+\.\d+\.\d+$")
+    best: tuple[int, ...] | None = None
+    best_s = ""
+    for root in roots:
+        try:
+            if not root.is_dir():
+                continue
+            for d in root.iterdir():
+                if d.is_dir() and pat.match(d.name):
+                    parts = tuple(int(x) for x in d.name.split("."))
+                    if best is None or parts > best:
+                        best, best_s = parts, d.name
+        except OSError:
+            continue
+    return best_s or _CHROME_VERSION_FALLBACK
+
+
+CHROME_VERSION = _detect_chrome_version()
+
 DEFAULT_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        f"(KHTML, like Gecko) Chrome/{CHROME_VERSION} Safari/537.36"
     ),
     "Accept-Language": "zh-HK,zh;q=0.9,en;q=0.8",
 }
