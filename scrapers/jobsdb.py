@@ -91,6 +91,41 @@ class JobsDBScraper(BaseScraper):
         self._browser = None
         self._context = None
         self._page = None
+        self._daterange: str = ""      # 站方端日期過濾（daterange=N），由 set_days() 注入
+
+    # ---------- 站方端日期過濾掛載點（base_scraper.scrape_all 呼叫） ----------
+    def set_days(self, days: int) -> None:
+        """把 --days 下推成 JobsDB 的 `daterange=N`。
+
+        ⚠️ 2026-09-10 逆向：站方側邊欄「Date posted」篩選器只給**五個離散值**
+        （連結直接印在頁面上）：
+            Today        → daterange=1
+            Last 3 days  → daterange=3
+            Last 7 days  → daterange=7
+            Last 14 days → daterange=14
+            Last 30 days → daterange=31   ← 注意是 31 不是 30
+        只吃這五個值；送其他數字（如 daterange=10）站方不予理會。
+        故取「不小於請求天數的最小合法值」；超過 31 天則不啟用站方端，
+        退回客戶端篩選（列表本就含 jobListingDate，不會少抓）。
+        """
+        try:
+            n = int(days)
+        except (TypeError, ValueError):
+            logger.warning("[jobsdb] --days %r 無法轉為整數，已忽略站方端過濾", days)
+            return
+        if n <= 0:
+            return
+        allowed = (1, 3, 7, 14, 31)
+        picked = next((v for v in allowed if v >= n), None)
+        if picked is None:
+            logger.warning(
+                "[jobsdb] --days %d 超出站方端上限（daterange 最大 31），"
+                "僅由客戶端以列表 jobListingDate 篩選", n)
+            return
+        if picked != n:
+            logger.info("[jobsdb] --days %d 無對應值，向上取整為 daterange=%d", n, picked)
+        self._daterange = str(picked)
+        logger.info("[jobsdb] 已啟用站方端日期過濾 daterange=%s", self._daterange)
 
     # ---------- 瀏覽器（共用一個 session，拿 cf clearance） ----------
     def _ensure_browser(self) -> None:
@@ -207,6 +242,9 @@ class JobsDBScraper(BaseScraper):
             params.append(f"page={page}")
         if sortmode:
             params.append(f"sortmode={sortmode}")
+        if self._daterange:
+            # 站方端日期過濾（僅 1/3/7/14/31 五個合法值，見 set_days）
+            params.append(f"daterange={self._daterange}")
         if params:
             path += "?" + "&".join(params)
         return BASE + path
