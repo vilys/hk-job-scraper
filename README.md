@@ -238,7 +238,7 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 | 近期 `--days` | ❌ 不適用 | ✅ **站方端 `criteria.postedDtFr/To`**（2026-09-09 新增，格式 DD/MM/YYYY：列表無日期，舊流程須逐筆抓詳情取 `#postedDt`，改為站方端後 20 筆僅 2 支請求） | ✅ 列表含日期 + **站方端 `daterange=N`**（2026-09-10 新增，實測站方總數 2,241 → 467 筆；⚠️ 只吃 `1/3/7/14/31` 五個離散值，其餘數字站方不理會，本爬蟲自動向上取整） | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ✅ 內嵌職位陣列瞬時（~9s，不點擊）+ **站方端 `fromage=N`**（2026-09-09 加入，⚠️ **尚未實測驗證**——該站當日遭 Cloudflare 攔截，見 Indeed 章節）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時（⚠️ 2026-09-09 實測 `postedDate` / `datePosted` / `daysSincePosted` 三種參數名皆無效，站方端無日期過濾；因列表已含 ISO 日期、客戶端零成本篩選，影響極小） | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
 | 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 已實測修正（2026-09-08）：描述原只抓到 17 字（`(.*?)</div>` 撞上巢狀 div）→ 改 DOM `inner_text` + 巢狀配對，實測 934–2476 字；另加點擊重試與 🐢 熔斷（連續 2 筆失敗即停止），16 筆由 **9 分鐘 / 剩 1 筆** → **~1 分鐘 / 完整** | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
 | 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | 首頁 ~58／續頁 10（guest 端點） | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
-| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告。⚠️⚠️ **2026-09-09：另須「UA 不覆寫」**，否則 Client Hints 版本不一致仍會被擋；⚠️ **目前遭 IP 層級封鎖（0 筆）**——2026-09-10 複測仍封鎖且 IP 未變（詳見 Indeed 章節）） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
+| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告。⚠️⚠️ **2026-09-09：另須「UA 不覆寫」**，否則 Client Hints 版本不一致仍會被擋；⚠️ **2026-09-10：全站封鎖中（0 筆）**——換全新 ISP 的 IP 仍擋，非 IP 層級問題（詳見 Indeed 章節）） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
 | 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ✅ 雙軌（2026-09-09）：首頁 `/jobs/search/` + 續頁 guest 端點，`start` 從已累積筆數接續；實測 4 頁 80 筆，`li_at` 更穩 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
 
 > 圖例：✅ 完全支援　⚠️ 部分 / 有限支援　❌ 不適用（傳入會警告並忽略）
@@ -889,7 +889,7 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
     |---|---|---|---|
     | ① 指紋不延續 | 每次 `new_context()` → CF 當成全新訪客 | 改 `launch_persistent_context` 持久化 profile | 已修 |
     | ② **UA 與 Client Hints 版本不一致** | UA 寫 `Chrome/124`，本機實為 `Chrome/152` | Indeed **不再覆寫 UA**（改用瀏覽器原生） | ✅ **突破挑戰** |
-    | ③ IP 層級封鎖 | `Blocked - Indeed.com` +「You have been blocked」+ Ray ID + 來源 IP | **無解，只能等** | ⛔ |
+    | ③ Indeed 全站封鎖 | 換全新 ISP 的 IP 仍封鎖；首頁／搜尋／hk／www 全擋 | 非單純 IP 層級，**待查**（見下方二次複測） | ⛔ |
 
     - **②是本次最關鍵的發現**：`config.DEFAULT_HEADERS` 的 UA 停留在 `Chrome/124.0.0.0`，
       但本機 Chrome 已是 152。Cloudflare 會比對 UA 與 Client Hints（`sec-ch-ua`）的真實版本，
@@ -917,7 +917,31 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
     - ✅ 好消息：新建的 `_block_state()` 表現理想，**9 秒內判讀出封鎖並立即停手**
       （舊碼會傻等 45 秒），不會因反覆重試加深黑名單。
 
-  - 📋 **IP 解封後的驗證清單**（換 IP 或等待後，照此順序執行）：
+  - 🚨 **2026-09-10 二次複測（換手機熱點、全新 IP）——推翻「IP 封鎖」結論**：
+    使用者改用手機熱點，對外 IP 由 HKT 寬頻 `1.64.x.x`（AS4760）
+    換成 **中國移動香港 `182.239.x.x`（AS9231）**，`mobile=true` /
+    `proxy=false` / `hosting=false`（乾淨的行動網路 IP，完全另一家業者）。
+    ⚠️ **仍遭一模一樣的封鎖**（`Blocked - Indeed.com`）。
+
+    - 進一步實測，**封鎖是全站性、不分鏡像的**：
+
+      | 測試目標 | 結果 |
+      |---|---|
+      | `hk.indeed.com/jobs?q=...`（搜尋頁） | ⛔ Blocked |
+      | `hk.indeed.com/`（首頁） | ⛔ Blocked |
+      | `www.indeed.com/jobs?q=...`（非 HK 鏡像） | ⛔ Blocked |
+
+    - **對照組（關鍵）**：同一顆全新 IP 上，**JobsDB（同樣走 Cloudflare）正常取 30 筆**
+      → 排除「新 IP 有問題」與「Cloudflare 全面封鎖」，是 Indeed 單方面所為。
+    - **結論修正**：既然橫跨兩個不同 ASN（HKT 寬頻 / 中國移動行動網路）、
+      且清空 profile（`INDEED_RESET_PROFILE=1`，等同全新指紋 + 全新 IP）仍被擋，
+      **這已非單純的 IP 層級封鎖**。較可能是 Indeed 對自動化流量的
+      指紋／行為層級封鎖，或其香港／亞洲區的全站性策略。
+      ⚠️ 因此「換 IP 等待解封」不再是有效解法。
+    - **仍待你確認（零請求，5 秒可驗）**：用手動 Chrome 開 `https://hk.indeed.com/`——
+      - 若**手動正常** → 是「自動化被識別」，尚有機會（可試有頭模式 `INDEED_HEADLESS=0`）
+      - 若**手動也被擋** → 全站性封鎖，Indeed 據點就此陣亡，建議轉為
+        「標註停用」並把資源投給其他據點
     1. 先驗 IP 是否已更換（不打 Indeed，避免吵到它）：
        ```bash
        python -c "import requests;print(requests.get('https://ifconfig.me/ip',timeout=15).text)"
