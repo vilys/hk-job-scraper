@@ -17,7 +17,7 @@
 >
 > ⚠️ **受限模組說明**：獵聘與 BOSS直聘 的 robots.txt 明文禁止搜尋路徑抓取、且反爬極兇（IP 驗證碼 / 全站安全驗證），兩站亦無香港站。模組依用戶明確要求提供，**預期多數情況回 0 筆**（附明確警告，非程式故障）。
 
-模組化、可擴充的香港求職網站爬蟲。已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Indeed**、**Recruit**、**JobMarket**、**foundit**、**eFinancialCareers**、**OfferToday** 十座可用據點，另含 **獵聘**、**BOSS直聘** 兩座受限模組（見文末路線圖）。
+模組化、可擴充的香港求職網站爬蟲。已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Recruit**、**JobMarket**、**foundit**、**eFinancialCareers**、**OfferToday** 九座可用據點；**Indeed** 因站方對香港訪客強制登入（2026-09-11 真人實測）現標為**停用**（程式碼保留，可原地復活）；另含 **獵聘**、**BOSS直聘** 兩座受限模組（見文末路線圖）。
 
 ---
 
@@ -235,10 +235,10 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 | 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 | ✅ POSITION level-2 code（31 大類 + 431 細類） |
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
 | 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
-| 近期 `--days` | ❌ 不適用 | ✅ **站方端 `criteria.postedDtFr/To`**（2026-09-09 新增，格式 DD/MM/YYYY：列表無日期，舊流程須逐筆抓詳情取 `#postedDt`，改為站方端後 20 筆僅 2 支請求） | ✅ 列表含日期 + **站方端 `daterange=N`**（2026-09-10 新增，實測站方總數 2,241 → 467 筆；⚠️ 只吃 `1/3/7/14/31` 五個離散值，其餘數字站方不理會，本爬蟲自動向上取整） | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ✅ 內嵌職位陣列瞬時（~9s，不點擊）+ **站方端 `fromage=N`**（2026-09-09 加入，⚠️ **尚未實測驗證**——該站當日遭 Cloudflare 攔截，見 Indeed 章節）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時（⚠️ 2026-09-09 實測 `postedDate` / `datePosted` / `daysSincePosted` 三種參數名皆無效，站方端無日期過濾；因列表已含 ISO 日期、客戶端零成本篩選，影響極小） | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
+| 近期 `--days` | ❌ 不適用 | ✅ **站方端 `criteria.postedDtFr/To`**（2026-09-09 新增，格式 DD/MM/YYYY：列表無日期，舊流程須逐筆抓詳情取 `#postedDt`，改為站方端後 20 筆僅 2 支請求） | ✅ 列表含日期 + **站方端 `daterange=N`**（2026-09-10 新增，實測站方總數 2,241 → 467 筆；⚠️ 只吃 `1/3/7/14/31` 五個離散值，其餘數字站方不理會，本爬蟲自動向上取整） | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ⛔ **2026-09-11 據點停用，本列僅供復活時參考**：內嵌職位陣列瞬時（~9s，不點擊）+ **站方端 `fromage=N`**（2026-09-09 加入，⚠️ **從未實測驗證**——該站次日即遭封鎖、最終證實為強制登入牆，見 Indeed 章節）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時（⚠️ 2026-09-09 實測 `postedDate` / `datePosted` / `daysSincePosted` 三種參數名皆無效，站方端無日期過濾；因列表已含 ISO 日期、客戶端零成本篩選，影響極小） | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
 | 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 已實測修正（2026-09-08）：描述原只抓到 17 字（`(.*?)</div>` 撞上巢狀 div）→ 改 DOM `inner_text` + 巢狀配對，實測 934–2476 字；另加點擊重試與 🐢 熔斷（連續 2 筆失敗即停止），16 筆由 **9 分鐘 / 剩 1 筆** → **~1 分鐘 / 完整** | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
 | 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | 首頁 ~58／續頁 10（guest 端點） | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
-| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告。⚠️⚠️ **2026-09-09：另須「UA 不覆寫」**，否則 Client Hints 版本不一致仍會被擋；⚠️ **2026-09-10：全站封鎖中（0 筆）**——換全新 ISP 的 IP 仍擋，非 IP 層級問題（詳見 Indeed 章節）） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
+| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告。⚠️⚠️ **2026-09-09：另須「UA 不覆寫」**，否則 Client Hints 版本不一致仍會被擋；⛔ **2026-09-11：據點停用（0 筆）**——真人手動開也只見登入牆，非單純封鎖（詳見 Indeed 章節）） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
 | 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ✅ 雙軌（2026-09-09）：首頁 `/jobs/search/` + 續頁 guest 端點，`start` 從已累積筆數接續；實測 4 頁 80 筆，`li_at` 更穩 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
 
 > 圖例：✅ 完全支援　⚠️ 部分 / 有限支援　❌ 不適用（傳入會警告並忽略）
@@ -942,6 +942,19 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
       - 若**手動正常** → 是「自動化被識別」，尚有機會（可試有頭模式 `INDEED_HEADLESS=0`）
       - 若**手動也被擋** → 全站性封鎖，Indeed 據點就此陣亡，建議轉為
         「標註停用」並把資源投給其他據點
+
+  - 🔚 **2026-09-11 最終結論（真人實測）——據點對訪客而言已陣亡**：
+    使用者以手動 Chrome 開啟 `https://hk.indeed.com/`，**沒有出現 Blocked 封鎖頁，
+    而是被要求登入（login wall）**；使用者未登入即離開。
+
+    - ⭐ **這兩個結果天差地遠，而且指向同一個結論**：
+      自動化 → `Blocked`；真人 → **強制登入**。
+      表示 Indeed 目前對香港訪客採「**強制登入**」策略——
+      即便哪天 `Blocked` 解除，訪客也過不了這道登入牆。
+    - 因此本據點對「訪客模式爬蟲」而言已無實用價值。
+      **程式碼保留不動**（CF 若日後放寬可原地復活），但不再投入偵察資源。
+    - 若要重啟本據點，唯一可行路徑是提供**已登入的 Indeed 帳號 cookie**
+      （相當於另一個等級的工程，且須自行承擔帳號風險），目前不建議。
     1. 先驗 IP 是否已更換（不打 Indeed，避免吵到它）：
        ```bash
        python -c "import requests;print(requests.get('https://ifconfig.me/ip',timeout=15).text)"
