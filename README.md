@@ -663,6 +663,57 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 
 ---
 
+## 🩺 全站健康檢查（SOP + 基準）
+
+### 為什麼要定期做
+
+**老據點會悄悄壞掉。** Indeed 就是活教材——它在 2026-09-08 還能抓 16 張卡片，
+兩天後連真人也只能看到登入牆。中間沒有任何錯誤訊息，只是默默回傳 0 筆。
+定期健康檢查是唯一能提早發現的方法。
+
+### SOP（🐢 依爬蟲禮節）
+
+一次 1 支請求、間隔 ≥8 秒、單輪 ≤5 站、每輪回報；遇限速／驗證碼／非預期回應立即停手。
+Indeed 已停用，不列入；獵聘 / BOSS直聘屬受限模組，確認受限即可。
+
+```bash
+# 基本搜尋（每站 1 頁）
+for s in moovup gov_hk jobsdb linkedin recruit jobmarket foundit efc offertoday; do
+  python main.py --source $s --pages 1 --outfile _health_$s
+  sleep 8
+done
+
+# 再對「有站方端日期過濾」的四站補驗 --days 7
+for s in gov_hk linkedin jobsdb offertoday; do
+  python main.py --source $s --pages 1 --days 7 --outfile _hdays_$s
+  sleep 8
+done
+```
+
+產出檔名以 `_` 開頭者屬偵察性質，檢查完請歸檔到 `output/_probe/`
+（⚠️ 勿用 `mv output/_*.json` 一次掃——會連正式資料集一起搬走，已發生過一次）。
+
+### 最近一次檢查結果（2026-09-11，環境：HKT 家用寬頻）
+
+九座可用據點**全數正常**：
+
+| 來源 | 基本搜尋 | `--days 7` | 站方端日期參數 |
+|---|---|---|---|
+| moovup | 12 | — | 不適用 |
+| 勞工處 gov_hk | 20 | 20 ✅ | `postedDtFr=04/09/2026` ~ `postedDtTo=11/09/2026` |
+| JobsDB | 30 | 30 ✅ | `daterange=7` |
+| LinkedIn | 60 | 60 ✅ | `f_TPR=r604800` |
+| Recruit | 25 | — | 不適用（列表含日期，客戶端篩） |
+| JobMarket | 25 | — | 不適用（列表含日期） |
+| foundit | 20 | — | 不適用（列表含相對日期） |
+| eFinancialCareers | 50（`total=70,412`） | — | 無站方端參數（客戶端篩 ISO 日期） |
+| OfferToday | 10 | 8 ✅ | `publishTime` + 客戶端再篩 |
+| ⛔ Indeed | — | — | **據點停用**（強制登入牆，見其技術筆記） |
+
+下次檢查時請與此表比對：**筆數「歸零」或「異常膨脹」都算異常**。
+
+---
+
 ## 🧭 技術筆記（Moovup 逆向要點）
 
 - 首頁 `https://moovup.com/hk/` 為 Nuxt SSR，職位結果由前端透過 GraphQL 取得：
