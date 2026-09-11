@@ -15,9 +15,17 @@
 >
 > 各爬蟲模組**僅針對其對應網站**，彼此的資料結構、地區編號體系互不相同（各站的地區字典各自獨立），請勿跨站混用。
 >
-> ⚠️ **受限模組說明**：獵聘與 BOSS直聘 的 robots.txt 明文禁止搜尋路徑抓取、且反爬極兇（IP 驗證碼 / 全站安全驗證），兩站亦無香港站。模組依用戶明確要求提供，**預期多數情況回 0 筆**（附明確警告，非程式故障）。
+> ⚠️ **受限模組說明（2026-09-11 更新）**：
+> - **獵聘 Liepin** —— 已於 2026-09-11 **升級為可用香港據點**（證實有約 800 筆香港職缺）。
+>   ⚠️ 但 `www.liepin.com/robots.txt` 明文 `Disallow: /*?*`（帶查詢串路徑禁抓），
+>   本模組搜尋網址帶查詢串 → 屬禁區；職缺資料實由 `api-c.liepin.com` 供應，
+>   該主機**無 robots.txt（404）**。**請自行評估合規風險。**
+> - **BOSS直聘 Zhipin** —— 維持**受限**。2026-09-11 複查：職缺城市體系不含香港，
+>   港澳台專區對訪客為空並要求登入 → 對本專案無可用價值。
 
-模組化、可擴充的香港求職網站爬蟲。已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Recruit**、**JobMarket**、**foundit**、**eFinancialCareers**、**OfferToday** 九座可用據點；**Indeed** 因站方對香港訪客強制登入（2026-09-11 真人實測）現標為**停用**（程式碼保留，可原地復活）；另含 **獵聘**、**BOSS直聘** 兩座受限模組（見文末路線圖）。
+模組化、可擴充的香港求職網站爬蟲。已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Recruit**、**JobMarket**、**foundit**、**eFinancialCareers**、**OfferToday**、**獵聘 Liepin** 十座可用據點；**Indeed** 因站方對香港訪客強制登入（2026-09-11 真人實測）現標為**停用**（程式碼保留，可原地復活）；**BOSS直聘** 為受限模組（香港職缺為空且需登入，見文末路線圖）。
+
+> 🆕 **2026-09-11：獵聘從「受限空殼」翻身為第十座據點。** 舊版判定「香港覆蓋未證實、多數回 0 筆」，本次重新偵察發現兩個關鍵：① 香港城市碼是 **320**（舊碼 `900` 是錯的）② **`city` 與 `dq` 必須同時送**才會過濾（只送 `city` 時站方完全不過濾）。修正後實測取得 **40 筆香港職缺、七個關鍵欄位零空值**，並支援香港 18 區篩選。詳見「🧭 技術筆記（獵聘）」。
 
 ---
 
@@ -230,16 +238,16 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 
 | 功能 / 參數 | Moovup | 勞工處 gov.hk | JobsDB | LinkedIn | Indeed | Recruit | JobMarket | foundit | eFinancialCareers | 獵聘 ⚠️ | BOSS直聘 ⚠️ | OfferToday |
 |------|------|------|------|------|------|------|------|------|------|------|------| ------ |
-| 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援（⚠️ **必給關鍵字**——空 `q=` 站方回 `did not match any jobs` / 0 筆） | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） | ✅ 支援（可留空→地區瀏覽頁） | ✅ 支援（可留空） | ⚠️ 機制已驗證但極易觸發驗證碼 | ⚠️ 全站安全驗證攔下 | ✅ 支援（可留空） |
-| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選）⚠️ **列表本身無地區欄**：單區篩選時**零請求回填**該區；多區／未篩選 → 用 `--fill-location`（AJAX 逐筆，25 筆/頁 = 25 支請求）或 `--detail` | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼直傳（900 是否香港未確認） | ❌ 不適用（香港不在站方城市體系） | ✅ 純 code 18 區 + 129 子區（中英文皆可，逗號多選） |
+| 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援（⚠️ **必給關鍵字**——空 `q=` 站方回 `did not match any jobs` / 0 筆） | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） | ✅ 支援（可留空→地區瀏覽頁） | ✅ 支援（可留空） | ⚠️ 機制已驗證（40 筆/頁）但連 6–7 支請求會觸發 IP 驗證碼 | ⚠️ 香港職缺為空（港澳台專區 0 張 + 登入牆） | ✅ 支援（可留空） |
+| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選）⚠️ **列表本身無地區欄**：單區篩選時**零請求回填**該區；多區／未篩選 → 用 `--fill-location`（AJAX 逐筆，25 筆/頁 = 25 支請求）或 `--detail` | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼 + 客戶端分區比對（`320` 香港；18 區見 `liepin_areas.json`，簡繁英皆可） | ❌ 不適用（香港不在站方城市體系） | ✅ 純 code 18 區 + 129 子區（中英文皆可，逗號多選） |
 | 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 | ✅ POSITION level-2 code（31 大類 + 431 細類） |
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
 | 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
-| 近期 `--days` | ❌ 不適用 | ✅ **站方端 `criteria.postedDtFr/To`**（2026-09-09 新增，格式 DD/MM/YYYY：列表無日期，舊流程須逐筆抓詳情取 `#postedDt`，改為站方端後 20 筆僅 2 支請求） | ✅ 列表含日期 + **站方端 `daterange=N`**（2026-09-10 新增，實測站方總數 2,241 → 467 筆；⚠️ 只吃 `1/3/7/14/31` 五個離散值，其餘數字站方不理會，本爬蟲自動向上取整） | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ⛔ **2026-09-11 據點停用，本列僅供復活時參考**：內嵌職位陣列瞬時（~9s，不點擊）+ **站方端 `fromage=N`**（2026-09-09 加入，⚠️ **從未實測驗證**——該站次日即遭封鎖、最終證實為強制登入牆，見 Indeed 章節）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時（⚠️ 2026-09-09 實測 `postedDate` / `datePosted` / `daysSincePosted` 三種參數名皆無效，站方端無日期過濾；因列表已含 ISO 日期、客戶端零成本篩選，影響極小） | ❌ 不適用 | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
+| 近期 `--days` | ❌ 不適用 | ✅ **站方端 `criteria.postedDtFr/To`**（2026-09-09 新增，格式 DD/MM/YYYY：列表無日期，舊流程須逐筆抓詳情取 `#postedDt`，改為站方端後 20 筆僅 2 支請求） | ✅ 列表含日期 + **站方端 `daterange=N`**（2026-09-10 新增，實測站方總數 2,241 → 467 筆；⚠️ 只吃 `1/3/7/14/31` 五個離散值，其餘數字站方不理會，本爬蟲自動向上取整） | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ⛔ **2026-09-11 據點停用，本列僅供復活時參考**：內嵌職位陣列瞬時（~9s，不點擊）+ **站方端 `fromage=N`**（2026-09-09 加入，⚠️ **從未實測驗證**——該站次日即遭封鎖、最終證實為強制登入牆，見 Indeed 章節）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時（⚠️ 2026-09-09 實測 `postedDate` / `datePosted` / `daysSincePosted` 三種參數名皆無效，站方端無日期過濾；因列表已含 ISO 日期、客戶端零成本篩選，影響極小） | ⚠️ 客戶端（`refreshTime` **刷新日**近似，非刊登日：實測 40 筆中 1天→6 / 3天→22 / 7天→33 / 14天→38） | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
 | 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 已實測修正（2026-09-08）：描述原只抓到 17 字（`(.*?)</div>` 撞上巢狀 div）→ 改 DOM `inner_text` + 巢狀配對，實測 934–2476 字；另加點擊重試與 🐢 熔斷（連續 2 筆失敗即停止），16 筆由 **9 分鐘 / 剩 1 筆** → **~1 分鐘 / 完整** | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
-| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | 首頁 ~58／續頁 10（guest 端點） | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 10–20（API） | ~30（卡片若能過驗證） | 10（站方上限） |
-| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告。⚠️⚠️ **2026-09-09：另須「UA 不覆寫」**，否則 Client Hints 版本不一致仍會被擋；⛔ **2026-09-11：據點停用（0 筆）**——真人手動開也只見登入牆，非單純封鎖（詳見 Indeed 章節）） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；首次導航偶爾過、隨即 IP 驗證碼） | ✅ 需（`channel="chrome"`；仍被全站安全驗證攔） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
-| 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ✅ 雙軌（2026-09-09）：首頁 `/jobs/search/` + 續頁 guest 端點，`start` 從已累積筆數接續；實測 4 頁 80 筆，`li_at` 更穩 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（分頁未驗證） | ❌ 僅第 1 頁 | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
+| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | 首頁 ~58／續頁 10（guest 端點） | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 40（pageSize=40；實測 42 張卡、剔除 2 筆外地後 40 張全在香港） | 0（港澳台專區無職缺） | 10（站方上限） |
+| 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告。⚠️⚠️ **2026-09-09：另須「UA 不覆寫」**，否則 Client Hints 版本不一致仍會被擋；⛔ **2026-09-11：據點停用（0 筆）**——真人手動開也只見登入牆，非單純封鎖（詳見 Indeed 章節）） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；**必須讓頁面自己的 JS 發請求**——直接 requests 或瀏覽器內 fetch 打 API 皆回 `flag=0/-1400`；連 6–7 支請求觸發 IP 驗證碼） | ✅ 需（`channel="chrome"`；⛔ 2026-09-11 複查：首頁改為可開，但港澳台專區 0 張 + 登入牆） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
+| 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ✅ 雙軌（2026-09-09）：首頁 `/jobs/search/` + 續頁 guest 端點，`start` 從已累積筆數接續；實測 4 頁 80 筆，`li_at` 更穩 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（`currentPage` **未實測驗證**——偵察時觸發驗證碼而停手） | ❌ 僅第 1 頁（港澳台專區本身 0 張） | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
 
 > 圖例：✅ 完全支援　⚠️ 部分 / 有限支援　❌ 不適用（傳入會警告並忽略）
 
@@ -695,7 +703,7 @@ done
 
 ### 最近一次檢查結果（2026-09-11，環境：HKT 家用寬頻）
 
-九座可用據點**全數正常**：
+十座可用據點**全數正常**（獵聘為 2026-09-11 新加入）：
 
 | 來源 | 基本搜尋 | `--days 7` | 站方端日期參數 |
 |---|---|---|---|
@@ -708,9 +716,13 @@ done
 | foundit | 20 | — | 不適用（列表含相對日期） |
 | eFinancialCareers | 50（`total=70,412`） | — | 無站方端參數（客戶端篩 ISO 日期） |
 | OfferToday | 10 | 8 ✅ | `publishTime` + 客戶端再篩 |
+| **獵聘 Liepin** 🆕 | **40**（香港，`total≈800`） | 33（客戶端，以 `refreshTime` 近似） | 無（客戶端篩）⚠️ **連 6–7 支請求會觸發 IP 驗證碼，檢查時僅跑 1 次** |
 | ⛔ Indeed | — | — | **據點停用**（強制登入牆，見其技術筆記） |
+| ⚠️ BOSS直聘 | — | — | **受限**：香港職缺為空（港澳台專區 0 張 + 登入牆），不列入檢查 |
 
 下次檢查時請與此表比對：**筆數「歸零」或「異常膨脹」都算異常**。
+⚠️ 獵聘因驗證碼門檻低，健康檢查時**只跑 1 次**；若回 0 筆請先確認是
+「觸發驗證碼」還是「機制壞掉」（看 log 有無 `safe.liepin.com`）。
 
 ---
 
@@ -1338,24 +1350,138 @@ done
 
 ---
 
-## 🧭 技術筆記（獵聘 liepin 逆向要點 — Wave 5 受限模組）
+## 🧭 技術筆記（獵聘 liepin 逆向要點 — 2026-09-11 重做為香港據點）
 
-- ⚠️ **robots 受限**：`robots.txt` 明文 `Disallow: /*?*`（所有帶查詢串路徑禁抓）。本模組標記 `_ROBOTS_RESTRICTED`，首次實例化即警告；係因用戶明確要求「8 個都做」才提供，請自行評估合規風險。
-- **香港站不存在**：`/hk/` 404；主站為內地平台，香港職缺覆蓋未證實。`city=900` 是否對應香港**未確認**（首次樣本疑未按城市過濾，回內地職位）。
-- **資料機制**：搜尋頁 `/zhaopin/?key=<kw>&city=<code>` 是空殼（secscan/security.js 前端安全掃描），資料由站方 JS 呼叫 `api-c.liepin.com/api/com.liepin.searchfront4c.pc-search-job`（POST JSON，`flag=1` 時回 `jobCardList`）。
-  - 直接 requests 調用該 API 一律 `flag=0`（43B 空回應）——需 secscan 令牌。
-  - **Playwright（本機 Chrome 指紋）首次導航可攔截到該回應**；但同 IP 短時間 2–3 次請求後即被 `safe.liepin.com/page/liepin/captchaPage_ip_PC`（IP 級驗證碼）持續攔截，Chrome 指紋也逃不掉。
-- **模組策略**：導航搜尋頁 → 監聽 `pc-search-job` 回應 → 解析 `jobCardList`（job.jobId/title/dq/salary、comp.compName）→ 命中驗證碼或無回應時**警告後回 0 筆**（行為明確，不 crash）。
-- **不支援項**：`--category` / `--industry` / `--sort`（無對應參數）、`--days` / `--detail`（詳情同受驗證碼保護）、`--pages > 1`（分頁參數未能驗證）→ 全部警告後忽略或回空。
-- **robots 有趣細節**：robots 明確禁的是 www 查詢串與 campus API；`api-c.liepin.com` 的主搜尋 API **不在禁區**（僅 `com.liepin.campus*` 被點名），但該 API 需要 secscan 令牌，實質仍須走瀏覽器流程。
+> **2026-09-11 重大更新**：原 Wave 5 版本判定「香港覆蓋未證實、多數回 0 筆」。本次重新偵察後證實
+> **獵聘有完整的香港職缺庫**（站方回報約 800 筆，含真實港區），並找出正確的過濾方式 → 升級為可用據點。
+
+- ⚠️ **robots 狀態（如實揭露）**：`www.liepin.com/robots.txt` 明文 `Disallow: /*?*`
+  （所有帶查詢串的路徑禁抓），本模組的搜尋網址帶查詢串 → **屬禁區**，模組保留
+  `_ROBOTS_RESTRICTED` 標記與實例化警告。
+  但實際職缺資料由**另一台主機** `api-c.liepin.com` 供應，而該主機
+  **沒有 robots.txt（HTTP 404）** — 按 RFC 9309，沒有 robots.txt 即表示該主機
+  未設任何限制。**請自行評估合規風險。**
+
+- ✅ **香港覆蓋（已證實）**：城市字典 `320 = 香港`（另有 `330` 澳門、`340` 台灣；
+  `410` = 全国「不過濾」）。實測 `?city=320&dq=320` 回傳 42 張卡、**40 張在香港**，
+  含真實港區：湾仔区 / 油尖旺区 / 观塘区 / 沙田区 / 中西区 / 西贡区 / 北区 /
+  离岛区 / 深水埗区 / 元朗区。站方 `pagination.totalCounts` ≈ 800。
+  ⚠️ 舊版記載的 `city=900` 是**錯誤的**，正確值為 **320**（本次修正）。
+
+- ⭐⭐ **最關鍵的陷阱：`city` 與 `dq` 必須同時給**
+  只送 `city=320` 時，前端仍把 `dq` 填成 `410`（全国），結果**完全沒過濾**。
+  實測證據：`city=320`（香港）與 `city=050020`（廣州）回傳**一模一樣**的結果
+  （皆 42 張、`totalCounts` 皆 807、地區分布皆以上海為主）。
+  → **必須 `city=320&dq=320` 才會生效**（生效後 `totalCounts` 變 800、地區轉為香港）。
+
+- **資料機制**：搜尋頁 `/zhaopin/?...` 是空殼，資料由站方 JS POST
+  `api-c.liepin.com/api/com.liepin.searchfront4c.pc-search-job`，
+  payload 結構為 `data.mainSearchPcConditionForm`：
+  `city` / `dq` / `key` / `pubTime` / `currentPage` / `pageSize`（40）/ `industry` / `salaryCode` / `eduLevel` …
+  - ⛔ **直接 requests 呼叫該 API 一律失敗**：`flag=0, code=-1400「出错了（400）」`。
+  - ⛔ **瀏覽器內 `fetch()` 呼叫也失敗**（同一個錯誤）——缺 secscan 前端令牌。
+  - ✅ **唯一可行路徑**：讓**頁面自己的 JS** 發出請求，我們只監聽回應。
+  - ✅ 網址參數會被前端正確讀進 payload（實測 `key` / `city` / `dq` 皆生效），
+    故**直接用網址篩選即可，不必改寫請求**（Playwright `route` 改寫亦實測無效）。
+
+- **欄位來源**（`jobCardList[].job` / `.comp`）：
+  | 欄位 | 來源 |
+  |---|---|
+  | `job_id` | `job.jobId`（`JobRecord.make_id("liepin", jobId)`） |
+  | `title` | `job.title` |
+  | `company` | `comp.compName` |
+  | `location` | `job.dq`（如 `香港-湾仔区`） |
+  | `salary` | `job.salary`（如 `25-35k·24薪`） |
+  | `url` | `job.link`（`https://www.liepin.com/job/19<id>.shtml`） |
+  | `posted_date` | `job.refreshTime`（`YYYYMMDDHHMMSS`）→ 轉 `YYYY-MM-DD` |
+  | `description` | `requireWorkYears` + `requireEduLevel` 合併 |
+  | `requirements` | `job.labels` 合併 |
+
+- ⚠️ `refreshTime` 是**刷新時間，不是刊登日**（站方未提供刊登日欄位）。
+  `--days` 以此**近似**，實測 40 筆中：`--days 1` → 6 筆、`3` → 22、`7` → 33、`14` → 38。
+  客戶端篩選（`list_has_date=True`），不抓詳情。
+
+- 🐢 **反爬：IP 驗證碼門檻約 6–7 支請求**
+  2026-09-11 實測：連續第 6–7 支請求觸發 `safe.liepin.com` IP 驗證碼，
+  本機 Chrome 指紋亦無法避免。對策：請求間隔由 5s 拉到 **8s**、
+  建議 `--pages 1～2` 為宜；命中驗證碼時模組**警告後回 0 筆並停止翻頁**（不硬闖）。
+
+- **地區篩選**：站方只到城市層級（香港 = 320），**無分區碼**；
+  分區名出現在 `dq` 字串（如「香港-观塘区」）→ `--district` 以客戶端字串比對
+  （字典見 `scrapers/liepin_areas.json`，支援簡／繁／英，如「观塘」「觀塘」「Kwun Tong」）。
+  ⚠️ 分區別名須**同時含簡體與繁體短名**——2026-09-11 踩過：只列繁體「觀塘」時，
+  打簡體「观塘」反而配對失敗（程式已另加「区/區」後綴正規化雙保險）。
+
+- **不支援項**：`--category` / `--industry` / `--sort`（無對應字典）、
+  `--detail`（詳情頁受保護、風險高）→ 全部 `logger.warning` 後忽略。
+  ⚠️ **分頁（`currentPage`）尚未實測驗證**（偵察時觸發驗證碼而停手）；
+  `--pages > 1` 若回空屬站方驗證碼或參數無效，非程式故障。
+
+- **實測驗收（2026-09-11，HKT 家用寬頻）**：
+  `--pages 1` → **40 筆香港職缺**，七個關鍵欄位（`job_id`/`title`/`company`/
+  `location`/`salary`/`url`/`posted_date`）**零空值**；地區分布 湾仔区 11 /
+  油尖旺区 7 / 观塘区 6 / 沙田区 4 / 香港 4 / 中西区 2 / 西贡区 2 / 其他 4。
+
+### 🗺️ 按地區篩選（獵聘）
+
+- **層級**：站方只到**城市**層級（`320` 香港 / `330` 澳門 / `340` 台灣），
+  **沒有分區碼**。分區名以字串形式出現在職缺的 `dq` 欄位（如 `香港-观塘区`），
+  因此 `--district` 香港 18 區是**客戶端字串比對**（零額外請求）。
+- **預設即香港**：本專案為香港求職爬蟲，未給 `--district` 時固定送 `city=320&dq=320`；
+  給了無法辨識的值也同樣回退全香港（僅 `logger.warning`，不中斷）。
+- **字典** `scrapers/liepin_areas.json`（獵聘專用，**不得跨站混用**）：
+  18 區 × 簡體（站方寫法）／繁體／英文／常見地名別名。
+  支援「观塘」「觀塘」「觀塘區」「Kwun Tong」等寫法。
+- ⚠️ **別名必須簡繁並列**：2026-09-11 踩過——只列繁體「觀塘」時，打簡體「观塘」
+  （獵聘自己用的寫法）反而配對失敗。程式另做「区／區」後綴正規化雙保險。
+
+```bash
+# 全香港（預設）
+python main.py --source liepin --pages 1
+# 元朗區（繁簡英皆可）
+python main.py --source liepin --district 元朗
+python main.py --source liepin --district YuenLong
+# 觀塘
+python main.py --source liepin --district 观塘
+```
+
+⚠️ 分區篩選是**從該頁結果中挑出**符合者，站方每次回傳的 40 筆是動態取樣，
+熱門區（湾仔、油尖旺、观塘）筆數較多，冷門區可能為 0 筆——**0 筆不等於該區沒有職缺**。
+
+---
 
 ## 🧭 技術筆記（BOSS直聘 zhipin 逆向要點 — Wave 5 受限模組）
 
-- ⚠️ **robots 受限**：`robots.txt` 明文 `Disallow: /*?query=*` 且**點名禁 `Jobuispider`**。本模組標記 `_ROBOTS_RESTRICTED`，首次實例化即警告；提供原因同上。
-- **香港站不存在**：`/hk/` 404；主站 home 頁無香港城市（站方城市體系不含香港）。
-- **全站安全驗證**：普通 requests 與 Playwright（本機 Chrome 指紋、zh-CN locale）開**任何路徑**一律落在「安全验证 - BOSS直聘」頁（無 title、需人機互動滑塊），無法取得任何職位資料——比獵聘更徹底的封鎖。
-- **模組策略**：導航 `/web/geek/job?query=<kw>` → 標題/內容含「安全验证」即**警告後回 0 筆**；若某日能過驗證則解析 `.job-card-wrapper` 卡（`.job-name` 的 `/job_detail/<encryptId>.html`、`.company-name`、`.job-area`、`.salary`）。
-- **不支援項**：`--district`（香港不在城市體系）/ `--category` / `--industry` / `--sort` / `--days` / `--detail` / `--pages > 1`（分頁依賴查詢串 = robots 禁區）→ 全部警告後忽略或回空。
+> **2026-09-11 複查**：站方防護已從「全站安全验证」改為**部分開放 + 登入牆**。
+> 首頁與海外專區可用純 `requests` 開啟（無安全驗證），但**香港職缺對訪客仍為零**
+> （港澳台專區空 + 要求登入）。結論：仍不適合作為香港據點。
+
+- ⚠️ **robots 受限**：`robots.txt` 明文 `Disallow: /*?query=*`、`*?city=*` 等，
+  並**點名禁 `Jobuispider`**。本模組標記 `_ROBOTS_RESTRICTED`，實例化即警告。
+- **2026-09-11 實測（與舊版記載不同之處）**：
+  - ✅ 純 `requests` 開 `https://www.zhipin.com/` → **HTTP 200、513KB 真實頁面、
+    108 個 `/job_detail/` 連結、無「安全验证」**（舊版記為「任何路徑一律落安全验证」）。
+  - ✅ 網址為**路徑式 SEO 結構**：`/c100010000-p100109/`（城市-職能）、
+    `/overseas/z8/`（中国港澳台）、`/overseas/p130000/`（職能），
+    純路徑**不在** `Disallow: /*?query=*` 範圍內；但帶關鍵字時會用
+    `/c100010000/?query=...`，那才是禁區。
+  - ⛔ **港澳台專區是空的**：`/overseas/z8/`（中国港澳台）回傳 **0 張職位卡**，
+    頁面明文「**没有更多职位，尝试登录查看全部职位 立即登录**」→ **登入牆**
+    （與 Indeed 香港同類處置）。
+  - ⛔ 首頁出現的 2 次「香港」是**電話國碼下拉選單**（`+852 中国香港`），
+    **不是職缺城市**；父層 `/overseas/` 的職缺城市為上海／南京／青島等內地城市
+    （該專區是「駐外職位」，供內地人出國，非香港職缺）。
+  - 國家碼字典（`/overseas/` SSR 內嵌）確有 `101 = 中国香港`，
+    但屬**國家/地區層級**，且該區實際無職缺。
+- **結論**：BOSS直聘的職缺城市體系**不含香港**，港澳台專區對訪客為空且需登入
+  → 對香港求職爬蟲**無可用價值**；模組保留（日後站方政策改變可復活），
+  但不投入偵察資源。
+- **模組策略**：導航 `/web/geek/job?query=<kw>` → 標題/內容含「安全验证」即警告後回 0 筆；
+  若能通過則解析 `.job-card-wrapper`（`.job-name` 的 `/job_detail/<encryptId>.html`、
+  `.company-name`、`.job-area`、`.salary`）。
+- **不支援項**：`--district`（香港不在城市體系）/ `--category` / `--industry` /
+  `--sort` / `--days` / `--detail` / `--pages > 1`（分頁依賴查詢串 = robots 禁區）
+  → 全部警告後忽略或回空。
 
 ---
 
@@ -1446,8 +1572,8 @@ done
 | — | ~~HKGoodJobs~~ → **OfferToday**（擴充八站 Wave 3′ 復活賽） | 低（純 JSON API） | ✅ **已完成並實測**（2026-09-07 落地，第十座可用據點。🚀 **免瀏覽器純 requests**——冷請求無 cookie 亦可；關鍵字 + 18 區/129 子區 + 31 大類/431 細類職能 + 15 大類/53 細類行業；`cardType` 過濾防假結果；`--days` 送 `publishTime` + 客戶端再篩；`--detail` 已實測（補描述/行業/`postDaysAgo`）；`--sort` 不適用；`pageSize` 上限 10，翻頁靠 `hasMore`） |
 | — | HKGoodJobs（擴充八站 Wave 3） | 判定 | ❌ **判定不可行，止損**（裸域全面真 403——Apache 伺服器端拒絕所有路徑，HTTP/HTTPS、真 Chrome 指紋、忽略憑證錯誤皆同；TLS 憑證另錯置錯誤網域。站方配置即拒所有自動/人工存取） |
 | — | Glassdoor HK（擴充八站 Wave 4） | 高（CF + 誘餌） | ❌ **判定不可行，止損**（CF 挑戰不穩；首次可 200 但回**位置污染頁**——geoId 被無視、按資料中心 IP 定位到印度小頁鎮「Ambahta Rindān」，`Hong Kong` 僅 2 次 / `Ambahta` 37 次、0 個真職位連結。抓到也是錯資料） |
-| 12 | 獵聘 Liepin（擴充八站 Wave 5） | 🔴 高（robots 禁抓 + IP 驗證碼） | ⚠️ **受限模組落地**（robots `Disallow: /*?*`；香港站不存在、`city=900` 未確認；機制已驗證——首次導航可攔 `pc-search-job` 回應，隨即 IP 驗證碼；命中即警告回 0 筆；--days/--detail/--pages>1 等不支援） |
-| 13 | BOSS直聘 Zhipin（擴充八站 Wave 5） | 🔴 高（robots 禁抓 + 全站安全驗證） | ⚠️ **受限模組落地**（robots `Disallow: /*?query=*` + 點名禁 Jobuispider；香港站不存在；任何自動化存取皆落「安全验证」頁；模組判定後警告回 0 筆；全部篩選/詳情/分頁不支援） |
+| 12 | 獵聘 Liepin（擴充八站 Wave 5） | 🟡 中（robots 禁抓 www 查詢串；IP 驗證碼門檻 ~6–7 支） | ✅ **2026-09-11 升級為可用香港據點**（第十座）！修正城市碼 `900`→**320**，並發現 `city` 與 `dq` 必須同時送才會過濾；實測 40 筆香港職缺、七關鍵欄位零空值、站方 `total≈800`；建香港 18 區字典；`--days` 以 `refreshTime` 客戶端篩選。⚠️ 分頁未驗證；連 6–7 支請求觸發 IP 驗證碼（間隔已調 8s） |
+| 13 | BOSS直聘 Zhipin（擴充八站 Wave 5） | 🔴 高（robots 禁抓 `?query=`/`?city=`） | ⚠️ **2026-09-11 複查：維持受限**。防護由「全站安全验证」改為部分開放（首頁純 requests 可開、路徑式 SEO 網址），但**港澳台專區 0 張職位卡 + 登入牆**，香港不在職缺城市體系 → 對本專案無可用價值；模組保留待站方政策改變 |
 
 > 路線圖前五站全數達標 ✅：Moovup / 勞工處 / JobsDB / LinkedIn / Indeed 五座據點皆已落地並實測。LinkedIn 現以訪客模式落地——功能可用但單次約 ~25–60 筆天花板；提供 `li_at` cookie（config.LINKEDIN_LI_AT / 環境變數）後深翻頁趨穩、可抓更深。Indeed 的 `--days` 現已由內嵌 `pubDate` 瞬時篩選（~9 秒，不再逐張點擊）；`--detail` 取描述改用 JS 點擊面板（~1 秒/張）；直連 viewjob 因 Cloudflare 不可行。
 >

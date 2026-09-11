@@ -1,0 +1,34 @@
+{
+  "_meta": {
+    "source": "liepin",
+    "purpose": "香港 18 區對照（獵聘專用，不得跨站混用）",
+    "note": "獵聘地區字典僅到「香港=320」層級，無分區碼；分區名出現在職缺 dq 欄位（如「香港-观塘区」），故以客戶端字串比對篩選。key 為獵聘使用的簡體寫法；aliases 需同時含簡體與繁體短名，否則只打簡體（如「观塘」）會配對失敗——2026-09-11 實測踩過。",
+    "liepin_city_code": "320",
+    "verified": "2026-09-11"
+  },
+  "districts": {
+    "中西区":   {"zh_hant": "中西區",   "en": "Central and Western", "aliases": ["中西區", "中西", "central", "central and western", "中環", "中环", "金鐘", "金钟"]},
+    "湾仔区":   {"zh_hant": "灣仔區",   "en": "Wan Chai",            "aliases": ["灣仔區", "灣仔", "湾仔", "湾仔区", "wan chai", "wanchai", "銅鑼灣", "铜锣湾"]},
+    "东区":     {"zh_hant": "東區",     "en": "Eastern",             "aliases": ["東區", "东区", "东", "eastern", "east", "鰂魚涌", "鲗鱼涌", "太古"]},
+    "南区":     {"zh_hant": "南區",     "en": "Southern",            "aliases": ["南區", "南区", "southern", "south", "香港仔", "鴨脷洲", "鸭脷洲"]},
+    "油尖旺区": {"zh_hant": "油尖旺區", "en": "Yau Tsim Mong",       "aliases": ["油尖旺區", "油尖旺区", "油尖旺", "yau tsim mong", "尖沙咀", "旺角", "佐敦"]},
+    "深水埗区": {"zh_hant": "深水埗區", "en": "Sham Shui Po",        "aliases": ["深水埗區", "深水埗区", "深水埗", "深水埔", "sham shui po", "長沙灣", "长沙湾"]},
+    "九龙城区": {"zh_hant": "九龍城區", "en": "Kowloon City",        "aliases": ["九龍城區", "九龙城区", "九龍城", "九龙城", "kowloon city", "土瓜灣", "土瓜湾", "紅磡", "红磡"]},
+    "黄大仙区": {"zh_hant": "黃大仙區", "en": "Wong Tai Sin",        "aliases": ["黃大仙區", "黄大仙区", "黃大仙", "黄大仙", "wong tai sin", "慈雲山", "慈云山"]},
+    "观塘区":   {"zh_hant": "觀塘區",   "en": "Kwun Tong",           "aliases": ["觀塘區", "观塘区", "觀塘", "观塘", "kwun tong", "牛頭角", "牛头角", "九龍灣", "九龙湾"]},
+    "荃湾区":   {"zh_hant": "荃灣區",   "en": "Tsuen Wan",           "aliases": ["荃灣區", "荃湾区", "荃灣", "荃湾", "tsuen wan", "青衣"]},
+    "屯门区":   {"zh_hant": "屯門區",   "en": "Tuen Mun",            "aliases": ["屯門區", "屯门区", "屯門", "屯门", "tuen mun"]},
+    "元朗区":   {"zh_hant": "元朗區",   "en": "Yuen Long",           "aliases": ["元朗區", "元朗区", "元朗", "yuen long", "天水圍", "天水围"]},
+    "北区":     {"zh_hant": "北區",     "en": "North",               "aliases": ["北區", "北区", "north", "上水", "粉嶺", "粉岭", "沙頭角", "沙头角"]},
+    "大埔区":   {"zh_hant": "大埔區",   "en": "Tai Po",              "aliases": ["大埔區", "大埔区", "大埔", "tai po"]},
+    "西贡区":   {"zh_hant": "西貢區",   "en": "Sai Kung",            "aliases": ["西貢區", "西贡区", "西貢", "西贡", "sai kung", "將軍澳", "将军澳"]},
+    "沙田区":   {"zh_hant": "沙田區",   "en": "Sha Tin",             "aliases": ["沙田區", "沙田区", "沙田", "sha tin", "馬鞍山", "马鞍山"]},
+    "葵青区":   {"zh_hant": "葵青區",   "en": "Kwai Tsing",          "aliases": ["葵青區", "葵青区", "葵青", "kwai tsing", "葵涌"]},
+    "离岛区":   {"zh_hant": "離島區",   "en": "Islands",             "aliases": ["離島區", "离岛区", "離島", "离岛", "islands", "東涌", "东涌", "機場", "机场"]}
+  },
+  "city": {
+    "香港": {"code": "320", "en": "Hongkong", "aliases": ["香港", "hong kong", "hongkong", "hk"]},
+    "澳门": {"code": "330", "en": "Macao",    "aliases": ["澳門", "澳门", "macao", "macau"]},
+    "台湾": {"code": "340", "en": "Taiwan",   "aliases": ["台灣", "台湾", "taiwan"]}
+  }
+}

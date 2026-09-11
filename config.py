@@ -166,7 +166,9 @@ SITE_CONFIG = {
     "foundit": {"needs_browser": True, "request_delay": 2.0},
     "efc": {"request_delay": 1.5},
     # Wave 5 受限站：反爬極兇 + robots 限制，間隔拉長（行為保守）
-    "liepin": {"needs_browser": True, "request_delay": 5.0},
+    # ⚠️ 獵聘反爬極兇：2026-09-11 實測連續第 6–7 支請求即觸發 safe.liepin.com
+    # IP 驗證碼。間隔由 5s 拉到 8s，且每次執行建議 --pages 1～2 為宜。
+    "liepin": {"needs_browser": True, "request_delay": 8.0},
     "zhipin": {"needs_browser": True, "request_delay": 5.0},
     # OfferToday（原 HKGoodJobs）：免瀏覽器，純 JSON API；
     # 但為表禮節（推薦池 API 較敏感）間隔拉到 3 秒
