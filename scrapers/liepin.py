@@ -201,14 +201,26 @@ class LiepinScraper(BaseScraper):
         except Exception:  # noqa: BLE001
             pass
 
-        if "safe.liepin.com" in pg.url or "captcha" in pg.url:
+        # ⭐ 判讀關卡：優先用「標題」判讀（實測驗證碼頁 title = '安全中心-验证码'），
+        #    因為跳轉時序不定——有時 5s 內就跳走，有時 10s 後才跳，只看 URL 會漏判。
+        try:
+            title = pg.title() or ""
+        except Exception:  # noqa: BLE001
+            title = ""
+        if "safe.liepin.com" in pg.url or "captcha" in pg.url.lower() or "验证码" in title:
             logger.warning(
                 "[liepin] 觸發站方驗證碼（safe.liepin.com）→ 回 0 筆。"
-                "此為站方反爬行為，非程式故障；建議稍後再試。"
+                "此為站方反爬行為，非程式故障；建議稍後再試。URL=%s ｜標題=%r",
+                pg.url[:120], title[:60],
             )
             return []
         if not hits:
-            logger.warning("[liepin] 未攔截到搜尋 API 回應（可能被安全驗證攔下）→ 回 0 筆")
+            logger.warning(
+                "[liepin] 未攔截到搜尋 API 回應 → 回 0 筆。"
+                "最終 URL=%s ｜標題=%r ｜可能原因：安全驗證 / 站方改版 / 等待不足。"
+                "請執行 `python _probe_liepin.py` 聽診（會列出所有 api 請求與頁面卡片數）",
+                pg.url[:120], title[:60],
+            )
             return []
 
         records: list[JobRecord] = []
