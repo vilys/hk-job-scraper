@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────────────────────
+# 換行符（EOL）統一策略
+# ─────────────────────────────────────────────────────────────
+#
+# 【起因】
+#   本機 Git 設了 core.autocrlf=true，意思是「取出檔案時轉成 CRLF」。
+#   但編輯工具（含本專案的自動化修改）寫入的是 LF，於是每次改檔，
+#   Git 都會警告：
+#     "This file uses 'LF' line endings, but Git is configured to
+#      convert them to 'CRLF' the next time the file is checked out."
+#
+# 【對策】
+#   明確宣告：版本庫存 LF，工作區也維持 LF，不再來回翻譯。
+#   - text=auto  → 讓 Git 自動判斷文字檔 / 二進位檔（png、ico 等不受影響）
+#   - eol=lf     → 取出時寫 LF（此設定優先於 core.autocrlf，跨平台行為一致）
+#
+# 【影響評估】
+#   本專案既有提交的 blob 全部已是 LF（2026-09-15 查證），
+#   因此加入本檔**不會產生任何歷史改動**，也不會讓既有檔案變成 modified。
+#
+# 【為何選 LF 而非 CRLF】
+#   1. Python 原始碼與 JSON 字典以 LF 為主流慣例，跨平台不因系統而異。
+#   2. 避免「同一份檔案在 Windows / macOS / CI 內容不同」的比對地雷。
+#   3. 爬蟲輸出的 CSV/JSON 若帶 CRLF，部分下游解析器會多出 \r。
+#
+# 備註：若日後需要在 Windows 上強制 CRLF，把下行改成 `eol=crlf` 即可，
+#       但要記得先跑 `git add --renormalize .` 讓索引同步。
+# ─────────────────────────────────────────────────────────────
+
+* text=auto eol=lf

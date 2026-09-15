@@ -46,8 +46,17 @@ class JobRecord:
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> "JobRecord":
-        """從 dict 重建（忽略未知欄位，raw 單獨保留）。"""
+        """從 dict 重建（忽略未知欄位，raw 單獨保留）。
+
+        ⚠️ `source` 缺值時由 `job_id` 前綴推導，不拋例外：
+        既有匯出檔若少此欄（如人工編輯過的 CSV），重建失敗會被 exporter
+        視為「檔案損毀」而備份清空舊資料——寧可退化也別讓資料消失。
+        """
         known = {k: d[k] for k in cls.FIELDS if k in d}
+        # job_id / source 皆補預設值：單筆壞資料不該讓整份既有檔被判為損毀
+        known.setdefault("job_id", "")
+        if "source" not in known:
+            known["source"] = str(d.get("job_id") or "").split("::")[0]
         raw = d.get("raw", {})
         if not isinstance(raw, dict):
             raw = {}

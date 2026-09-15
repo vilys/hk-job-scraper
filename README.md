@@ -133,6 +133,7 @@ hk-job-scraper/
 ├── exporter.py             # JSON / CSV 匯出（增量 + 去重）
 ├── base_scraper.py         # 爬蟲抽象基類（search / get_detail / scrape_all）
 ├── build_dashboard.py      # 聚合 output/ 所有產出 → 單檔離線 HTML 儀表板
+├── .gitattributes          # 換行符策略：全專案統一 LF（消除 Windows CRLF 警告）
 ├── scrapers/
 │   ├── __init__.py         # 爬蟲註冊表（SCRAPERS）
 │   ├── moovup.py           # Moovup 爬蟲（已實作 + 實測）
@@ -158,6 +159,10 @@ hk-job-scraper/
 │   ├── foundit_locations.json    # foundit 地區字典（46 個瀏覽頁 slug，中英雙語）
 │   ├── efc.py               # eFinancialCareers 爬蟲（純 JSON API，免瀏覽器）
 │   └── efc_geo.json         # eFC 地區字典（3 大區：Hong Kong / HK Island / Kowloon）
+├── tests/                  # 離線測試（零請求）：python -m unittest discover -s tests
+│   ├── test_job_model.py   # JobRecord 模型與壞資料防禦
+│   ├── test_exporter.py    # 去重 / BOM / 損毀備份
+│   └── test_dictionaries.py # 17 個字典的完整性與跨站隔離
 ├── docs/
 │   ├── moovup_地區編號對照表.md    # 人可直讀的 Moovup 地區↔編號對照表
 │   └── 擴充八站開發計畫.md         # 擴充八站的偵察結論、五波順序與驗收標準
@@ -733,6 +738,64 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 程式邏輯（`--district` / `--days`）已於同日**零請求離線驗證全綠**，
 > 僅「分頁 `currentPage` 端到端」與「`--district` 實跑」待換 IP 或冷卻後補測。
 > 期間回 0 筆屬**預期，非故障**；勿密集重試（只會延長封鎖）。
+
+---
+
+## 🧪 離線測試（`tests/`）
+
+> 🐢 **為什麼要有測試**：這是爬蟲專案，任何驗證若只能靠真實請求，就與
+> 「不要太狠、一步一步、不要被封」直接衝突。這套測試的任務是把**能在本地推理完的
+> 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
+
+```bash
+python -m unittest discover -s tests -v      # 22 個測試，約 0.06 秒，零網路請求
+```
+
+框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。
+
+| 測試檔 | 守什麼 |
+|---|---|
+| `test_job_model.py` | `JobRecord` 的 id 生成、13 欄位集合、dict 往返、壞資料防禦 |
+| `test_exporter.py` | 增量去重（後到覆蓋）、CSV 必帶 UTF-8 BOM 且恰 13 欄、**既有檔損毀時必須先備份 `.corrupt.bak`** |
+| `test_dictionaries.py` | 17 個字典可載入且數量對齊功能矩陣、**字典不可跨站混用**、獵聘簡繁別名齊備 |
+
+### 這套測試當場抓到的 bug（2026-09-15）
+
+- ⚠️ **`JobRecord.from_dict` 缺 `source` / `job_id` 時會拋 `TypeError`** → 已修。
+  影響比想像嚴重：`exporter._load_existing_json` 會把這個例外判為「檔案損毀」，
+  於是**備份 `.corrupt.bak` 後整份舊資料被清空**——一份人工編輯過、少了一欄的 CSV
+  就足以釀災。修法：`job_id` 補 `""`、`source` 由 `job_id` 前綴推導，
+  讓單筆壞資料不再拖垮整份檔案。（行為改變僅發生在原本會拋例外的失敗路徑，
+  正常資料輸出零改變。）
+- ✅ 順帶查清 `linkedin_geo.json` 的 `districts` 是 **20 項**：
+  18 區 + `香港`／`全港` 兩個 fallback（共用 geoUrn `103291313`），字典本身無誤。
+
+### 測試的邊界（如實標註）
+
+- 只涵蓋**零請求**的純邏輯與字典；各站的實際爬取（選擇器、翻頁、反爬）**仍需實測**，
+  測試**不能**取代「🩺 全站健康檢查」。
+- 字典數量斷言是**刻意釘死**的：數字變動代表字典被動過，測試會紅，確認後再更新對照表。
+
+### 換行符策略（`.gitattributes`，2026-09-15）
+
+Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但編輯工具寫入的是 LF，
+於是每次改檔都會跳出：
+
+> *"This file uses 'LF' line endings, but Git is configured to convert them to
+> 'CRLF' the next time the file is checked out."*
+
+這**不是錯誤**，但每次都跳很吵，而且代表「同一份檔案在不同系統內容不同」。
+
+對策：在專案根目錄放 `.gitattributes`，內容一行 `* text=auto eol=lf`——
+**版本庫存 LF、工作區也維持 LF**，不再來回翻譯（`eol` 屬性優先於 `core.autocrlf`，
+跨平台行為一致）。
+
+- ✅ 查證過：既有提交的 blob **全部已是 LF**，故加入本檔**不產生任何歷史改動**
+  （實測 `git add --renormalize .` 後 status 無任何額外異動）。
+- ℹ️ 工作區目前仍有 18 個舊檔是 CRLF（多為 `scrapers/*.json` 字典），
+  屬**無害殘留**：Git 會在提交時正規化，不影響執行也不再觸發警告；
+  若想徹底一致，重 clone 一次即可全部變成 LF。
+- 🧪 這對爬蟲的實質好處：輸出的 CSV／JSON 不會混進 `\r`，下游解析器較不易踩雷。
 
 ---
 
