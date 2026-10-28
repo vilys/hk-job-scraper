@@ -39,7 +39,10 @@ from pathlib import Path
 from typing import Optional
 from urllib.parse import quote
 
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:  # pragma: no cover — 允許「只裝 requests」的極簡安裝
+    sync_playwright = None
 
 from base_scraper import BaseScraper
 from job_model import JobRecord
@@ -117,6 +120,10 @@ class IndeedScraper(BaseScraper):
         """
         if self._context is not None:
             return
+        if sync_playwright is None:
+            raise RuntimeError(
+                "此據點需要 Playwright：pip install playwright && playwright install chromium"
+            )
         self._pw = sync_playwright().start()
         if os.environ.get("INDEED_RESET_PROFILE") == "1" and PROFILE_DIR.exists():
             import shutil

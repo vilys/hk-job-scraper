@@ -29,7 +29,10 @@ from datetime import datetime
 from typing import Optional
 from urllib.parse import quote, urljoin
 
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:  # pragma: no cover — 允許「只裝 requests」的極簡安裝
+    sync_playwright = None
 
 from config import DEFAULT_HEADERS
 from job_model import JobRecord
@@ -131,6 +134,10 @@ class JobsDBScraper(BaseScraper):
     def _ensure_browser(self) -> None:
         if self._browser is not None:
             return
+        if sync_playwright is None:
+            raise RuntimeError(
+                "此據點需要 Playwright：pip install playwright && playwright install chromium"
+            )
         self._pw = sync_playwright().start()
         self._browser = self._pw.chromium.launch(headless=True)
         self._context = self._browser.new_context(
