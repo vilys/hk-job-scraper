@@ -4,7 +4,7 @@
 但 /jobs-guest/jobs/api/seeMoreJobPostings/search 是訪客專用分頁端點，
 翻頁應更可靠。本腳本逐支驗證：指定 start，回傳卡片數與去重後的新增數。
 
-用法：python _probe_li_guest.py 0
+用法：python tools/_probe_li_guest.py 0
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
-PROBE = Path(__file__).parent / "output" / "_probe"
+PROBE = Path(__file__).resolve().parents[1] / "output" / "_probe"
 PROBE.mkdir(parents=True, exist_ok=True)
 
 GUEST = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"

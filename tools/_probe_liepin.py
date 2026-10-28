@@ -6,8 +6,8 @@
   B. 等待時間不足（secscan JS 慢）
   C. 缺首次造訪 cookie
   D. 攔截本身不穩定（已知）
-用法：
-  python _probe_liepin.py [url]
+用法（請在專案根目錄執行）：
+  python tools/_probe_liepin.py [url]
 """
 from __future__ import annotations
 

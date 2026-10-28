@@ -218,7 +218,7 @@ class LiepinScraper(BaseScraper):
             logger.warning(
                 "[liepin] 未攔截到搜尋 API 回應 → 回 0 筆。"
                 "最終 URL=%s ｜標題=%r ｜可能原因：安全驗證 / 站方改版 / 等待不足。"
-                "請執行 `python _probe_liepin.py` 聽診（會列出所有 api 請求與頁面卡片數）",
+                "請執行 `python tools/_probe_liepin.py` 聽診（會列出所有 api 請求與頁面卡片數）",
                 pg.url[:120], title[:60],
             )
             return []

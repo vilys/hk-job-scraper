@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """OfferToday 冷請求探針（免瀏覽器、免 cookie）。
 
-用法：probe_ot_cold.py <label> '<json override>' [<label2> '<json2>' ...]
+用法（請在專案根目錄執行）：python tools/probe_ot_cold.py <label> '<json override>' [<label2> '<json2>' ...]
 每支請求間隔 GAP 秒，不重試、不併發。
 🛑 安全閥：HTTP != 200 / code != 0 / 驗證碼徵兆 → 立即停手。
 """

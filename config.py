@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 # ---- LinkedIn 登入態 cookie（可選，訪客模式不需要） ----
@@ -44,46 +45,82 @@ _CHROME_VERSION_FALLBACK = "152.0.0.0"   # 偵測失敗時的退路（僅影響 
 def _detect_chrome_version() -> str:
     """量測本機 Google Chrome 的完整版本號（如 `152.0.7977.83`）。
 
-    搜尋順序：環境變數 CHROME_UA_VERSION → 常見安裝路徑下的版本目錄。
-    找不到則回退 `_CHROME_VERSION_FALLBACK` 並保持程式可運作。
+    搜尋順序：環境變數 CHROME_UA_VERSION → 各平台安裝位置 → 回退常數。
+    找不到時程式仍可運作，僅 UA 字串退回預設值。
     """
     override = os.getenv("CHROME_UA_VERSION", "").strip()
     if override and override[0].isdigit():
         return override
 
     import re
-    roots: list[Path] = []
-    if os.name == "nt":
-        for base in (os.environ.get("PROGRAMFILES", r"C:\Program Files"),
-                     os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"),
-                     os.environ.get("LOCALAPPDATA", "")):
-            if base:
-                roots.append(Path(base) / "Google" / "Chrome" / "Application")
-    else:
-        roots.append(Path("/Applications/Google Chrome.app/Contents"))
-
     pat = re.compile(r"^\d+\.\d+\.\d+\.\d+$")
-    best: tuple[int, ...] | None = None
-    best_s = ""
-    for root in roots:
-        try:
-            if not root.is_dir():
-                continue
-            for d in root.iterdir():
-                if d.is_dir() and pat.match(d.name):
-                    parts = tuple(int(x) for x in d.name.split("."))
-                    if best is None or parts > best:
-                        best, best_s = parts, d.name
-        except OSError:
-            continue
-    return best_s or _CHROME_VERSION_FALLBACK
+
+    try:
+        if os.name == "nt":
+            roots: list[Path] = []
+            for base in (os.environ.get("PROGRAMFILES", r"C:\Program Files"),
+                         os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"),
+                         os.environ.get("LOCALAPPDATA", "")):
+                if base:
+                    roots.append(Path(base) / "Google" / "Chrome" / "Application")
+            best: tuple[int, ...] | None = None
+            best_s = ""
+            for root in roots:
+                if not root.is_dir():
+                    continue
+                for d in root.iterdir():
+                    if d.is_dir() and pat.match(d.name):
+                        parts = tuple(int(x) for x in d.name.split("."))
+                        if best is None or parts > best:
+                            best, best_s = parts, d.name
+            if best_s:
+                return best_s
+
+        elif sys.platform == "darwin":
+            # macOS：版本號在 Info.plist，不在以版本命名的目錄裡
+            plist = Path("/Applications/Google Chrome.app/Contents/Info.plist")
+            if plist.is_file():
+                import plistlib
+                with plist.open("rb") as fh:
+                    ver = (plistlib.load(fh) or {}).get("CFBundleShortVersionString", "")
+                if pat.match(str(ver)):
+                    return str(ver)
+
+        else:
+            # Linux：直接問執行檔
+            import shutil
+            import subprocess
+            exe = shutil.which("google-chrome") or shutil.which("google-chrome-stable")
+            if exe:
+                out = subprocess.run([exe, "--version"], capture_output=True,
+                                     text=True, timeout=5).stdout
+                m = re.search(r"(\d+\.\d+\.\d+\.\d+)", out)
+                if m:
+                    return m.group(1)
+    except Exception:  # noqa: BLE001 — 偵測失敗一律回退，不影響主流程
+        pass
+
+    return _CHROME_VERSION_FALLBACK
+
+
+def _platform_token() -> str:
+    """UA 中的平台字串，必須與實際作業系統一致。
+
+    原本寫死 `Windows NT 10.0`：在 Mac 上執行時，UA 自稱 Windows 卻帶著
+    Mac 的 Client Hints，等於主動告訴 Cloudflare「我在說謊」。
+    """
+    if os.name == "nt":
+        return "Windows NT 10.0; Win64; x64"
+    if sys.platform == "darwin":
+        return "Macintosh; Intel Mac OS X 10_15_7"
+    return "X11; Linux x86_64"
 
 
 CHROME_VERSION = _detect_chrome_version()
 
 DEFAULT_HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        f"Mozilla/5.0 ({_platform_token()}) AppleWebKit/537.36 "
         f"(KHTML, like Gecko) Chrome/{CHROME_VERSION} Safari/537.36"
     ),
     "Accept-Language": "zh-HK,zh;q=0.9,en;q=0.8",

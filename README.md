@@ -1,6 +1,58 @@
 # 香港求職網站自動搜尋程式 (HK Job Scraper)
 
-> ⚠️ **適用範圍備註**：本程式採「一網站一爬蟲模組」設計，目前已完成 **九座據點**：
+> 🚀 **第一次用？看這一節就夠，60 秒能跑出第一份結果。** 後面的技術筆記是給要改程式的人看的，不必先讀。
+
+## ⚡ 60 秒上手
+
+```bash
+# 1) 取得程式
+git clone https://github.com/vilys/hk-job-scraper.git
+cd hk-job-scraper
+
+# 2) 安裝依賴（先選 A 就好，想跑更多站再回頭裝 B）
+#    A. 最小安裝 —— 足夠跑「不需要瀏覽器」的據點
+pip install requests beautifulsoup4 lxml
+
+#    B. 完整安裝 —— 要跑 Moovup / JobsDB / foundit / 獵聘 等才需要
+# pip install -r requirements.txt
+# playwright install chromium        # 只需執行一次
+
+# 3) 跑第一支（推薦：勞工處。免瀏覽器、免登入、免 cookie）
+python main.py --source gov_hk --keyword "會計" --pages 1
+```
+
+結果會寫到 `output/gov_hk_會計.json`；想要 Excel 可直接開的格式，把結尾換成 `--output csv`。
+
+**為什麼第一支建議用 `gov_hk`？** 它是政府網站，ASP.NET 伺服器渲染、沒有 Cloudflare、不需要登入，
+是全專案門檻最低的據點。先用它確認環境沒問題，再去挑戰需要瀏覽器的站——這樣出錯時，
+你只需要懷疑一件事，而不是三件。
+
+**各站需要什麼？**
+
+| 需求 | 據點 |
+|---|---|
+| 只要 `requests`（最小安裝即可） | 勞工處 `gov_hk`、JobMarket、eFinancialCareers、LinkedIn、OfferToday |
+| 需要 Playwright + `playwright install chromium` | Moovup、JobsDB、Recruit、Indeed（停用中） |
+| **另需本機安裝 Google Chrome**（指紋辨識） | foundit、獵聘 `liepin`、BOSS直聘 |
+
+```bash
+# 其他常見用法
+python main.py --source gov_hk   --keyword "零售" --pages 2 --district 屯門 --days 7
+python main.py --source jobsdb   --keyword "data" --pages 2 --days 7 --output both
+python main.py --source moovup   --keyword "會計" --pages 3 --detail
+python main.py --source all      --keyword "會計" --pages 1        # 全部據點各跑 1 頁
+python main.py --help                                              # 完整參數
+```
+
+> 🐢 **爬蟲禮節**：本專案預設把請求間隔拉在 1.5–8 秒。請不要為了快而改小，
+> 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
+
+> 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
+> 22 個測試、約 0.06 秒、零網路請求。
+
+---
+
+> ⚠️ **適用範圍備註**：本程式採「一網站一爬蟲模組」設計，目前共有 **12 個模組、10 座可用據點**：
 > - **Moovup 好工速遞（moovup.com）** —— 見「🗺️ 按地區篩選（Moovup）」與「🧭 技術筆記（Moovup）」
 > - **勞工處互動就業服務（jobs.gov.hk / www1.jobs.gov.hk）** —— 見「🗺️ 按地區篩選（勞工處）」與「🧭 技術筆記（勞工處）」
 > - **JobsDB（hk.jobsdb.com）** —— 見「🗺️ 按地區篩選（JobsDB）」與「🧭 技術筆記（JobsDB）」
@@ -133,7 +185,9 @@ hk-job-scraper/
 ├── exporter.py             # JSON / CSV 匯出（增量 + 去重）
 ├── base_scraper.py         # 爬蟲抽象基類（search / get_detail / scrape_all）
 ├── build_dashboard.py      # 聚合 output/ 所有產出 → 單檔離線 HTML 儀表板
+├── LICENSE                 # MIT 授權
 ├── .gitattributes          # 換行符策略：全專案統一 LF（消除 Windows CRLF 警告）
+├── tools/                  # 診斷／偵察腳本（非常規執行所需，見 tools/README.md）
 ├── scrapers/
 │   ├── __init__.py         # 爬蟲註冊表（SCRAPERS）
 │   ├── moovup.py           # Moovup 爬蟲（已實作 + 實測）
@@ -223,17 +277,17 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 
 | 參數 | 必填 | 預設 | 說明 |
 |------|------|------|------|
-| `--source` | 否 | `moovup` | 爬蟲來源：`moovup` \| `gov_hk` \| `jobsdb` \| `linkedin` \| `all` |
+| `--source` | 否 | `moovup` | 爬蟲來源：`moovup` \| `gov_hk` \| `jobsdb` \| `linkedin` \| `indeed`（停用） \| `recruit` \| `jobmarket` \| `foundit` \| `efc` \| `liepin` \| `zhipin`（受限） \| `offertoday` \| `all`（全部據點各跑 `--pages` 頁）。各站支援差異見下方「📊 各站功能支援矩陣」。 |
 | `--keyword` | 否 | 空 | 搜尋關鍵字（繁體中文或英文皆可；**留空 = 不限定關鍵字，僅依地區/類別瀏覽，gov_hk 支援**；JobsDB 留空則搜全站） |
-| `--pages` | 否 | `3` | 最大翻頁數（Moovup 每頁約 12 筆；gov.hk 每頁約 20 筆；JobsDB 每頁約 20–30 筆） |
+| `--pages` | 否 | `3` | 最大翻頁數。各站每頁筆數不同（Moovup 12、勞工處 ~20、JobsDB ~20–30、LinkedIn 首頁 ~58／續頁 10…），詳見矩陣「每頁筆數」列。 |
 | `--output` | 否 | `json` | 輸出格式：`json` \| `csv` \| `both` |
 | `--detail` | 否 | 關 | 同時抓取每筆職位的詳情（職責 / 要求 / 發佈時間 / **刊登日期**）；**JobsDB 的 `--detail` 為 best-effort**，詳情頁選擇器與列表略有差異，實測微調中 |
 | `--outfile` | 否 | 自動命名 | 自訂輸出檔名（不含副檔名），預設 `output/<source>_<keyword>` |
-| `--district` | 否 | 無 | 地區篩選（**Moovup / 勞工處 / JobsDB 均已接上**）。JobsDB 用中文名或 slug（如 荃灣 \| tsuen-wan，見 `scrapers/jobsdb_districts.json`，**40 個已驗證**）；多個以逗號分隔時 JobsDB 僅取第一個。 |
-| `--category` | 否 | 無 | 工作種類 / 職能篩選（**勞工處 + JobsDB 已接上**）。JobsDB 用中文名 / 英文 / slug（如 `資訊及通訊科技` \| `Information & Communication Technology`，見 `scrapers/jobsdb_classifications.json`，**30 個含 slug**）。兩站字典獨立。 |
-| `--industry` | 否 | 無 | 行業篩選（**僅 gov_hk 支援**；JobsDB 無獨立行業維度，傳入會被忽略並提示） |
-| `--sort` | 否 | 無 | 排序：**gov_hk 全選項支援**（`post_dt_desc`(新→舊) / `post_dt_asc`(舊→新) / `salary_desc`·`salary_asc`(月薪) / `yr_exp_asc`·`yr_exp_desc`(經驗) / `edu_lvl_asc`·`edu_lvl_desc`(學歷)）；**JobsDB 僅支援 `post_dt_desc`**（對應網址 `?sortmode=ListedDate`，新→舊），其餘選項為 gov_hk 專有、傳入會警告並回退預設。設 `--days` 未指定 `--sort` 時自動套 `post_dt_desc` |
-| `--days` | 否 | 無 | 只保留最近 N 天內刊登的職位。**勞工處**：自動抓詳情取刊登日期，並預設按日期由近至遠排序；**JobsDB**：列表頁已含相對刊登日（`7d ago`），直接由列表過濾，不必抓詳情 |
+| `--district` | 否 | 無 | 地區篩選，**多數據點已接上**（支援的站與格式見矩陣「地區」列）。例：JobsDB 用中文名或 slug（`荃灣` \| `tsuen-wan`，見 `scrapers/jobsdb_districts.json`）；勞工處用數字 ID 或中文；Moovup 用 shortCode。**各站字典獨立，不可混用**；逗號分隔時 JobsDB 僅取第一個。 |
+| `--category` | 否 | 無 | 工作種類 / 職能篩選（支援：勞工處、JobsDB、Recruit、JobMarket、OfferToday，見矩陣）。例：JobsDB 用中文名 / 英文 / slug（見 `scrapers/jobsdb_classifications.json`）。**各站字典獨立**。 |
+| `--industry` | 否 | 無 | 行業篩選（支援：勞工處、JobMarket、OfferToday）。JobsDB 無獨立行業維度，傳入會被忽略並提示。 |
+| `--sort` | 否 | 無 | 排序：**gov_hk 全選項支援**（`post_dt_desc`(新→舊) / `post_dt_asc`(舊→新) / `salary_desc`·`salary_asc`(月薪) / `yr_exp_asc`·`yr_exp_desc`(經驗) / `edu_lvl_asc`·`edu_lvl_desc`(學歷)）；**JobsDB 與 LinkedIn 僅支援 `post_dt_desc`**（新→舊），其餘選項為 gov_hk 專有、傳入會警告並回退預設。設 `--days` 未指定 `--sort` 時自動套 `post_dt_desc` |
+| `--days` | 否 | 無 | 只保留最近 N 天內刊登的職位。各站實作不同：勞工處 / JobsDB / LinkedIn / OfferToday 有**站方端**日期參數；Moovup 不支援（警告後忽略）；獵聘以 `refreshTime`（刷新日）近似。詳見矩陣「近期」列。 |
 
 ### 📊 各站功能支援矩陣（重要：功能互不相連）
 
@@ -729,7 +783,7 @@ done
 ⚠️ 獵聘因驗證碼門檻低，健康檢查時**只跑 1 次**。
 ⚠️⚠️ 獵聘回 0 筆時**不要只看 log**：2026-09-14 實測，即使已跳轉到驗證碼頁，
 log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，URL 判讀會漏）。
-正確做法是執行 `python _probe_liepin.py` 聽診，直接看**標題**（`安全中心-验证码`）
+正確做法是執行 `python tools/_probe_liepin.py` 聽診，直接看**標題**（`安全中心-验证码`）
 與 euuid 解碼內容，一次區分「驗證碼／站方改版／等待不足」三種病因。
 （模組已於 2026-09-14 改為**優先用標題判讀**，0 筆時也會印出最終 URL 與標題。）
 
@@ -1482,7 +1536,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - 🩺 **2026-09-14 聽診：IP 級驗證碼，冷卻 38 小時仍未解除**（⚠️ 重要）
   9/11 10:29 產出 40 筆後，本輪於 9/14 00:30 再試：
   - `--district 元朗 --pages 1` → **0 筆**，但日誌只印「未攔截到搜尋 API 回應」，看不出原因。
-  - **立即停手**，改用聽診器 `python _probe_liepin.py`（單次導航，錄下所有 api 請求／
+  - **立即停手**，改用聽診器 `python tools/_probe_liepin.py`（單次導航，錄下所有 api 請求／
     最終 URL／標題／頁面卡片數）查明真相：
     - 頁面 5 秒內被導向 `https://safe.liepin.com/page/liepin/captchaPage_ip_PC?euuid=...`
     - `title = '安全中心-验证码'`，內文「猎聘安全中心发现您的帐号或IP可能存在异常」
@@ -1493,7 +1547,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
     鎖的正是 HKT 家用寬頻那顆（此時手機熱點已斷、流量回到有線）。
   - ⚠️ **間隔 38 小時未自動解除** → 獵聘的 IP 冷卻期可能以「天」計，
     **切勿密集重試**（重試只會延長封鎖，且我們這輪 2 支就讓它從「還能開頁」變成「直接跳驗證碼」）。
-  - ✅ 對策：遇到 0 筆時先跑 `python _probe_liepin.py` 聽診，
+  - ✅ 對策：遇到 0 筆時先跑 `python tools/_probe_liepin.py` 聽診，
     區分「驗證碼（等冷卻／換 IP）」與「站方改版（要改程式）」——兩種病藥完全不同。
 
 - **地區篩選**：站方只到城市層級（香港 = 320），**無分區碼**；
@@ -1505,7 +1559,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - **不支援項**：`--category` / `--industry` / `--sort`（無對應字典）、
   `--detail`（詳情頁受保護、風險高）→ 全部 `logger.warning` 後忽略。
   ⚠️ **分頁（`currentPage`）仍待端到端驗證**——2026-09-14 因站方 IP 驗證碼未能實測；
-  `--pages > 1` 若回空，先跑 `_probe_liepin.py` 確認是否為驗證碼，非程式故障。
+  `--pages > 1` 若回空，先跑 `tools/_probe_liepin.py` 確認是否為驗證碼，非程式故障。
 
 - ✅ **離線驗證（2026-09-14，零請求，拿 9/11 存檔 40 筆回歸）**：
   - **地區篩選全綠**：元朗 1 / 观塘 6 / 湾仔区 11 / 油尖旺 7 / 沙田 4 / 中西区 2 / 离岛 1；
