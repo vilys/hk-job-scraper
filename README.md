@@ -54,6 +54,10 @@ python main.py --help                                              # 完整參�
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
 > 22 個測試、約 0.06 秒、零網路請求。
 
+> 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
+> `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
+> 但不必把任何人的實際位址留在網路上。
+
 ---
 
 > ⚠️ **適用範圍備註**：本程式採「一網站一爬蟲模組」設計，目前共有 **12 個模組、10 座可用據點**：
@@ -1098,7 +1102,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
       `fromage=N` 仍標註為**尚未實測驗證**。
 
   - 🔁 **2026-09-10 複測（IP 未更換，仍封鎖）**：
-    - 使用者已重開路由器，但**對外 IP 仍是 `1.64.x.x`**（以 `ifconfig.me` 獨立驗證，
+    - 使用者已重開路由器，但**對外 IP 仍是同一顆 HKT 位址**（以 `ifconfig.me` 獨立驗證，
       非 Indeed 回報）。封鎖同樣存在，來源 IP 一字不差。
     - **為什麼重開路由器沒換到 IP**：本機為內網 `192.168.1.111`、閘道 `192.168.1.1`，
       對外 IP 由路由器的 WAN 持有。經查該 IP 屬 **HKT（香港電訊，AS4760）家用寬頻**
@@ -1153,7 +1157,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
        ```bash
        python -c "import requests;print(requests.get('https://ifconfig.me/ip',timeout=15).text)"
        ```
-       若仍印出 `1.64.x.x` → 尚未更換，不必浪費請求測 Indeed。
+       若印出的 IP 仍屬 HKT／AS4760 → 尚未更換，不必浪費請求測 Indeed。
     2. IP 確認不同後，清空 profile 重跑一次（讓它重新握手）：
        ```bash
        INDEED_RESET_PROFILE=1 python main.py --source indeed --keyword "software engineer" --pages 1 --outfile _probe_indeed_r3
