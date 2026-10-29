@@ -30,6 +30,14 @@ class BaseScraper(ABC):
     # 列表頁是否已內含可解析的刊登日期（JobsDB 是；gov_hk / moovup 否）。
     # 若為 True，--days 篩選可直接用列表資料，不必為了取日期而逐筆抓詳情頁。
     list_has_date: bool = False
+    # 站方是否保證列表按刊登日期「新→舊」。只有保證時，--days 才能在某頁全數過期時
+    # 提早停翻（後面的頁只會更舊）。回傳順序依相關性 / 推薦 / 固定 SEO 的站點為 False，
+    # 否則會靜默漏抓：某頁剛好沒有 10 天內的職位，不代表後面幾頁也沒有。
+    list_sorted_desc: bool = False
+    # 模組是否可預設執行。--source all 只跑 enabled 的站；
+    # 已判定不可行（登入牆 / 無香港職缺）或具 IP 封鎖風險的站設 False，
+    # 仍可用 --source <name> 單獨指定。
+    enabled: bool = True
 
     def __init__(self, headers: dict | None = None):
         self.headers = dict(DEFAULT_HEADERS)
@@ -62,6 +70,29 @@ class BaseScraper(ABC):
         self._stats["failed"] += 1
         logger.error("[%s] 已重試 %d 次仍失敗，放棄。", self.source, MAX_RETRIES)
         raise last_err
+
+    def _start_playwright(self):
+        """啟動 sync Playwright，並確保失敗時不留半啟動狀態。
+
+        若前一次 start() 成功但 launch() 失敗（例如瀏覽器未安裝），殘留的 driver
+        會讓下一次 start() 拋出「Sync API inside the asyncio loop」——真實原因
+        （Executable doesn't exist）因此被蓋掉。這裡先收掉舊的再重開。
+        """
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError as e:  # pragma: no cover
+            raise RuntimeError(
+                "此據點需要 Playwright：pip install playwright && playwright install chromium"
+            ) from e
+        old = getattr(self, "_pw", None)
+        if old is not None:
+            try:
+                old.stop()
+            except Exception:  # noqa: BLE001
+                pass
+            self._pw = None
+        self._pw = sync_playwright().start()
+        return self._pw
 
     # ---------- 抽象介面 ----------
     @abstractmethod
@@ -153,7 +184,6 @@ class BaseScraper(ABC):
                 break
 
             logger.info("[%s] 第 %d 頁取得 %d 筆。", self.source, page, len(jobs))
-            self._stats["success"] += len(jobs)
 
             # 列表補地區：僅有實作 fill_locations() 的來源支援（目前 recruit）；
             # 其餘來源警告一次後忽略，絕不中斷——跨站隔離鐵律。
@@ -194,12 +224,23 @@ class BaseScraper(ABC):
                     )
                 jobs = kept
                 if not jobs:
-                    logger.info(
-                        "[%s] 本頁已無 %d 天內的職位，停止翻頁。", self.source, days
+                    # 只有「站方保證新→舊」且本次確實是日期排序時，後面的頁才必然更舊
+                    sorted_desc = (
+                        self.list_sorted_desc
+                        and (sort or "post_dt_desc").strip().lower() == "post_dt_desc"
                     )
-                    break
+                    if sorted_desc:
+                        logger.info(
+                            "[%s] 本頁已無 %d 天內的職位，停止翻頁。", self.source, days
+                        )
+                        break
+                    logger.info(
+                        "[%s] 本頁無 %d 天內的職位，但站方不保證日期排序，繼續翻頁。",
+                        self.source, days,
+                    )
 
             all_jobs.extend(jobs)
+            self._stats["success"] += len(jobs)   # 只計入通過篩選、實際保留的筆數
             self._sleep()
 
         if output:

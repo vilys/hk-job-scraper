@@ -344,6 +344,9 @@ class OfferTodayScraper(BaseScraper):
             "Accept": "application/json, text/plain, */*",
             "Origin": BASE,
             "Referer": BASE + "/hk/search",
+            # 2026-10-29 實測：閘道（Server-Info: boss-alb / process-stage: Stage-Inbound）
+            # 對缺 traceid 的請求一律回 400，連應用層都到不了；值不拘，非空即可。
+            "traceid": f"F-{uuid.uuid4().hex}",
         })
         for attempt in range(1, 4):
             try:
@@ -465,7 +468,9 @@ class OfferTodayScraper(BaseScraper):
                 API_DETAIL, params=params,
                 headers={**DEFAULT_HEADERS, **(self.headers or {}),
                          "Accept": "application/json, text/plain, */*",
-                         "Origin": BASE, "Referer": BASE + "/hk/search"},
+                         "Origin": BASE, "Referer": BASE + "/hk/search",
+                         # 同列表 API：閘道缺 traceid 直接 400
+                         "traceid": f"F-{uuid.uuid4().hex}"},
                 timeout=REQUEST_TIMEOUT,
             )
             if r.status_code != 200:

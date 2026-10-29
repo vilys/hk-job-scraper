@@ -41,6 +41,8 @@ class ZhipinScraper(BaseScraper):
     source = "zhipin"
     use_browser = True
     list_has_date = False
+    # 港澳台專區 0 張職位卡 + 登入牆：模組保留，但不納入 --source all。
+    enabled = False
     _ROBOTS_RESTRICTED = True   # robots.txt Disallow: /*?query=*
 
     def __init__(self, headers: dict | None = None):

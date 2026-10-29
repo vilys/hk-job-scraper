@@ -100,7 +100,7 @@ class FounditScraper(BaseScraper):
             return self._page
         if sync_playwright is None:
             raise RuntimeError("需要 playwright：pip install playwright && playwright install chromium")
-        self._pw = sync_playwright().start()
+        self._pw = self._start_playwright()
         try:
             # ⚠️ 必須用系統 Chrome 指紋；內建 Chromium headless 會被 WAF 403
             self._browser = self._pw.chromium.launch(headless=True, channel="chrome")

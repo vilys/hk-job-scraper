@@ -81,6 +81,9 @@ def _load_areas() -> dict:
 class LiepinScraper(BaseScraper):
     source = "liepin"
     use_browser = True
+    # robots 禁抓 + 連 6–7 支請求即觸發 IP 驗證碼：不納入 --source all，
+    # 避免一次全站抓取就把使用者 IP 打進驗證碼牆。
+    enabled = False
     list_has_date = True        # 列表含 refreshTime，可客戶端篩選 --days
     _ROBOTS_RESTRICTED = True   # www 帶查詢串路徑屬 robots 禁區（資料實由 api-c 供應）
 
@@ -136,7 +139,7 @@ class LiepinScraper(BaseScraper):
             return self._page
         if sync_playwright is None:
             raise RuntimeError("需要 playwright：pip install playwright && playwright install chromium")
-        self._pw = sync_playwright().start()
+        self._pw = self._start_playwright()
         try:
             self._browser = self._pw.chromium.launch(headless=True, channel="chrome")
         except Exception as e:  # noqa: BLE001

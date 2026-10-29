@@ -11,7 +11,7 @@
 - 容錯讀取：CSV 可能是 UTF-8 / UTF-8-BOM / Big5(cp950) / GB18030，逐個嘗試。
 - 自動跳過非職位檔（如 ict_density_leaderboard.json 是地區統計，不是職位陣列）。
 - 依 job_id 去重（多檔重複匯出同一職位時，保留描述較完整 / 抓取較新的一筆）。
-- 正規化刊登日：五站格式各異（"23h ago" / "10/07/2026" / "2 days ago" / "7日前"），
+- 正規化刊登日：各站格式各異（"23h ago" / "10/07/2026" / "2 days ago" / "7日前"），
   統一折算成 age_days（距今天數）以便篩選與排序。
 """
 from __future__ import annotations
@@ -40,6 +40,13 @@ SOURCE_LABEL = {
     "jobsdb": "JobsDB",
     "linkedin": "LinkedIn",
     "indeed": "Indeed",
+    "recruit": "Recruit",
+    "jobmarket": "JobMarket",
+    "foundit": "foundit",
+    "efc": "eFinancialCareers",
+    "liepin": "獵聘",
+    "zhipin": "BOSS直聘",
+    "offertoday": "OfferToday",
 }
 
 # CSV 讀取時的編碼候選（含香港常見的 Big5 / GB18030）
@@ -438,15 +445,17 @@ const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ageTxt = j => j.age_days === null ? "日期未知"
   : (j.age_days === 0 ? "今天" : j.age_days + " 天前");
+// 原始薪資字串常已含「per month / 月薪 / hour」，別再補一次單位
 const salTxt = j => !j.salary ? "" :
-  (j.salary + (j.salary_unit ? "（" + j.salary_unit + "）" : ""));
+  (j.salary + (j.salary_unit && !/(月|month|年|year|annum|小時|hour|hr|\/h)/i.test(j.salary)
+    ? "（" + j.salary_unit + "）" : ""));
 // 刊登日為主；列表層抓取常無刊登日，退而顯示「抓取於 N 天前」作為參考座標
 const ageHtml = j => j.age_days === null
   ? `未知刊登日${j.scraped_days === null ? "" : `（抓取於 ${j.scraped_days} 天前）`}`
   : `${ageTxt(j)}${j.posted_date ? "（" + esc(j.posted_date) + "）" : ""}`;
 
 function initStats(){
-  $("sub").textContent = `五站聚合 · 共 ${META.total} 筆職位 · 來自 ${META.files_used} 個輸出檔`
+  $("sub").textContent = `${Object.keys(META.per_source).length} 站聚合 · 共 ${META.total} 筆職位 · 來自 ${META.files_used} 個輸出檔`
     + (META.scraped_min ? ` · 抓取期間 ${META.scraped_min} ~ ${META.scraped_max}` : "")
     + ` · 生成於 ${META.generated_at}`;
   $("stats").innerHTML = [

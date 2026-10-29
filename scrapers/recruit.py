@@ -85,19 +85,27 @@ CARD_SEL = "tr.JobGrid"
 # 翻頁：用「Next」鈕最穩（頁碼鈕名稱會隨頁碼位移）
 PAGER_NEXT_TARGET = "pagerBottom$ctl02$ctl00"
 
-# 排序：結果頁 select[name=sortByDDL] 的選項值
+# 排序：結果頁 select[name=sortByDDL] 的選項值。
+# 2026-10-29 實測下拉只有五項且皆為單向（站方不提供 asc/desc 切換）：
+#   POST_DATE(Post Date) / WORK_EXP_FROM(Exp.) / EDU_LEVEL_ID(Education)
+#   / SALARY_FROM(Salary($)) / RELEVANCE_PRIORITY(Relevance，預設)
+# 因此 desc 為原生方向，asc 只能回退同一選項並明確警告——不可靜默假裝已排序。
 _SORT_MAP = {
     "post_dt_desc": "POST_DATE",
     "post_dt_asc": "POST_DATE",
-    "post_date": "POST_DATE",
-    "date": "POST_DATE",
     "salary_desc": "SALARY_FROM",
-    "salary": "SALARY_FROM",
-    "exp": "WORK_EXP_FROM",
-    "experience": "WORK_EXP_FROM",
-    "edu": "EDU_LEVEL_ID",
-    "education": "EDU_LEVEL_ID",
-    "relevance": "RELEVANCE_PRIORITY",
+    "salary_asc": "SALARY_FROM",
+    "yr_exp_desc": "WORK_EXP_FROM",
+    "yr_exp_asc": "WORK_EXP_FROM",
+    "edu_lvl_desc": "EDU_LEVEL_ID",
+    "edu_lvl_asc": "EDU_LEVEL_ID",
+}
+# 站方沒有升冪，這些輸入只能近似處理
+_ASC_FALLBACK = {
+    "post_dt_asc": "Post Date 固定為新→舊",
+    "salary_asc": "Salary 固定為高→低",
+    "yr_exp_asc": "Exp. 固定為高→低",
+    "edu_lvl_asc": "Education 固定為高→低",
 }
 
 _HERE = Path(__file__).resolve().parent
@@ -216,11 +224,15 @@ def resolve_sort(sort_input: Optional[str]) -> str:
     """把通用排序參數轉成 Recruit 的 sortByDDL 選項值。"""
     if not sort_input:
         return ""
-    val = _SORT_MAP.get(str(sort_input).strip().lower(), "")
-    if val:
-        logger.info("[recruit] 排序：%s → %s", sort_input, val)
-    else:
-        logger.warning("[recruit] 不支援的排序 %s（已忽略）", sort_input)
+    key = str(sort_input).strip().lower()
+    val = _SORT_MAP.get(key, "")
+    if not val:
+        logger.warning("[recruit] 不支援的排序 %s（已忽略，站方僅 5 種單向排序）", sort_input)
+        return ""
+    if key in _ASC_FALLBACK:
+        logger.warning("[recruit] --sort %s 無對應方向（%s），改用站方固定方向",
+                       sort_input, _ASC_FALLBACK[key])
+    logger.info("[recruit] 排序：%s → %s", sort_input, val)
     return val
 
 
@@ -228,6 +240,7 @@ class RecruitScraper(BaseScraper):
     source = "recruit"
     use_browser = True       # WebForms 翻頁必須在真瀏覽器內執行 __doPostBack
     list_has_date = True     # 列表卡 td.post-date-col 已有刊登日（YYYY-MM-DD）
+    list_sorted_desc = True  # POST_DATE 排序為新→舊，--days 可提早停翻
 
     def __init__(self, headers: dict | None = None):
         super().__init__(headers)
@@ -246,7 +259,7 @@ class RecruitScraper(BaseScraper):
             return self._page
         if sync_playwright is None:
             raise RuntimeError("需要 playwright：pip install playwright && playwright install chromium")
-        self._pw = sync_playwright().start()
+        self._pw = self._start_playwright()
         self._browser = self._pw.chromium.launch(headless=True)
         self._context = self._browser.new_context(
             locale="zh-HK",

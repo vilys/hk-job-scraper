@@ -78,6 +78,7 @@ class LinkedInScraper(BaseScraper):
     source = "linkedin"
     use_browser = False
     list_has_date = True   # 列表卡已含相對刊登日（time），--days 不必抓詳情
+    list_sorted_desc = True  # sortBy=DD 為新→舊，--days 可提早停翻
 
     def __init__(self, headers: dict | None = None):
         super().__init__(headers)

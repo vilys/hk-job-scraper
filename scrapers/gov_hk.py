@@ -162,6 +162,9 @@ def resolve_industry(industry_input: Optional[str]) -> str:
 class GovHkScraper(BaseScraper):
     source = "gov_hk"
     use_browser = False
+    # --days 一律下推成站方 postedDtFr/To，回傳集合本身已被日期切乾淨，
+    # 因此某頁為空即代表區間內已無職位，可安全停翻（與列表內部排序無關）。
+    list_sorted_desc = True
 
     def __init__(self, headers: dict | None = None):
         super().__init__(headers)

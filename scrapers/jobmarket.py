@@ -184,6 +184,7 @@ class JobMarketScraper(BaseScraper):
     source = "jobmarket"
     use_browser = False      # 全程普通 requests：列表端點 + 批次 API + 詳情頁皆可直接 GET
     list_has_date = True     # 列表卡 p.post-date 已有刊登日（04 Sep 2026）
+    list_sorted_desc = True  # 列表預設新→舊（站方 Order 參數無效但預設已是降冪）
 
     def __init__(self, headers: dict | None = None):
         super().__init__(headers)
