@@ -2,21 +2,32 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import sys
+from pathlib import Path
 
+from exporter import export_csv
 from hkjobs import __version__
+from hkjobs.args import add_machine_arguments, add_search_arguments
 from hkjobs.capabilities import SOURCES
 from hkjobs.contract import (
+    EXIT_ALL_FAILED,
+    EXIT_EMPTY,
     EXIT_OK,
+    EXIT_PARTIAL,
     EXIT_UNEXPECTED,
     EXIT_USAGE,
     SCHEMA_VERSION,
+    SourceResult,
     configure_io,
     emit_json,
+    exit_code_for,
     now_iso,
+    search_payload,
 )
 from hkjobs.options import load_dimension
+from scrapers import SCRAPERS
 
 logger = logging.getLogger("hkjobs")
 
@@ -133,6 +144,108 @@ def cmd_options(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def _run_one(source: str, args: argparse.Namespace) -> SourceResult:
+    logger.info("==== 開始爬取來源：%s ====", source)
+    scraper = None
+    try:
+        scraper = SCRAPERS[source]()
+        jobs = scraper.scrape_all(
+            keyword=args.keyword,
+            max_pages=args.pages,
+            district=args.district,
+            category=args.category,
+            industry=args.industry,
+            sort=args.sort,
+            days=args.days,
+            with_detail=args.detail,
+            fill_location=args.fill_location,
+            output=None,
+            fmt="json",
+        )
+        logger.info("[%s] 取得 %d 筆職位。", source, len(jobs))
+        return SourceResult(source, "ok", jobs)
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("[%s] 執行失敗：%s", source, exc)
+        return SourceResult(source, "failed", [], str(exc))
+    finally:
+        if scraper is not None:
+            scraper.close()
+
+
+def _print_human(results: list[SourceResult], code: int) -> None:
+    print(f"{'來源':<14}{'筆數':>6}  狀態")
+    for result in results:
+        label = {"ok": "ok", "failed": "失敗", "skipped": "略過"}[result.status]
+        extra = f"（{result.error}）" if result.error else ""
+        print(f"{result.name:<14}{len(result.jobs):>6}  {label}{extra}")
+    total = sum(len(r.jobs) for r in results if r.status == "ok")
+    with_salary = sum(
+        1 for r in results if r.status == "ok" for j in r.jobs if j.salary
+    )
+    print(f"\n總計：{total} 筆（{with_salary} 筆有薪資）")
+    if code == EXIT_EMPTY:
+        print("提示：0 筆結果。可放寬 --days、換 --keyword，或先跑 hkjobs sources 確認支援度。")
+    elif code in (EXIT_PARTIAL, EXIT_ALL_FAILED):
+        print("提示：有來源失敗。可稍後重試，或先跑 hkjobs sources 確認據點狀態。")
+    print("提示：加 --json 取得機器可讀 JSON；加 --out result.json 儲存結果。")
+
+
+def _write_out(path: Path, payload: dict, results: list[SourceResult], *, json_mode: bool) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.suffix.lower() == ".csv":
+        jobs = [j for r in results if r.status == "ok" for j in r.jobs]
+        export_csv(jobs, str(path), incremental=False)
+        return
+    data = payload if json_mode else payload["jobs"]
+    with path.open("w", encoding="utf-8") as fh:
+        json.dump(data, fh, ensure_ascii=False, indent=2)
+
+
+def cmd_search(args: argparse.Namespace) -> int:
+    _setup_logging(quiet=args.quiet, json_mode=args.json)
+    if args.source != "all" and args.source not in SOURCES:
+        return _usage_error(
+            f"未知來源：{args.source}（可選：{', '.join(SOURCES)}, all）"
+        )
+
+    plan = (
+        [(name, info.enabled) for name, info in SOURCES.items()]
+        if args.source == "all"
+        else [(args.source, True)]
+    )
+    results: list[SourceResult] = []
+    for name, enabled in plan:
+        if not enabled:
+            logger.warning("[%s] 停用，略過（可用 --source %s 單獨執行）", name, name)
+            results.append(SourceResult(name, "skipped"))
+            continue
+        results.append(_run_one(name, args))
+
+    effective_sort = args.sort or ("post_dt_desc" if args.days is not None else None)
+    query = {
+        "source": args.source,
+        "keyword": args.keyword,
+        "pages": args.pages,
+        "days": args.days,
+        "district": args.district,
+        "category": args.category,
+        "industry": args.industry,
+        "sort": effective_sort,
+        "detail": bool(args.detail),
+        "fillLocation": bool(args.fill_location),
+    }
+    code = exit_code_for(results)
+    payload = search_payload(query, results, code)
+
+    if args.out:
+        _write_out(Path(args.out), payload, results, json_mode=args.json)
+    if args.json:
+        emit_json(payload)
+    else:
+        _print_human(results, code)
+    return code
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="hkjobs", description="香港職位搜尋 CLI（agent 友善）"
@@ -143,6 +256,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_sources = sub.add_parser("sources", help="列出據點能力矩陣")
     p_sources.add_argument("--json", action="store_true", help="輸出 JSON")
     p_sources.set_defaults(handler=cmd_sources)
+
+    p_search = sub.add_parser("search", help="搜尋職位（agent 請用 --json）")
+    add_search_arguments(p_search, include_output_flags=False)
+    add_machine_arguments(p_search)
+    p_search.set_defaults(handler=cmd_search)
 
     p_options = sub.add_parser("options", help="列出據點的有效參數值（地區/職能/行業/排序）")
     p_options.add_argument("--source", required=True, help="據點名稱（不接受 all）")

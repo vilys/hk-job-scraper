@@ -244,3 +244,137 @@ class TestOptionsCommand(unittest.TestCase):
         code, _, err = run_cli(["options", "--source", "all"])
         self.assertEqual(code, 2)
         self.assertIn("未知來源", err)
+
+
+import os
+import tempfile
+from unittest import mock
+
+from hkjobs.capabilities import SourceInfo
+from scrapers import SCRAPERS  # noqa: F811  （Task 3 已 import，此行供 clarity）
+
+
+def _fake_info(name="fake", enabled=True):
+    return SourceInfo(
+        name=name, label="Fake", enabled=enabled, needs_browser=False,
+        needs_chrome=False, per_page=1, keyword_required=False,
+        days_mode="list", sort_values=(), supports={}, request_delay=0.0, notes="",
+    )
+
+
+class _OkScraper:
+    def __init__(self):
+        pass
+
+    def scrape_all(self, **kwargs):
+        return [JobRecord(job_id="fake::1", source="fake", title="工程師", salary="20000")]
+
+    def close(self):
+        pass
+
+
+class _EmptyScraper(_OkScraper):
+    def scrape_all(self, **kwargs):
+        return []
+
+
+class _FailScraper(_OkScraper):
+    def scrape_all(self, **kwargs):
+        raise RuntimeError("HTTP 403")
+
+
+class TestSearchCommand(unittest.TestCase):
+    def _patched(self, infos, registry):
+        return mock.patch.multiple(cli, SOURCES=infos, SCRAPERS=registry)
+
+    def test_success_envelope(self):
+        with self._patched({"fake": _fake_info()}, {"fake": _OkScraper}):
+            code, out, _ = run_cli(["search", "--source", "fake", "--json"])
+        self.assertEqual(code, 0)
+        payload = json.loads(out)
+        self.assertEqual(payload["summary"]["total"], 1)
+        self.assertEqual(payload["summary"]["sources"][0]["status"], "ok")
+        self.assertEqual(set(payload["jobs"][0]), set(JobRecord.FIELDS))
+        self.assertNotIn("error", payload)
+        self.assertEqual(payload["query"]["sort"], None)
+
+    def test_no_results(self):
+        with self._patched({"fake": _fake_info()}, {"fake": _EmptyScraper}):
+            code, out, _ = run_cli(["search", "--source", "fake", "--json"])
+        self.assertEqual(code, 5)
+        self.assertEqual(json.loads(out)["error"]["code"], "no_results")
+
+    def test_partial_failure(self):
+        infos = {"good": _fake_info("good"), "bad": _fake_info("bad")}
+        registry = {"good": _OkScraper, "bad": _FailScraper}
+        with self._patched(infos, registry):
+            code, out, _ = run_cli(["search", "--source", "all", "--json"])
+        self.assertEqual(code, 3)
+        payload = json.loads(out)
+        self.assertEqual(payload["error"]["code"], "partial_failure")
+        self.assertEqual(
+            [s["status"] for s in payload["summary"]["sources"]], ["ok", "failed"]
+        )
+
+    def test_all_failed(self):
+        infos = {"bad": _fake_info("bad")}
+        with self._patched(infos, {"bad": _FailScraper}):
+            code, out, _ = run_cli(["search", "--source", "bad", "--json"])
+        self.assertEqual(code, 4)
+        self.assertEqual(json.loads(out)["error"]["code"], "all_sources_failed")
+
+    def test_skipped_source_reported(self):
+        infos = {"off": _fake_info("off", enabled=False)}
+        with self._patched(infos, {"off": _OkScraper}):
+            code, out, _ = run_cli(["search", "--source", "all", "--json"])
+        self.assertEqual(code, 5)
+        payload = json.loads(out)
+        self.assertEqual(payload["summary"]["sources"][0]["status"], "skipped")
+
+    def test_unknown_source(self):
+        with self._patched({"fake": _fake_info()}, {"fake": _OkScraper}):
+            code, _, err = run_cli(["search", "--source", "nope", "--json"])
+        self.assertEqual(code, 2)
+        self.assertIn("未知來源", err)
+
+    def test_json_writes_no_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            old = os.getcwd()
+            os.chdir(tmp)
+            try:
+                with self._patched({"fake": _fake_info()}, {"fake": _OkScraper}):
+                    code, _, _ = run_cli(["search", "--source", "fake", "--json"])
+                self.assertEqual(code, 0)
+                self.assertEqual(os.listdir(tmp), [])
+            finally:
+                os.chdir(old)
+
+    def test_out_json_envelope(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "result.json")
+            with self._patched({"fake": _fake_info()}, {"fake": _OkScraper}):
+                code, out, _ = run_cli(
+                    ["search", "--source", "fake", "--json", "--out", path]
+                )
+            self.assertEqual(code, 0)
+            with open(path, encoding="utf-8") as fh:
+                saved = json.load(fh)
+            self.assertEqual(saved, json.loads(out))
+
+    def test_out_csv_bom(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "result.csv")
+            with self._patched({"fake": _fake_info()}, {"fake": _OkScraper}):
+                code, _, _ = run_cli(["search", "--source", "fake", "--out", path])
+            self.assertEqual(code, 0)
+            with open(path, "rb") as fh:
+                raw = fh.read()
+            self.assertTrue(raw.startswith(b"\xef\xbb\xbf"))
+            self.assertIn(b"job_id", raw)
+            self.assertIn("工程師".encode("utf-8"), raw)
+
+    def test_unexpected_error_envelope(self):
+        with mock.patch.object(cli, "cmd_search", side_effect=RuntimeError("boom")):
+            code, out, _ = run_cli(["search", "--source", "fake", "--json"])
+        self.assertEqual(code, 1)
+        self.assertEqual(json.loads(out)["error"]["code"], "unexpected")
