@@ -52,7 +52,7 @@ python main.py --help                                              # 完整參�
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 22 個測試、約 0.06 秒、零網路請求。
+> 32 個測試、約 0.1 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -63,32 +63,36 @@ python main.py --help                                              # 完整參�
 
 ---
 
-> ⚠️ **適用範圍備註**：本程式採「一網站一爬蟲模組」設計，目前共有 **12 個模組、10 座可用據點**：
+> ⚠️ **適用範圍備註**：本程式採「一網站一爬蟲模組」設計，目前共有 **12 個模組；9 座預設啟用**（`--source all` 實際跑 9 站），3 座不預設啟用（Indeed、獵聘 Liepin 已停用；BOSS直聘受限）：
 > - **Moovup 好工速遞（moovup.com）** —— 見「🗺️ 按地區篩選（Moovup）」與「🧭 技術筆記（Moovup）」
 > - **勞工處互動就業服務（jobs.gov.hk / www1.jobs.gov.hk）** —— 見「🗺️ 按地區篩選（勞工處）」與「🧭 技術筆記（勞工處）」
 > - **JobsDB（hk.jobsdb.com）** —— 見「🗺️ 按地區篩選（JobsDB）」與「🧭 技術筆記（JobsDB）」
 > - **LinkedIn（www.linkedin.com）** —— 見「🧭 技術筆記（LinkedIn）」與「🗺️ 按地區篩選（LinkedIn）」
-> - **Indeed（hk.indeed.com）** —— 見「🧭 技術筆記（Indeed）」與「🗺️ 按地區篩選（Indeed）」
+> - **Indeed（hk.indeed.com）** ⛔ 已停用 —— 見「🧭 技術筆記（Indeed）」與「🗺️ 按地區篩選（Indeed）」
 > - **Recruit（www.recruit.com.hk）** —— 見「🧭 技術筆記（Recruit 逆向要點）」與「🗺️ 按地區篩選（Recruit）」
 > - **JobMarket 求職廣場（www.jobmarket.com.hk）** —— 見「🧭 技術筆記（JobMarket 逆向要點）」與「🗺️ 按地區篩選（JobMarket）」
 > - **foundit（www.foundit.hk，原 Monster HK）** —— 見「🧭 技術筆記（foundit 逆向要點）」與「🗺️ 按地區篩選（foundit）」
 > - **eFinancialCareers（www.efinancialcareers.hk）** —— 見「🧭 技術筆記（eFinancialCareers 逆向要點）」與「🗺️ 按地區篩選（eFinancialCareers）」
-> - **獵聘 Liepin（www.liepin.com）** ⚠️ 受限模組 —— 見「🧭 技術筆記（獵聘）」
+> - **OfferToday（www.offertoday.com，原 HKGoodJobs）** —— 見「🧭 技術筆記（OfferToday 逆向要點）」與「🗺️ 按地區篩選（OfferToday）」
+> - **獵聘 Liepin（www.liepin.com）** ⛔ 已停用（2026-09-14 起 IP 驗證碼） —— 見「🧭 技術筆記（獵聘）」
 > - **BOSS直聘（www.zhipin.com）** ⚠️ 受限模組 —— 見「🧭 技術筆記（BOSS直聘）」
 >
 > 各爬蟲模組**僅針對其對應網站**，彼此的資料結構、地區編號體系互不相同（各站的地區字典各自獨立），請勿跨站混用。
 >
-> ⚠️ **受限模組說明（2026-09-11 更新）**：
-> - **獵聘 Liepin** —— 已於 2026-09-11 **升級為可用香港據點**（證實有約 800 筆香港職缺）。
->   ⚠️ 但 `www.liepin.com/robots.txt` 明文 `Disallow: /*?*`（帶查詢串路徑禁抓），
+> ⚠️ **停用／受限模組說明（2026-10-31 更新）**：
+> - **獵聘 Liepin** —— 2026-09-11 曾升級為可用香港據點（實測約 800 筆香港職缺），
+>   但 2026-09-14 起本機 IP 遭 **IP 級驗證碼封鎖**（`captchaPage_ip_PC`），
+>   程式已設 `enabled=False`；`--source all` 不會執行，仍可用 `--source liepin` 單獨指定。
+>   ⚠️ `www.liepin.com/robots.txt` 明文 `Disallow: /*?*`（帶查詢串路徑禁抓），
 >   本模組搜尋網址帶查詢串 → 屬禁區；職缺資料實由 `api-c.liepin.com` 供應，
 >   該主機**無 robots.txt（404）**。**請自行評估合規風險。**
+> - **Indeed** —— 2026-09-11 起站方對香港訪客強制登入，已設 `enabled=False`（程式碼保留）。
 > - **BOSS直聘 Zhipin** —— 維持**受限**。2026-09-11 複查：職缺城市體系不含香港，
 >   港澳台專區對訪客為空並要求登入 → 對本專案無可用價值。
 
-模組化、可擴充的香港求職網站爬蟲。已完成 **Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Recruit**、**JobMarket**、**foundit**、**eFinancialCareers**、**OfferToday**、**獵聘 Liepin** 十座可用據點；**Indeed** 因站方對香港訪客強制登入（2026-09-11 真人實測）現標為**停用**（程式碼保留，可原地復活）；**BOSS直聘** 為受限模組（香港職缺為空且需登入，見文末路線圖）。
+模組化、可擴充的香港求職網站爬蟲。目前 **9 座預設啟用**：**Moovup 好工速遞**、**勞工處 gov.hk**、**JobsDB**、**LinkedIn**、**Recruit**、**JobMarket**、**foundit**、**eFinancialCareers**、**OfferToday**；**Indeed**（2026-09-11 強制登入牆）與**獵聘 Liepin**（2026-09-14 IP 驗證碼）已停用（程式碼保留，可原地復活）；**BOSS直聘** 為受限模組（香港職缺為空且需登入，見文末路線圖）。`--source all` 只跑上述 9 站。
 
-> 🆕 **2026-09-11：獵聘從「受限空殼」翻身為第十座據點。** 舊版判定「香港覆蓋未證實、多數回 0 筆」，本次重新偵察發現兩個關鍵：① 香港城市碼是 **320**（舊碼 `900` 是錯的）② **`city` 與 `dq` 必須同時送**才會過濾（只送 `city` 時站方完全不過濾）。修正後實測取得 **40 筆香港職缺、七個關鍵欄位零空值**，並支援香港 18 區篩選。詳見「🧭 技術筆記（獵聘）」。
+> 🆕 **2026-09-11：獵聘從「受限空殼」翻身為可用香港據點。** 舊版判定「香港覆蓋未證實、多數回 0 筆」，本次重新偵察發現兩個關鍵：① 香港城市碼是 **320**（舊碼 `900` 是錯的）② **`city` 與 `dq` 必須同時送**才會過濾（只送 `city` 時站方完全不過濾）。修正後實測取得 **40 筆香港職缺、七個關鍵欄位零空值**，並支援香港 18 區篩選。詳見「🧭 技術筆記（獵聘）」。⚠️ 該據點已於 **2026-09-14 停用**（IP 級驗證碼），`--source all` 不再執行。
 
 ---
 
@@ -161,7 +165,7 @@ python main.py --help                                              # 完整參�
   - **列表階段即自動補地區/職缺類型/行業/學歷**：呼叫站方自己的批次 API `/API/Web/GetJobDetail/<ids>`（每頁 1 次），`location` 預設就有值——與 Recruit 不同，不必 `--detail`。
   - **支援近期篩選 `--days N`**：列表卡已含刊登日（`04 Sep 2026`），直接由列表過濾，瞬時。
   - **每頁 20 筆、翻頁 `Page=N` 無重複**；`--detail` 走 `/Job/CurrentJob?Jobid=` 完整描述。
-  - **不支援項**：`--sort`（站方 Order 參數實測無效；列表預設已按刊登日新→舊，傳入會警告並忽略）。
+  - **不支援項**：`--sort`（站方 Order 參數實測無效；列表**大致**按刊登日新→舊，惟頂部推廣／置頂區塊不參與排序，傳入會警告並忽略）。
 - **foundit 據點已實戰驗證（擴充八站 Wave 2，原 Monster HK）**：
   - **指紋 WAF 站**：`/search/*` 對 requests 與 Playwright 內建 Chromium headless 一律 403；**需以系統 Google Chrome 指紋（`channel="chrome"`）headless 開啟**。職位詳情 `/job/*` 則普通 requests 直達（~0.5 秒/筆）。
   - **關鍵字搜尋走 SEO 瀏覽頁**：站方自己的搜尋 API 目前故障（404），改打伺服器端渲染的 `/search/<關鍵字>-jobs[-in-<地區>][-<頁碼>]`（20 筆/頁），engineer 實測 2,989 筆。
@@ -312,7 +316,7 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 | 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選）⚠️ **列表本身無地區欄**：單區篩選時**零請求回填**該區；多區／未篩選 → 用 `--fill-location`（AJAX 逐筆，25 筆/頁 = 25 支請求）或 `--detail` | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼 + 客戶端分區比對（`320` 香港；18 區見 `liepin_areas.json`，簡繁英皆可） | ❌ 不適用（香港不在站方城市體系） | ✅ 純 code 18 區 + 129 子區（中英文皆可，逗號多選） |
 | 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 | ✅ POSITION level-2 code（31 大類 + 431 細類） |
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
-| 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設已新→舊） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
+| 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設大致新→舊，頂部推廣區塊除外） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
 | 近期 `--days` | ❌ 不適用 | ✅ **站方端 `criteria.postedDtFr/To`**（2026-09-09 新增，格式 DD/MM/YYYY：列表無日期，舊流程須逐筆抓詳情取 `#postedDt`，改為站方端後 20 筆僅 2 支請求） | ✅ 列表含日期 + **站方端 `daterange=N`**（2026-09-10 新增，實測站方總數 2,241 → 467 筆；⚠️ 只吃 `1/3/7/14/31` 五個離散值，其餘數字站方不理會，本爬蟲自動向上取整） | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ⛔ **2026-09-11 據點停用，本列僅供復活時參考**：內嵌職位陣列瞬時（~9s，不點擊）+ **站方端 `fromage=N`**（2026-09-09 加入，⚠️ **從未實測驗證**——該站次日即遭封鎖、最終證實為強制登入牆，見 Indeed 章節）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時（⚠️ 2026-09-09 實測 `postedDate` / `datePosted` / `daysSincePosted` 三種參數名皆無效，站方端無日期過濾；因列表已含 ISO 日期、客戶端零成本篩選，影響極小） | ⚠️ 客戶端（`refreshTime` **刷新日**近似，非刊登日：實測 40 筆中 1天→6 / 3天→22 / 7天→33 / 14天→38） | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
 | 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ 已實測修正（2026-09-08：selector 全錯導致只抓到標題——正確值為 `advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 已實測修正（2026-09-08）：描述原只抓到 17 字（`(.*?)</div>` 撞上巢狀 div）→ 改 DOM `inner_text` + 巢狀配對，實測 934–2476 字；另加點擊重試與 🐢 熔斷（連續 2 筆失敗即停止），16 筆由 **9 分鐘 / 剩 1 筆** → **~1 分鐘 / 完整** | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
 | 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | 首頁 ~58／續頁 10（guest 端點） | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 40（pageSize=40；實測 42 張卡、剔除 2 筆外地後 40 張全在香港） | 0（港澳台專區無職缺） | 10（站方上限） |
@@ -477,7 +481,7 @@ python main.py --source efc --keyword "risk manager" --pages 2
 python main.py --source efc --keyword "analyst" --district 九龍 --days 7
 python main.py --source efc --keyword "" --district "Hong Kong Island"   # 空關鍵字 = 純瀏覽
 
-# 43) 獵聘（⚠️ 受限模組：robots 禁抓 + IP 驗證碼；回 0 筆屬預期，警告會說明原因）
+# 43) 獵聘（⛔ 2026-09-14 起停用；保留程式碼供復活，回 0 筆屬預期）
 python main.py --source liepin --keyword "engineer"
 
 # 44) BOSS直聘（⚠️ 受限模組：全站安全驗證；回 0 筆屬預期）
@@ -657,7 +661,7 @@ JobsDB 使用**完全自有的 slug / 查詢體系**，與 Moovup 的 shortCode�
 
 ## 📊 聚合儀表板（`build_dashboard.py`）
 
-把 `output/` 裡**所有**爬蟲產出（五站、任意多次任務的 JSON/CSV）聚合成一個**單檔離線網頁**，
+把 `output/` 裡**所有**爬蟲產出（各站、任意多次任務的 JSON/CSV）聚合成一個**單檔離線網頁**，
 直接雙擊就能開，不必起伺服器。
 
 ```bash
@@ -678,10 +682,10 @@ python build_dashboard.py --glob "output/*.json"
 - **圖表**：據點分佈長條圖、熱門地區 TOP 10
 - **其他**：深淺主題切換、描述展開全文、職位標題直接連回原始網頁、分頁載入
 
-### 資料處理（為什麼能混著吃五站的檔）
+### 資料處理（為什麼能混著吃各站的檔）
 | 議題 | 處理方式 |
 |------|----------|
-| 五站日期格式各異 | 統一折算 `age_days`（距今天數）：`23h ago` / `3d ago` / `30d+ ago` / `2 days ago` / `7日前` / `2個月前` / `10/07/2026` 全數支援 |
+| 各站日期格式各異 | 統一折算 `age_days`（距今天數）：`23h ago` / `3d ago` / `30d+ ago` / `2 days ago` / `7日前` / `2個月前` / `10/07/2026` 全數支援 |
 | 列表層抓取無刊登日 | 另計 `scraped_days`（抓取距今），卡片顯示「未知刊登日（抓取於 N 天前）」；套用時間篩選時這類會被排除 |
 | 同一職位重複出現在多檔 | 以 `job_id` 去重，保留描述較完整 / 抓取較新的一筆 |
 | CSV 編碼不一（UTF-8 / BOM / Big5 / GB18030） | 逐個編碼嘗試；`ict_density_leaderboard.*` 等非職位檔自動略過 |
@@ -751,12 +755,21 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 
 ### SOP（🐢 依爬蟲禮節）
 
-一次 1 支請求、間隔 ≥8 秒、單輪 ≤5 站、每輪回報；遇限速／驗證碼／非預期回應立即停手。
-Indeed 已停用，不列入；獵聘 / BOSS直聘屬受限模組，確認受限即可。
+一次 1 支請求、間隔 ≥8 秒、**單輪 ≤5 站**（輪與輪之間休息 ≥30 秒）、每輪回報；
+遇限速／驗證碼／非預期回應立即停手。
+Indeed／獵聘已停用，不列入巡檢；BOSS直聘屬受限模組，確認受限即可。
+⚠️ `--source all` 會**一次連跑 9 站**，僅供便利使用，**不要**拿來做健康檢查——請照下方分批。
 
 ```bash
-# 基本搜尋（每站 1 頁）
-for s in moovup gov_hk jobsdb linkedin recruit jobmarket foundit efc offertoday; do
+# 第 1 批（5 站）
+for s in moovup gov_hk jobsdb linkedin recruit; do
+  python main.py --source $s --pages 1 --outfile _health_$s
+  sleep 8
+done
+sleep 30
+
+# 第 2 批（4 站）
+for s in jobmarket foundit efc offertoday; do
   python main.py --source $s --pages 1 --outfile _health_$s
   sleep 8
 done
@@ -771,9 +784,9 @@ done
 產出檔名以 `_` 開頭者屬偵察性質，檢查完請歸檔到 `output/_probe/`
 （⚠️ 勿用 `mv output/_*.json` 一次掃——會連正式資料集一起搬走，已發生過一次）。
 
-### 最近一次檢查結果（2026-09-11，環境：HKT 家用寬頻）
+### 歷史檢查基準（2026-09-11，環境：HKT 家用寬頻）
 
-十座可用據點**全數正常**（獵聘為 2026-09-11 新加入）：
+**2026-09-11 當時**十座可用據點全數正常（獵聘為當日新加入；三日後即因 IP 驗證碼停用，見下方現況）：
 
 | 來源 | 基本搜尋 | `--days 7` | 站方端日期參數 |
 |---|---|---|---|
@@ -790,8 +803,10 @@ done
 | ⛔ Indeed | — | — | **據點停用**（強制登入牆，見其技術筆記） |
 | ⚠️ BOSS直聘 | — | — | **受限**：香港職缺為空（港澳台專區 0 張 + 登入牆），不列入檢查 |
 
+> 📌 **現況（2026-10-31）**：Indeed 與獵聘已停用；`--source all` 跑 9 站。上表是 2026-09-11 的歷史快照，勿當作現行基準。
+
 下次檢查時請與此表比對：**筆數「歸零」或「異常膨脹」都算異常**。
-⚠️ 獵聘因驗證碼門檻低，健康檢查時**只跑 1 次**。
+⚠️ 獵聘已停用，**不列入巡檢**；若復活測試，只跑 1 次並預期 0 筆／驗證碼。
 ⚠️⚠️ 獵聘回 0 筆時**不要只看 log**：2026-09-14 實測，即使已跳轉到驗證碼頁，
 log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，URL 判讀會漏）。
 正確做法是執行 `python tools/_probe_liepin.py` 聽診，直接看**標題**（`安全中心-验证码`）
@@ -813,7 +828,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 22 個測試，約 0.06 秒，零網路請求
+python -m unittest discover -s tests -v      # 32 個測試，約 0.1 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。
@@ -1321,7 +1336,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - **詳情頁**：內含 **JSON-LD `JobPosting` 結構化資料**（地區 / 行業 / 僱傭類型 / 薪資區間 / 完整描述 / `datePosted`）。注意站方 JSON-LD 內含未跳脫的控制字元，需先清 `\x00–\x1f` 再 `json.loads`。地區取 `jobLocation.address` 的 streetAddress / addressLocality / addressRegion 三欄**去重後**合併（三欄常重複如 New Territories / Hong Kong / Hong Kong）。
   - 詳情用普通 `requests` 即可（無反爬），~0.2 秒/筆。
 - **`--days` 行為**：`list_has_date=True`，列表卡已含刊登日（`YYYY-MM-DD`），由列表直接過濾，**不必抓詳情（瞬時）**；`days_since_posted()` 支援 `%Y-%m-%d` 與 `%d/%m/%Y` 兩種格式。
-- **地區篩選體系**：Recruit 專屬數字 ID（逗號分隔可多選），與其他五站完全獨立，不可混用（見下方「🗺️ 按地區篩選（Recruit）」）。
+- **地區篩選體系**：Recruit 專屬數字 ID（逗號分隔可多選），與其他各站完全獨立，不可混用（見下方「🗺️ 按地區篩選（Recruit）」）。
 - **不支援項**：`--industry`（該站無行業篩選維度，傳入 `logger.warning` 後忽略）。均不影響其他據點。
 - **各欄位資料來源總表（Recruit → JobRecord）**：
 
@@ -1377,7 +1392,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - **地區補齊：站方批次 API（重要）**：列表載入後站方 JS 呼叫 **`GET /API/Web/GetJobDetail/<id1,id2,...>`**（JSON），回傳每筆的 `JobLocation` / `JobType` / `JobIndustry` / `Qualification` / `Benefit` / `JobDetails` / `JobSummary`。本爬蟲在列表階段即呼叫同一 API（**每頁 1 次**）補齊 location / job_type / industry / 學歷 / 福利——**`location` 預設就有值，不必 `--detail`**。
 - **詳情頁（僅 `--detail` 顯式要完整描述時才用）**：`GET /Job/CurrentJob?Jobid=<id>`（普通 requests）。`​.job-post-content` 完整描述、`.job-par` 行業/職能文字（正則抽 `Industry X Job Function Y`）、`.job-list-detail-date` 內含 ref 編號與 `05-Sep-2026` 刊登日、`.benefits` 福利。
 - **`--days` 行為**：`list_has_date=True`，列表卡已含刊登日（`%d %b %Y`），由列表直接過濾（瞬時）；`days_since_posted()` 另支援詳情層的 `%d-%b-%Y`。
-- **排序**：站方 UI 的 `Order` 參數實測無有效效果（`Order=PostDate` 甚至回 0 筆），而列表預設即刊登日新→舊（job id 遞減）→ **`--sort` 一律警告後忽略**。
+- **排序**：站方 UI 的 `Order` 參數實測無有效效果（`Order=PostDate` 甚至回 0 筆），而列表**大致**按刊登日新→舊（job id 遞減；頂部推廣／置頂區塊除外）→ **`--sort` 一律警告後忽略**。
 - **地區篩選體系**：JobMarket 專屬雙參數（`AreaID` 5 大區 + `AreaLocationID` 75 子區），與其他六站完全獨立，不可混用（見下方「🗺️ 按地區篩選（JobMarket）」）。
 - **各欄位資料來源總表（JobMarket → JobRecord）**：
 
@@ -1488,7 +1503,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 
 ---
 
-## 🧭 技術筆記（獵聘 liepin 逆向要點 — 2026-09-11 重做為香港據點）
+## 🧭 技術筆記（獵聘 liepin 逆向要點 — 2026-09-11 重做為香港據點；2026-09-14 停用）
 
 > **2026-09-11 重大更新**：原 Wave 5 版本判定「香港覆蓋未證實、多數回 0 筆」。本次重新偵察後證實
 > **獵聘有完整的香港職缺庫**（站方回報約 800 筆，含真實港區），並找出正確的過濾方式 → 升級為可用據點。
@@ -1735,7 +1750,7 @@ python main.py --source liepin --district 观塘
 | — | ~~HKGoodJobs~~ → **OfferToday**（擴充八站 Wave 3′ 復活賽） | 低（純 JSON API） | ✅ **已完成並實測**（2026-09-07 落地，第十座可用據點。🚀 **免瀏覽器純 requests**——冷請求無 cookie 亦可；關鍵字 + 18 區/129 子區 + 31 大類/431 細類職能 + 15 大類/53 細類行業；`cardType` 過濾防假結果；`--days` 送 `publishTime` + 客戶端再篩；`--detail` 已實測（補描述/行業/`postDaysAgo`）；`--sort` 不適用；`pageSize` 上限 10，翻頁靠 `hasMore`） |
 | — | HKGoodJobs（擴充八站 Wave 3） | 判定 | ❌ **判定不可行，止損**（裸域全面真 403——Apache 伺服器端拒絕所有路徑，HTTP/HTTPS、真 Chrome 指紋、忽略憑證錯誤皆同；TLS 憑證另錯置錯誤網域。站方配置即拒所有自動/人工存取） |
 | — | Glassdoor HK（擴充八站 Wave 4） | 高（CF + 誘餌） | ❌ **判定不可行，止損**（CF 挑戰不穩；首次可 200 但回**位置污染頁**——geoId 被無視、按資料中心 IP 定位到印度小頁鎮「Ambahta Rindān」，`Hong Kong` 僅 2 次 / `Ambahta` 37 次、0 個真職位連結。抓到也是錯資料） |
-| 12 | 獵聘 Liepin（擴充八站 Wave 5） | 🟡 中（robots 禁抓 www 查詢串；IP 驗證碼門檻 ~6–7 支） | ✅ **2026-09-11 升級為可用香港據點**（第十座）！修正城市碼 `900`→**320**，並發現 `city` 與 `dq` 必須同時送才會過濾；實測 40 筆香港職缺、七關鍵欄位零空值、站方 `total≈800`；建香港 18 區字典；`--days` 以 `refreshTime` 客戶端篩選。⚠️ 分頁未驗證；連 6–7 支請求觸發 IP 驗證碼（間隔已調 8s） |
+| 12 | 獵聘 Liepin（擴充八站 Wave 5） | 🟡 中（robots 禁抓 www 查詢串；IP 驗證碼門檻 ~6–7 支） | ✅ **2026-09-11 曾升級為可用香港據點**！修正城市碼 `900`→**320**，並發現 `city` 與 `dq` 必須同時送才會過濾；實測 40 筆香港職缺、七關鍵欄位零空值、站方 `total≈800`；建香港 18 區字典；`--days` 以 `refreshTime` 客戶端篩選。⚠️ 分頁未驗證；連 6–7 支請求觸發 IP 驗證碼（間隔已調 8s）；**2026-09-14 起 IP 級封鎖，已停用**，見「全站健康檢查」現況 |
 | 13 | BOSS直聘 Zhipin（擴充八站 Wave 5） | 🔴 高（robots 禁抓 `?query=`/`?city=`） | ⚠️ **2026-09-11 複查：維持受限**。防護由「全站安全验证」改為部分開放（首頁純 requests 可開、路徑式 SEO 網址），但**港澳台專區 0 張職位卡 + 登入牆**，香港不在職缺城市體系 → 對本專案無可用價值；模組保留待站方政策改變 |
 
 > 路線圖前五站全數達標 ✅：Moovup / 勞工處 / JobsDB / LinkedIn / Indeed 五座據點皆已落地並實測。LinkedIn 現以訪客模式落地——功能可用但單次約 ~25–60 筆天花板；提供 `li_at` cookie（config.LINKEDIN_LI_AT / 環境變數）後深翻頁趨穩、可抓更深。Indeed 的 `--days` 現已由內嵌 `pubDate` 瞬時篩選（~9 秒，不再逐張點擊）；`--detail` 取描述改用 JS 點擊面板（~1 秒/張）；直連 viewjob 因 Cloudflare 不可行。
