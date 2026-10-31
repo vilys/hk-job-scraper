@@ -378,3 +378,30 @@ class TestSearchCommand(unittest.TestCase):
             code, out, _ = run_cli(["search", "--source", "fake", "--json"])
         self.assertEqual(code, 1)
         self.assertEqual(json.loads(out)["error"]["code"], "unexpected")
+
+
+import subprocess
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+class TestPackaging(unittest.TestCase):
+    def test_pyproject_declares_entry_point(self):
+        with open(os.path.join(ROOT, "pyproject.toml"), encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn('hkjobs = "hkjobs.cli:main"', text)
+        self.assertIn('scrapers = ["*.json"]', text)
+
+
+class TestModuleEntry(unittest.TestCase):
+    def test_python_m_hkjobs_utf8(self):
+        proc = subprocess.run(
+            [sys.executable, "-m", "hkjobs", "sources", "--json"],
+            cwd=ROOT,
+            capture_output=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr.decode("utf-8", "replace"))
+        payload = json.loads(proc.stdout.decode("utf-8"))
+        self.assertEqual(len(payload["sources"]), 12)
+        self.assertTrue(any(s["label"] == "勞工處" for s in payload["sources"]))
