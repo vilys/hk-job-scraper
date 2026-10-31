@@ -173,7 +173,7 @@ class MoovupScraper(BaseScraper):
             raise RuntimeError(
                 "未安裝 Playwright，請先執行：pip install playwright && playwright install chromium"
             )
-        self._pw = sync_playwright().start()
+        self._pw = self._start_playwright()
         ua = self.headers.get("User-Agent", "")
         self._browser = self._pw.chromium.launch(headless=True)
         self._ctx = self._browser.new_context(

@@ -26,6 +26,25 @@ def _ensure_dir(filepath: str) -> None:
         os.makedirs(d, exist_ok=True)
 
 
+def _atomic_write(filepath: str, writer, *, encoding: str, newline: str | None = None) -> None:
+    """先寫 <path>.tmp 再 os.replace，避免中途中斷留下半個檔。
+
+    增量模式會先讀回既有檔；直接覆寫時若中途失敗，舊資料就沒了，下次讀到半個
+    JSON 還會被判定毀損而備份。原子替換保證檔案只會是「舊的」或「新的」。
+    """
+    tmp = f"{filepath}.tmp"
+    try:
+        with open(tmp, "w", encoding=encoding, newline=newline) as f:
+            writer(f)
+        os.replace(tmp, filepath)
+    except BaseException:
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+        raise
+
+
 def _dedupe(jobs: Iterable[JobRecord]) -> list[JobRecord]:
     seen: dict[str, JobRecord] = {}
     for j in jobs:
@@ -84,8 +103,11 @@ def export_json(
     else:
         jobs = _dedupe(jobs)
 
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump([j.to_dict() for j in jobs], f, ensure_ascii=False, indent=2)
+    _atomic_write(
+        filepath,
+        lambda f: json.dump([j.to_dict() for j in jobs], f, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
     logger.info("已匯出 %d 筆職位 -> %s", len(jobs), filepath)
     return len(jobs)
 
@@ -104,12 +126,15 @@ def export_csv(
         jobs = _dedupe(jobs)
 
     fields = list(JobRecord.FIELDS)
-    # BOM 讓 Excel 正確辨識 UTF-8 繁體中文
-    with open(filepath, "w", encoding="utf-8-sig", newline="") as f:
+
+    def _dump(f) -> None:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         for j in jobs:
             writer.writerow(j.to_dict())
+
+    # BOM 讓 Excel 正確辨識 UTF-8 繁體中文
+    _atomic_write(filepath, _dump, encoding="utf-8-sig", newline="")
     logger.info("已匯出 %d 筆職位 -> %s", len(jobs), filepath)
     return len(jobs)
 

@@ -44,7 +44,7 @@ python main.py --source gov_hk --keyword "會計" --pages 1
 python main.py --source gov_hk   --keyword "零售" --pages 2 --district 屯門 --days 7
 python main.py --source jobsdb   --keyword "data" --pages 2 --days 7 --output both
 python main.py --source moovup   --keyword "會計" --pages 3 --detail
-python main.py --source all      --keyword "會計" --pages 1        # 全部據點各跑 1 頁
+python main.py --source all      --keyword "會計" --pages 1        # 全部「已啟用」據點各跑 1 頁（自動略過停用來源）
 python main.py --help                                              # 完整參數
 ```
 
@@ -288,7 +288,7 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 
 | 參數 | 必填 | 預設 | 說明 |
 |------|------|------|------|
-| `--source` | 否 | `moovup` | 爬蟲來源：`moovup` \| `gov_hk` \| `jobsdb` \| `linkedin` \| `indeed`（停用） \| `recruit` \| `jobmarket` \| `foundit` \| `efc` \| `liepin` \| `zhipin`（受限） \| `offertoday` \| `all`（全部據點各跑 `--pages` 頁）。各站支援差異見下方「📊 各站功能支援矩陣」。 |
+| `--source` | 否 | `moovup` | 爬蟲來源：`moovup` \| `gov_hk` \| `jobsdb` \| `linkedin` \| `indeed`（停用） \| `recruit` \| `jobmarket` \| `foundit` \| `efc` \| `liepin` \| `zhipin`（受限） \| `offertoday` \| `all`（全部**已啟用**據點各跑 `--pages` 頁；`enabled=False` 的 indeed / liepin / zhipin 會自動略過並提示，仍可個別指定）。各站支援差異見下方「📊 各站功能支援矩陣」。 |
 | `--keyword` | 否 | 空 | 搜尋關鍵字（繁體中文或英文皆可；**留空 = 不限定關鍵字，僅依地區/類別瀏覽，gov_hk 支援**；JobsDB 留空則搜全站） |
 | `--pages` | 否 | `3` | 最大翻頁數。各站每頁筆數不同（Moovup 12、勞工處 ~20、JobsDB ~20–30、LinkedIn 首頁 ~58／續頁 10…），詳見矩陣「每頁筆數」列。 |
 | `--output` | 否 | `json` | 輸出格式：`json` \| `csv` \| `both` |
@@ -1653,6 +1653,7 @@ python main.py --source liepin --district 观塘
 
 - **身世之謎**：入口 `https://www.offertoday.com/hk/recommend`。SPA（Vue）＋ 頁面載 `static.zhipin.com/assets/sdk/apm/patas.2.1.0.min.js`（**BOSS直聘 APM SDK**）→ **疑為 BOSS直聘的香港站**，但**未繼承其全站安全驗證**，目前對自動化友善；另有 `/web/security/entry/index.js` 需持續觀察是否升級防護。
 - **🚀 免瀏覽器**：R8/R9 實測 **冷 `requests`（無 cookie、無瀏覽器指紋）直打列表 API 回 `code=0`**，且關鍵字／地區／職能／行業／翻頁**全數生效** → `use_browser=False`，與 JobMarket、eFinancialCareers 同級輕量。
+- **⚠️ 2026-10-29 起必須帶 `traceid` 標頭**：列表與詳情 API 全數回 `HTTP 400`，回應只有 `Failure: 400 Bad Request`，標頭為 `Server-Info: boss-alb` / `process-stage: Stage-Inbound`——**閘道層就拒掉，根本沒進應用層**。逐項比對瀏覽器真實 XHR 後定位：只補 `traceid: <任意非空字串>`（實測 `F-abc` 即可）立刻回 `200`；`api-language`、`x-requested-with`、`device_id` cookie 均非必要。已於 `_post()` 與 `get_detail()` 統一補上。
 - **列表 API**：`POST /wapi/geek/recommend/search/list`
   payload：`keyword` / `page` / `pageSize`（**上限 10**）/ `salaryType`（0 月薪、1 時薪）/ `publishTime`（0 今天、1 三天、2 七天、3 十四天）/ `employmentTypes` / `experiences` / `educationLevels` / `benefits` / `workPermits` / `rcdType`（固定 7）/ `jobFunctionCodes` / `industries` / `subDistrictCodes` / `searchSource`。回應在 `data.resultList`。
 - **🎴 `cardType` 過濾（模組必守，否則會拿到假結果）**

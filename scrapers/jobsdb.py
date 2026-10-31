@@ -87,6 +87,7 @@ class JobsDBScraper(BaseScraper):
     source = "jobsdb"
     use_browser = True
     list_has_date = True   # 列表頁已含相對刊登日（jobListingDate），--days 不必抓詳情
+    list_sorted_desc = True  # sortmode=ListedDate 為新→舊，--days 可提早停翻
 
     def __init__(self, headers: Optional[dict] = None):
         super().__init__(headers)
@@ -138,11 +139,14 @@ class JobsDBScraper(BaseScraper):
             raise RuntimeError(
                 "此據點需要 Playwright：pip install playwright && playwright install chromium"
             )
-        self._pw = sync_playwright().start()
+        self._pw = self._start_playwright()
         self._browser = self._pw.chromium.launch(headless=True)
         self._context = self._browser.new_context(
-            user_agent=DEFAULT_HEADERS["User-Agent"] + " zh-HK,zh;q=0.9,en;q=0.8",
+            user_agent=DEFAULT_HEADERS["User-Agent"],
             locale="zh-HK",
+            # Accept-Language 是獨立標頭；先前被接在 UA 尾巴，變成
+            # "...Chrome/156 zh-HK,zh;q=0.9" 這種一眼可辨的異常字串。
+            extra_http_headers={"Accept-Language": "zh-HK,zh;q=0.9,en;q=0.8"},
         )
         self._page = self._context.new_page()
         # 先訪首頁取得 Cloudflare clearance cookie（避免每頁重挑戰）

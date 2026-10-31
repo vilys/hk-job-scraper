@@ -106,7 +106,13 @@ def main() -> None:
 
     # 解析要執行的爬蟲
     if args.source == "all":
-        sources = list(SCRAPERS.keys())
+        sources = [n for n, cls in SCRAPERS.items() if getattr(cls, "enabled", True)]
+        skipped = [n for n, cls in SCRAPERS.items() if not getattr(cls, "enabled", True)]
+        if skipped:
+            logger.warning(
+                "--source all 已略過停用來源：%s（需要時請用 --source <名稱> 單獨指定）",
+                ", ".join(skipped),
+            )
     elif args.source in SCRAPERS:
         sources = [args.source]
     else:

@@ -93,6 +93,9 @@ try {
 class IndeedScraper(BaseScraper):
     source = "indeed"
     use_browser = True
+    # 2026-09 起 Indeed 對職缺詳情強制登入，列表亦只回極少數結果：
+    # 不納入 --source all（仍可 --source indeed 單獨嘗試）。
+    enabled = False
     # 列表內嵌 mosaic provider JSON 含 pubDate（毫秒戳），search() 解析後寫入
     # posted_date（折算「N day ago」），故 --days 篩選無需抓詳情（瞬時）。
     list_has_date = True
@@ -124,7 +127,7 @@ class IndeedScraper(BaseScraper):
             raise RuntimeError(
                 "此據點需要 Playwright：pip install playwright && playwright install chromium"
             )
-        self._pw = sync_playwright().start()
+        self._pw = self._start_playwright()
         if os.environ.get("INDEED_RESET_PROFILE") == "1" and PROFILE_DIR.exists():
             import shutil
             shutil.rmtree(PROFILE_DIR, ignore_errors=True)
