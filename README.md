@@ -48,11 +48,15 @@ python main.py --source all      --keyword "會計" --pages 1        # 全部「
 python main.py --help                                              # 完整參數
 ```
 
+> 🤖 **給 AI agent／程式呼叫**：`pip install -e .`（或 `pipx install .`）後可用 `hkjobs` 命令。
+> 探索順序：`hkjobs sources --json` → `hkjobs options --source <站> --json` → `hkjobs search ... --json`。
+> 完整機器契約（JSON 封套、exit code、速率禮節）見 [`AGENTS.md`](AGENTS.md)。舊 `python main.py` 用法完全不變。
+
 > 🐢 **爬蟲禮節**：本專案預設把請求間隔拉在 1.5–8 秒。請不要為了快而改小，
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 32 個測試、約 0.1 秒、零網路請求。
+> 70 個測試、約 0.5 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -200,6 +204,14 @@ hk-job-scraper/
 ├── exporter.py             # JSON / CSV 匯出（增量 + 去重）
 ├── base_scraper.py         # 爬蟲抽象基類（search / get_detail / scrape_all）
 ├── build_dashboard.py      # 聚合 output/ 所有產出 → 單檔離線 HTML 儀表板
+├── pyproject.toml          # 打包與 hkjobs console script
+├── AGENTS.md               # 給 AI agent／程式呼叫的機器契約
+├── hkjobs/                 # agent 友善 CLI（search / sources / options）
+│   ├── cli.py              # 子命令分派
+│   ├── args.py             # 搜尋參數（main.py 共用）
+│   ├── capabilities.py     # 12 站能力矩陣
+│   ├── options.py          # 字典查詢 adapter
+│   └── contract.py         # JSON 封套與 exit code
 ├── LICENSE                 # MIT 授權
 ├── .gitattributes          # 換行符策略：全專案統一 LF（消除 Windows CRLF 警告）
 ├── tools/                  # 診斷／偵察腳本（非常規執行所需，見 tools/README.md）
@@ -231,6 +243,8 @@ hk-job-scraper/
 ├── tests/                  # 離線測試（零請求）：python -m unittest discover -s tests
 │   ├── test_job_model.py   # JobRecord 模型與壞資料防禦
 │   ├── test_exporter.py    # 去重 / BOM / 損毀備份
+│   ├── test_contracts.py   # 各站 CLI 契約（停用站、排序、提早停翻、輸出原子性）
+│   ├── test_cli_contract.py # hkjobs CLI 契約（封套 / exit code / 能力表 / 字典）
 │   └── test_dictionaries.py # 17 個字典的完整性與跨站隔離
 ├── docs/
 │   ├── moovup_地區編號對照表.md    # 人可直讀的 Moovup 地區↔編號對照表
@@ -288,6 +302,26 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 
 ---
 
+## 🤖 給 AI agent／程式呼叫（hkjobs）
+
+```bash
+pip install -e .        # 或 pipx install .
+hkjobs sources --json   # 12 站能力矩陣（啟用/瀏覽器/每頁/支援維度/近 N 天機制）
+hkjobs options --source jobsdb --json          # 該站有效地區/職能/行業/排序值
+hkjobs search --source jobsdb --keyword data --days 7 --json   # 結果只印 stdout，不寫檔
+hkjobs search --source gov_hk --keyword 會計 --out result.json # 要存檔才加 --out
+```
+
+| 命令 | 用途 |
+|---|---|
+| `hkjobs search` | 搜尋；`--json` 輸出單一封套、日誌走 stderr、預設零寫檔 |
+| `hkjobs sources` | 能力矩陣（機器可讀版支援矩陣） |
+| `hkjobs options` | 字典值查詢（地區／職能／行業／排序，含別名與 ID） |
+
+- `--json` 的 exit code：`0` 成功、`2` 參數錯、`3` 部分失敗、`4` 全失敗、`5` 零結果、`1` 未預期。
+- `--out` 依副檔名：`.csv` 寫 CSV（UTF-8 BOM），其他寫 JSON。
+- 完整契約與 agent 注意事項：見 [`AGENTS.md`](AGENTS.md)。
+
 ## 📖 完整命令列參數
 
 | 參數 | 必填 | 預設 | 說明 |
@@ -324,6 +358,8 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 | 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ✅ 雙軌（2026-09-09）：首頁 `/jobs/search/` + 續頁 guest 端點，`start` 從已累積筆數接續；實測 4 頁 80 筆，`li_at` 更穩 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（`currentPage` **未實測驗證**——偵察時觸發驗證碼而停手） | ❌ 僅第 1 頁（港澳台專區本身 0 張） | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
 
 > 圖例：✅ 完全支援　⚠️ 部分 / 有限支援　❌ 不適用（傳入會警告並忽略）
+
+> 🤖 機器可讀版本：`hkjobs sources --json`（能力表由 `hkjobs/capabilities.py` 提供，與本表同步維護）。
 
 ### 使用範例
 
@@ -828,7 +864,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 32 個測試，約 0.1 秒，零網路請求
+python -m unittest discover -s tests -v      # 70 個測試，約 0.5 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。
@@ -838,6 +874,8 @@ python -m unittest discover -s tests -v      # 32 個測試，約 0.1 秒，零�
 | `test_job_model.py` | `JobRecord` 的 id 生成、13 欄位集合、dict 往返、壞資料防禦 |
 | `test_exporter.py` | 增量去重（後到覆蓋）、CSV 必帶 UTF-8 BOM 且恰 13 欄、**既有檔損毀時必須先備份 `.corrupt.bak`** |
 | `test_dictionaries.py` | 17 個字典可載入且數量對齊功能矩陣、**字典不可跨站混用**、獵聘簡繁別名齊備 |
+| `test_contracts.py` | 各站 CLI 契約：每站參數映射、`--sort` 警告語意、停用站清單、`list_sorted_desc` 提早停翻、輸出檔原子性 |
+| `test_cli_contract.py` | hkjobs CLI 契約：舊 `main.py` 選項不變、JSON 封套、exit code 0–5、能力表與 scraper 旗標一致、字典 adapter、`--out` |
 
 ### 這套測試當場抓到的 bug（2026-09-15）
 
