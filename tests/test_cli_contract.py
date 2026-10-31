@@ -131,3 +131,58 @@ class TestCapabilities(unittest.TestCase):
             "jobmarket", "foundit", "efc", "offertoday",
         ]
         self.assertEqual([n for n, i in SOURCES.items() if i.enabled], expected)
+
+
+from hkjobs.options import load_dimension
+
+
+class TestOptions(unittest.TestCase):
+    def test_jobsdb_district(self):
+        dim = load_dimension("jobsdb", "district")
+        self.assertEqual(dim["count"], 40)
+        entry = next(e for e in dim["values"] if e["name"] == "荃灣")
+        self.assertEqual(entry["id"], "tsuen-wan")
+        self.assertIn("tsuen-wan", entry["aliases"])
+
+    def test_gov_hk_category(self):
+        dim = load_dimension("gov_hk", "category")
+        self.assertTrue(any(e["name"] == "會計" for e in dim["values"]))
+
+    def test_offertoday_nested(self):
+        dim = load_dimension("offertoday", "category")
+        parent = next(e for e in dim["values"] if e["id"] == "101000")
+        self.assertEqual(parent["name"], "會計")
+        child = next(e for e in dim["values"] if e["id"] == "101000c101001")
+        self.assertEqual(child["parentId"], "101000")
+
+    def test_counts(self):
+        self.assertEqual(load_dimension("recruit", "district")["count"], 94)
+        self.assertEqual(load_dimension("jobmarket", "industry")["count"], 30)
+        self.assertEqual(load_dimension("efc", "district")["count"], 3)
+        self.assertEqual(load_dimension("linkedin", "district")["count"], 20)
+        self.assertEqual(load_dimension("liepin", "district")["count"], 18)
+
+    def test_moovup_shortcode(self):
+        dim = load_dimension("moovup", "district")
+        entry = next(e for e in dim["values"] if e["id"] == "000011")
+        self.assertEqual(entry["name"], "香港仔")
+
+    def test_free_and_unsupported(self):
+        self.assertEqual(load_dimension("indeed", "district")["kind"], "free")
+        self.assertIsNone(load_dimension("jobsdb", "industry"))
+        self.assertIsNone(load_dimension("zhipin", "district"))
+        self.assertIsNone(load_dimension("moovup", "sort"))
+        self.assertEqual(load_dimension("gov_hk", "sort")["kind"], "enum")
+
+    def test_supports_flag_matches_loader(self):
+        for name, info in SOURCES.items():
+            for dim in ("district", "category", "industry"):
+                loaded = load_dimension(name, dim)
+                self.assertEqual(
+                    loaded is not None, info.supports.get(dim, False), f"{name}.{dim}"
+                )
+            self.assertEqual(
+                load_dimension(name, "sort") is not None,
+                bool(info.sort_values),
+                f"{name}.sort",
+            )
