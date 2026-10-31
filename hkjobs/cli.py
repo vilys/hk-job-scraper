@@ -5,6 +5,7 @@ import argparse
 import json
 import logging
 import sys
+import unicodedata
 from pathlib import Path
 
 from exporter import export_csv
@@ -30,6 +31,33 @@ from hkjobs.options import load_dimension
 from scrapers import SCRAPERS
 
 logger = logging.getLogger("hkjobs")
+
+# 表格欄寬下限（實際寬度依內容動態計算，見 `_print_sources_table`）
+LABEL_W = 14
+NAME_W = 12
+ENABLED_W = 6
+BROWSER_W = 8
+PERPAGE_W = 5
+
+
+def _disp_width(text: str) -> int:
+    """字串在終端上的顯示寬度：全形／寬字元算 2、組合字元算 0。
+
+    Python 的 `str.ljust` 按**字元數**補空格，遇到中文只補 1 格，
+    實際卻佔 2 格 → 欄位錯位（`JobMarket 求職廣場jobmarket`）。
+    """
+    width = 0
+    for ch in text:
+        if unicodedata.combining(ch):
+            continue
+        width += 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
+    return width
+
+
+def _pad(text: str, width: int, *, align: str = "left") -> str:
+    """依顯示寬度補齊到 `width` 欄（右對齊用於數字欄）。"""
+    gap = max(0, width - _disp_width(text))
+    return (" " * gap + text) if align == "right" else (text + " " * gap)
 
 
 def _setup_logging(*, quiet: bool, json_mode: bool) -> None:
@@ -74,14 +102,25 @@ def _sources_rows() -> list[dict]:
 
 
 def _print_sources_table(rows: list[dict]) -> None:
-    print(f"{'來源':<14}{'代號':<12}{'啟用':<6}{'瀏覽器':<8}{'每頁':>5}  支援維度 / 近N天")
-    print("-" * 86)
+    # 欄寬取「表頭與所有內容的最大顯示寬度」；寫死寬度遇到超長站名必破版
+    label_w = max([LABEL_W] + [_disp_width(r["label"]) for r in rows])
+    name_w = max([NAME_W] + [_disp_width(r["name"]) for r in rows])
+
+    header = (
+        _pad("來源", label_w) + " " + _pad("代號", name_w) + " "
+        + _pad("啟用", ENABLED_W) + " " + _pad("瀏覽器", BROWSER_W) + " "
+        + _pad("每頁", PERPAGE_W, align="right") + "  支援維度 / 近N天"
+    )
+    print(header)
+    print("-" * _disp_width(header))
     for r in rows:
         dims = [k for k in ("district", "category", "industry") if r["supports"][k]]
         print(
-            f"{r['label']:<14}{r['name']:<12}{'是' if r['enabled'] else '否':<6}"
-            f"{'需' if r['needsBrowser'] else '—':<8}{r['perPage']:>5}  "
-            f"{'/'.join(dims) or '—'} / {r['daysMode']}"
+            _pad(r["label"], label_w) + " " + _pad(r["name"], name_w) + " "
+            + _pad("是" if r["enabled"] else "否", ENABLED_W) + " "
+            + _pad("需" if r["needsBrowser"] else "—", BROWSER_W) + " "
+            + _pad(str(r["perPage"]), PERPAGE_W, align="right")
+            + f"  {'/'.join(dims) or '—'} / {r['daysMode']}"
         )
     print("\n提示：加 --json 取得完整矩陣；有效值用 hkjobs options --source <站> --json")
 
@@ -173,11 +212,15 @@ def _run_one(source: str, args: argparse.Namespace) -> SourceResult:
 
 
 def _print_human(results: list[SourceResult], code: int) -> None:
-    print(f"{'來源':<14}{'筆數':>6}  狀態")
+    print(_pad("來源", LABEL_W) + _pad("筆數", 6, align="right") + "  狀態")
     for result in results:
         label = {"ok": "ok", "failed": "失敗", "skipped": "略過"}[result.status]
         extra = f"（{result.error}）" if result.error else ""
-        print(f"{result.name:<14}{len(result.jobs):>6}  {label}{extra}")
+        print(
+            _pad(result.name, LABEL_W)
+            + _pad(str(len(result.jobs)), 6, align="right")
+            + f"  {label}{extra}"
+        )
     total = sum(len(r.jobs) for r in results if r.status == "ok")
     with_salary = sum(
         1 for r in results if r.status == "ok" for j in r.jobs if j.salary

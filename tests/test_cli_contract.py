@@ -222,6 +222,34 @@ class TestSourcesCommand(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("勞工處", out)
 
+    def test_sources_human_columns_aligned(self):
+        """CJK 全形字要按「顯示寬度」補齊；按字元數補會讓中文站名擠歪表格。"""
+        import re
+
+        from hkjobs.cli import _disp_width
+
+        code, out, _ = run_cli(["sources"])
+        self.assertEqual(code, 0)
+
+        starts = set()
+        # 只認「維度欄的開頭」：district/category/industry 的整段組合（或 —）後面接 " / "
+        dims = r"(?:(?:district|category|industry)(?:/(?:district|category|industry))*|—) / "
+        for line in out.splitlines():
+            match = re.search(dims, line)
+            if match:
+                starts.add(_disp_width(line[:match.start()]))
+        self.assertEqual(len(starts), 1, f"維度欄起點不一致：{starts}")
+        # 標籤剛好頂滿欄寬時，兩欄會黏成一串（修正前的症狀）
+        self.assertNotIn("求職廣場jobmarket", out)
+        self.assertNotIn("eFinancialCareersefc", out)
+
+    def test_disp_width_counts_fullwidth_as_two(self):
+        from hkjobs.cli import _disp_width
+
+        self.assertEqual(_disp_width("abc"), 3)
+        self.assertEqual(_disp_width("求職"), 4)
+        self.assertEqual(_disp_width("Job Market"), 10)
+
 
 class TestOptionsCommand(unittest.TestCase):
     def test_options_json_dimension(self):
