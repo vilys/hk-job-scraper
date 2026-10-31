@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hk-job-scraper"
+description = "香港求職網站自動搜尋與職位匯出（agent 友善 CLI）"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dynamic = ["version"]
+dependencies = [
+    "requests>=2.31",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.0",
+]
+
+[project.optional-dependencies]
+browser = ["playwright>=1.40"]
+
+[project.scripts]
+hkjobs = "hkjobs.cli:main"
+
+[tool.setuptools]
+py-modules = ["config", "base_scraper", "exporter", "job_model"]
+packages = ["hkjobs", "scrapers"]
+
+[tool.setuptools.package-data]
+scrapers = ["*.json"]
+
+[tool.setuptools.dynamic]
+version = { attr = "hkjobs.__version__" }

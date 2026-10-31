@@ -36,7 +36,9 @@ Qualification / Benefit / JobDetails——故 `location` 預設就有值，不�
   細類**可單送**（與 Recruit 不同，無需搭配大類）。
 - 行業：`JobIndustryID`（30 業）。
 - 排序：站方 UI 的 Order 參數實測無有效效果（Order=PostDate 甚至回 0 筆），
-  列表預設即刊登日新→舊（job id 遞減）→ `--sort` 一律警告後忽略。
+  列表大致按刊登日新→舊（job id 遞減；**頂部推廣／置頂區塊不參與排序且通常偏舊**）
+  → `--sort` 一律警告後忽略。此例外不影響 `list_sorted_desc` 的提早停翻：
+  推廣區塊只在頂部，若整頁皆過期，後頁只會更舊。
 
 字典（本站專屬，與其他六站互不混用）
 --------
@@ -184,7 +186,7 @@ class JobMarketScraper(BaseScraper):
     source = "jobmarket"
     use_browser = False      # 全程普通 requests：列表端點 + 批次 API + 詳情頁皆可直接 GET
     list_has_date = True     # 列表卡 p.post-date 已有刊登日（04 Sep 2026）
-    list_sorted_desc = True  # 列表預設新→舊（站方 Order 參數無效但預設已是降冪）
+    list_sorted_desc = True  # 大致新→舊；頂部推廣區塊例外（該區塊偏舊，提早停翻仍安全）
 
     def __init__(self, headers: dict | None = None):
         super().__init__(headers)
@@ -203,7 +205,7 @@ class JobMarketScraper(BaseScraper):
         if sort:
             logger.warning(
                 "[jobmarket] 不支援 --sort（站方 Order 參數實測無效；"
-                "列表預設已按刊登日新→舊），已忽略")
+                "列表大致按刊登日新→舊，頂部推廣區塊除外），已忽略")
 
         params: dict[str, str] = {"Page": str(max(1, page))}
         if keyword:
