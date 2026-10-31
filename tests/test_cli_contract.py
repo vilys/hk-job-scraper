@@ -102,3 +102,32 @@ class TestContract(unittest.TestCase):
             contract.emit_json({"t": "勞工處"})
         self.assertIn("勞工處", buf.getvalue())
         self.assertEqual(json.loads(buf.getvalue()), {"t": "勞工處"})
+
+
+from hkjobs.capabilities import ALL_SORT_VALUES, SOURCES
+from scrapers import SCRAPERS
+
+
+class TestCapabilities(unittest.TestCase):
+    def test_sources_cover_registry(self):
+        self.assertEqual(set(SOURCES), set(SCRAPERS))
+
+    def test_flags_match_scraper_classes(self):
+        for name, cls in SCRAPERS.items():
+            info = SOURCES[name]
+            self.assertEqual(info.enabled, cls.enabled, name)
+            self.assertEqual(info.needs_browser, cls.use_browser, name)
+
+    def test_values_are_valid(self):
+        allowed = {"server", "list", "detail", "approx", "none"}
+        for name, info in SOURCES.items():
+            self.assertIn(info.days_mode, allowed, name)
+            self.assertTrue(set(info.sort_values) <= set(ALL_SORT_VALUES), name)
+            self.assertGreaterEqual(info.per_page, 0, name)
+
+    def test_enabled_preset_order(self):
+        expected = [
+            "moovup", "gov_hk", "jobsdb", "linkedin", "recruit",
+            "jobmarket", "foundit", "efc", "offertoday",
+        ]
+        self.assertEqual([n for n, i in SOURCES.items() if i.enabled], expected)
