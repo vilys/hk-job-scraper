@@ -14,7 +14,9 @@
 
 ## 前置條件
 
-- 分支：`dev/agent-cli`（由使用者建立；本計畫所有 commit 都在此分支）。
+- 分支：曾用 `dev/agent-cli`（由使用者建立；本計畫所有 commit 都在此分支）。
+  該分支已於 2026-10-31 完整合併進 `master`（merge commit `609e32f`）並刪除本地與遠端；
+  全部 commit 仍保留在 master 歷史中，可用 `git branch dev/agent-cli f14a85e` 復原。
 - 工作目錄：repo 根目錄 `hk-job-scraper/`。
 - Python：使用 `venv/`。已啟用時用 `python`，未啟用時用 `./venv/Scripts/python.exe`（Windows）。以下指令統一寫 `python`，執行前確認 `python -c "import requests"` 不報錯。
 - 既有 32 個測試必須保持全綠：`python -m unittest discover -s tests`。
@@ -1692,11 +1694,11 @@ Expected: 2 tests PASS
 
 Expected: `hkjobs 0.1.0`
 
-在 repo 外執行（路徑依你的 venv 位置調整）：
+在 repo 外執行（`$REPO` 換成你 clone 的 `hk-job-scraper` 路徑）：
 
 ```bash
-cd /c/Users/user
-"/c/Users/user/Documents/Qoder/2026-10-28/fc0f348d/hk-job-scraper/venv/Scripts/hkjobs.exe" sources --json
+cd ~                                              # 任意 repo 外目錄
+"$REPO/venv/Scripts/hkjobs.exe" sources --json    # 證明不依賴 cwd
 ```
 
 Expected: 12 站 JSON；證明不依賴 cwd。
