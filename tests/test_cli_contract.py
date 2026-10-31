@@ -186,3 +186,61 @@ class TestOptions(unittest.TestCase):
                 bool(info.sort_values),
                 f"{name}.sort",
             )
+
+
+import contextlib
+
+from hkjobs import cli
+
+
+def run_cli(argv):
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        code = cli.main(argv)
+    return code, out.getvalue(), err.getvalue()
+
+
+class TestSourcesCommand(unittest.TestCase):
+    def test_sources_json(self):
+        code, out, _ = run_cli(["sources", "--json"])
+        self.assertEqual(code, 0)
+        payload = json.loads(out)
+        self.assertEqual(payload["schemaVersion"], 1)
+        self.assertEqual(payload["command"], "sources")
+        self.assertEqual(len(payload["sources"]), 12)
+        self.assertEqual(
+            payload["presets"]["all"],
+            [n for n, i in SOURCES.items() if i.enabled],
+        )
+        gov = next(s for s in payload["sources"] if s["name"] == "gov_hk")
+        self.assertEqual(gov["valueCounts"], {"district": 27, "category": 29, "industry": 27})
+        self.assertEqual(gov["daysMode"], "server")
+        self.assertFalse(gov["needsBrowser"])
+
+    def test_sources_human(self):
+        code, out, _ = run_cli(["sources"])
+        self.assertEqual(code, 0)
+        self.assertIn("勞工處", out)
+
+
+class TestOptionsCommand(unittest.TestCase):
+    def test_options_json_dimension(self):
+        code, out, _ = run_cli(
+            ["options", "--source", "jobsdb", "--dimension", "district", "--json"]
+        )
+        self.assertEqual(code, 0)
+        payload = json.loads(out)
+        self.assertEqual(payload["source"], "jobsdb")
+        self.assertEqual(payload["dimensions"]["district"]["count"], 40)
+
+    def test_options_unsupported_is_null(self):
+        code, out, _ = run_cli(
+            ["options", "--source", "jobsdb", "--dimension", "industry", "--json"]
+        )
+        self.assertEqual(code, 0)
+        self.assertIsNone(json.loads(out)["dimensions"]["industry"])
+
+    def test_options_rejects_all(self):
+        code, _, err = run_cli(["options", "--source", "all"])
+        self.assertEqual(code, 2)
+        self.assertIn("未知來源", err)
