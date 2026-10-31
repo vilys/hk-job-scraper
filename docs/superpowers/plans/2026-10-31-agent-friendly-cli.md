@@ -75,7 +75,7 @@ class TestLegacyParser(unittest.TestCase):
         self.assertEqual(
             strings,
             {
-                "-h", "--source", "--keyword", "--pages", "--output", "--detail",
+                "-h", "--help", "--source", "--keyword", "--pages", "--output", "--detail",
                 "--fill-location", "--outfile", "--district", "--category",
                 "--industry", "--sort", "--days",
             },
