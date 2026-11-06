@@ -352,6 +352,9 @@ class GovHkScraper(BaseScraper):
     def get_detail(self, job_url: str) -> Optional[JobRecord]:
         r = self.session.get(job_url, headers=self.headers, timeout=REQUEST_TIMEOUT)
         soup = BeautifulSoup(r.text, "lxml")
+        # 詳情頁標題在 #jobTitle（span.item-content，實測 2026-11-06）。
+        # 少了這行會讓 get_detail() 回傳的 JobRecord.title 永遠是空字串。
+        title_el = soup.find(id="jobTitle")
         emp = soup.find(id="empName")
         loc = soup.find(id="locDesc")
         remark = soup.find(id="jobRemark")
@@ -373,6 +376,7 @@ class GovHkScraper(BaseScraper):
         return JobRecord(
             job_id=job_id,
             source=self.source,
+            title=title_el.get_text(strip=True) if title_el else "",
             company=emp.get_text(strip=True) if emp else "",
             location=loc.get_text(strip=True) if loc else "",
             description=remark.get_text(strip=True) if remark else "",

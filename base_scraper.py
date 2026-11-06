@@ -46,6 +46,7 @@ class BaseScraper(ABC):
         self.session = None      # 由子類（requests / playwright）自行管理
         self._stats = {"success": 0, "failed": 0, "skipped": 0}
         self._warned_fill_location = False   # --fill-location 不支援時只警告一次
+        self.last_error: str | None = None   # 最近一次搜尋頁失敗原因（供呼叫端判定 status=failed）
 
     # ---------- 通用工具 ----------
     def _sleep(self, extra: float = 0.0) -> None:
@@ -149,6 +150,9 @@ class BaseScraper(ABC):
             output:       輸出檔案路徑（None 表示不匯出）
             fmt:          json / csv / both
         """
+        # 每次 scrape_all 都是獨立的一輪，先清掉上一輪的失敗記號
+        self.last_error = None
+
         # 站方端日期過濾掛載點：有實作 set_days() 的來源可把 --days 直接下推到搜尋請求
         # （linkedin 的 f_TPR、gov_hk 的 criteria.postedDtFr/To…）。
         # ⚠️ 必須在下方 with_detail 判斷「之前」執行：否則 list_has_date=False 的來源
@@ -176,7 +180,8 @@ class BaseScraper(ABC):
                     category=category, industry=industry, sort=sort,
                 )
             except Exception as e:  # noqa: BLE001
-                logger.error("[%s] 搜尋第 %d 頁失敗：%s", self.source, page, e)
+                self.last_error = f"搜尋第 {page} 頁失敗：{e}"
+                logger.error("[%s] %s", self.source, self.last_error)
                 break
 
             if not jobs:
@@ -242,6 +247,12 @@ class BaseScraper(ABC):
             all_jobs.extend(jobs)
             self._stats["success"] += len(jobs)   # 只計入通過篩選、實際保留的筆數
             self._sleep()
+
+        # 全數頁面失敗時不得偽裝成「查無結果」：向呼叫端拋出，讓 hkjobs CLI 的
+        # _run_one 標記 status=failed（exit 4 / all_sources_failed）。
+        # 已有成功資料則保留部分結果，只在 stderr 留下錯誤，不改既有行為。
+        if self.last_error and not all_jobs:
+            raise RuntimeError(self.last_error)
 
         if output:
             export(all_jobs, output, fmt=fmt, incremental=True)

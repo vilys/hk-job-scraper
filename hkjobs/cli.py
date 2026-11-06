@@ -204,7 +204,9 @@ def _run_one(source: str, args: argparse.Namespace) -> SourceResult:
         logger.info("[%s] 取得 %d 筆職位。", source, len(jobs))
         return SourceResult(source, "ok", jobs)
     except Exception as exc:  # noqa: BLE001
-        logger.exception("[%s] 執行失敗：%s", source, exc)
+        # 爬蟲失敗已是預期內的路徑（會轉成 status=failed / exit 4），
+        # 用 error 而非 exception：錯誤全文已在 SourceResult.error，stderr 不必再噴 traceback。
+        logger.error("[%s] 執行失敗：%s", source, exc)
         return SourceResult(source, "failed", [], str(exc))
     finally:
         if scraper is not None:
