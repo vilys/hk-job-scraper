@@ -64,7 +64,9 @@ def add_search_arguments(
                         "設 --days 時若未指定 --sort，自動套用 post_dt_desc。")
     p.add_argument("--days", type=int, default=None,
                    help="只保留最近 N 天內刊登的職位："
-                        "gov_hk 自動抓詳情取日期；JobsDB 與 LinkedIn 直接用列表相對刊登日過濾（不抓詳情）；"
+                        "gov_hk 以站方 postedDtFr/To 過濾（結果已被切乾淨，但輸出不含 "
+                        "posted_date，需要日期欄請加 --detail）；"
+                        "JobsDB 與 LinkedIn 直接用列表相對刊登日過濾（不抓詳情）；"
                         "moovup 不支援（傳入會警告並忽略）；"
                         "offertoday 支援：送站方 publishTime 參數 + 客戶端再篩"
                         "（只有「on MM-DD」格式能算天數，其餘視為過舊淘汰）。"

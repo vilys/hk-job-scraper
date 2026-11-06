@@ -17,6 +17,7 @@ import exporter
 from base_scraper import BaseScraper
 from job_model import JobRecord
 from scrapers import SCRAPERS
+from scrapers.jobsdb import strip_new_badge
 from scrapers.recruit import resolve_sort
 
 CLI_SORTS = (
@@ -44,6 +45,25 @@ class TestRecruitSortContract(unittest.TestCase):
     def test_unknown_sort_is_rejected_loudly(self):
         with self.assertLogs("scrapers.recruit", level="WARNING"):
             self.assertEqual(resolve_sort("relevance"), "")
+
+
+class TestJobsDBTitleBadge(unittest.TestCase):
+    """JobsDB 把「New」徽章直接拼進標題文字（2026-10-31 實測：無子元素、無偽元素）。"""
+
+    def test_strips_badge_glued_to_title(self):
+        self.assertEqual(
+            strip_new_badge("Infrastructure ArchitectNew"),
+            "Infrastructure Architect",
+        )
+        self.assertEqual(
+            strip_new_badge("Senior Full Stack Software EngineerNew"),
+            "Senior Full Stack Software Engineer",
+        )
+
+    def test_keeps_legitimate_word_new(self):
+        for title in ("Brand New", "New", "New Media Designer", ""):
+            with self.subTest(title=title):
+                self.assertEqual(strip_new_badge(title), title)
 
 
 class TestSourceRegistry(unittest.TestCase):

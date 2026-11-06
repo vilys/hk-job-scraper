@@ -401,7 +401,8 @@ python main.py --source gov_hk --keyword "會計" --industry "金融業" --pages
 # 12) 勞工處：不給關鍵字，僅按地區 + 工作種類瀏覽（屯門的電腦及資訊科技職位）
 python main.py --source gov_hk --district "屯門" --category "電腦及資訊科技" --pages 2
 
-# 13) 勞工處：只留最近 10 天內刊登的職位（自動抓詳情取刊登日期，並按日期由近至遠排）
+# 13) 勞工處：只留最近 10 天內刊登的職位（日期過濾下推站方 postedDtFr/To，不逐筆抓詳情；
+#     代價是輸出沒有 posted_date，要日期欄請再加 --detail）
 python main.py --source gov_hk --district "屯門" --category "電腦及資訊科技" --days 10 --outfile tuenmun_it_10d
 
 # 14) 勞工處：依刊登日期由近至遠排序（post_dt_desc = 新→舊）

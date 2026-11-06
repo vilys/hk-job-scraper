@@ -18,6 +18,7 @@
   傳入會警告並回退網站預設（Relevance）。sortmode 可與 keywords/page/地區瀏覽網址共存（站方
   會將 /jobs?keywords=K&page=N&sortmode=ListedDate 301 正規化為 /K-jobs?...，Playwright 自動跟隨）。
 - 刊登日為「相對時間」字串（7d ago / 13h ago / Just now），用 days_since_posted() 解析。
+- 標題會併入「New」徽章（如 `...EngineerNew`），以 strip_new_badge() 剝除。
 """
 from __future__ import annotations
 
@@ -37,6 +38,14 @@ except ImportError:  # pragma: no cover — 允許「只裝 requests」的極簡
 from config import DEFAULT_HEADERS
 from job_model import JobRecord
 from base_scraper import BaseScraper
+
+# 站方把「New」徽章直接併入標題文字（無子元素、無偽元素，實測 2026-10-31）。
+# 只剝緊貼前一字元的尾綴，避免誤傷「Brand New」這類正常標題。
+_NEW_BADGE_RE = re.compile(r"(?<=\S)New$")
+
+
+def strip_new_badge(title: str) -> str:
+    return _NEW_BADGE_RE.sub("", (title or "").strip()).strip()
 
 logger = logging.getLogger(__name__)
 
@@ -293,7 +302,7 @@ class JobsDBScraper(BaseScraper):
             el = card.query_selector(f"[data-automation='{da}']")
             return el.get_attribute("href") if el else ""
 
-        title = _txt("jobTitle")
+        title = strip_new_badge(_txt("jobTitle"))
         h = _href("jobTitle")
         m = re.search(r"/job/(\d+)", h or "")
         jid = m.group(1) if m else (h or title)
@@ -344,7 +353,7 @@ class JobsDBScraper(BaseScraper):
         return JobRecord(
             job_id=f"jobsdb_{jid}",
             source="jobsdb",
-            title=_txt("job-detail-title") or _txt("jobTitle"),
+            title=strip_new_badge(_txt("job-detail-title") or _txt("jobTitle")),
             company=_txt("advertiser-name"),
             location=_txt("job-detail-location"),
             salary=_txt("job-detail-salary") or _txt("jobSalary"),
