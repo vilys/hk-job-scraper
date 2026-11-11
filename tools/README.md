@@ -55,14 +55,23 @@ v2 拿去當 `--baseline` **機械上可跑（exit 0）**，但驗不到聚合�
 | `jobs[].posted_date` | 站方原字串（`19h ago`、`10/11/2026`…） | 已是 ISO `YYYY-MM-DD` |
 | `posted_date_raw` | 沒有此欄 | 有，但重播時被丟掉 |
 | 會跑 `parse_date()` 的相對時間／`DD/MM/YYYY` 分支 | **會** | **不會**（ISO 原樣轉回） |
-| 去重與 `rawTotal` | 由 196 筆原始資料重算，`deduped=9` | 資料已去重過，只是 187 筆再算一次，`deduped=0` |
+| 去重與 `rawTotal` | 由 196 筆原始資料重算，現行去重規則 `total=194 / deduped=2`（舊規則曾為 187 / 9） | 資料已去重過，只是 194 筆再算一次，`deduped=0 / rawTotal=194` |
 
 原因：`tools/replay_aggregation.py` 用 `JobRecord.from_dict()` 重建職位，而
 `JobRecord.FIELDS` 只有 **v1 的 13 欄**——`posted_date_raw`、`salary_min/max/period`、
 `sources`、`urls` 全部被忽略。v2 的 `posted_date` 已是 ISO，`to_v2()` 只是把 ISO
-原樣放回去，相對時間與 `DD/MM/YYYY` 分支根本沒被執行。2026-11-11 實測：
-v1 基準有 **81 筆非 ISO 日期**、重播後 `deduped=9 / rawTotal=196`；
-v2 基準非 ISO **0 筆**、`deduped=0 / rawTotal=187`。
+原樣放回去，相對時間與 `DD/MM/YYYY` 分支根本沒被執行。2026-11-11 實測
+（**現行去重規則**）：v1 基準有 **81 筆非空非 ISO 日期**、重播後
+`total=194 / deduped=2 / rawTotal=196 / withSalary=55`；
+v2 基準 `posted_date` 非 ISO **0 筆**、`deduped=0 / rawTotal=194`。
+
+> 去重規則已改：同 URL、或同「標題＋公司＋同一 ISO 刊登日」才合併；**不同刊登日的
+> 重貼會保留**，兩筆日期皆空才退回舊的「標題＋公司」鍵。舊文件寫的
+> `187 / deduped=9` 是 2026-11-11 當天舊規則的歷史數字，不是現行結果。
+>
+> 本機若還留著當天舊規則產出的 `output/all.json`（v2 封套、**187 筆**），那是歷史快照；
+> 直接跑 `python tools/replay_aggregation.py` 會以現行規則覆寫成 **194 筆**。想保留舊快照
+> 請先另存，或用 `--out output/<別名>.json` 指定輸出（本文件的驗證都建議這樣做）。
 
 **結論**：要驗證聚合解析（日期正規化、薪金解析、去重、排序）請用 **v1 原始封套**
 （從既有存檔取得，或由舊版 CLI 輸出）。**不要把隨便一份最新 `--json` 輸出當成等價基準**；
@@ -81,11 +90,11 @@ python tools/replay_aggregation.py --baseline output/baseline_from_v2.json --out
 ```
 
 > **別覆寫 `output/all_baseline.json`**：若手上已有真正的 196 筆 v1 基準，
-> 一覆寫就救不回被去重合併掉的 9 筆。降階檔請另存新名，用 `--baseline` 指定。
+> 一覆寫就救不回被去重合併掉的 2 筆。降階檔請另存新名，用 `--baseline` 指定。
 >
 > 降階後 `posted_date_raw` 回到 `posted_date`，重播時確實會跑 `parse_date()`
-> （實測原始字串 `1h ago`、`49m ago` 重現、155/187 筆轉成 ISO）。但 v2 已經去重合併過，
-> 降階檔只有 187 筆、`deduped=0`，仍不等於原本 196 筆的 v1 基準：
+> （實測原始字串 `1h ago`、`49m ago` 重現、162/194 筆轉成 ISO）。但 v2 已經去重合併過，
+> 降階檔只有 194 筆、`deduped=0 / rawTotal=194`，仍不等於原本 196 筆的 v1 基準：
 > **這條路適合驗解析，不適合驗去重**。
 
 ### Windows cp950 主控台
@@ -94,6 +103,18 @@ python tools/replay_aggregation.py --baseline output/baseline_from_v2.json --out
 `hkjobs.contract.configure_io()` 先把 stdout／stderr 設為 UTF-8，且所有 `tools/*.py`
 的 module docstring 都只用 cp950 可編碼字元；其餘探針腳本也在入口重設兩個串流。
 新增輸出文字時請避開 emoji／`≈` 等 cp950 無法編碼的字元（`→` `×` `÷` `—` 則可用）。
+
+### 相關入口（不在 tools/ 裡，但常被一起問到）
+
+| 入口 | 用途 |
+|---|---|
+| `python -m hkjobs guide`／`python -m hkjobs`（無子命令） | 互動引導：用編號選站、職能、天數，固定 `--pages 1`；選完**先印完整命令**再問要不要執行，取消即零請求 |
+| 雙擊 `start.bat`（Windows） | 自動找 `venv`／`.venv`、檢查依賴（缺了提示 `pip install -r requirements.txt`）後進入同一個引導模式 |
+| `python build_dashboard.py` | 把 `output/` 的 JSON／CSV 做成單檔 HTML 看板，**認得 CLI 的 schema v2 封套**；預設 16px、大字模式、鍵盤可達；`--out` 純檔名放 `output/`，含目錄或絕對路徑照給，寫入失敗回 `exit 2` 且不丟 traceback |
+
+`build_dashboard.py` 的日期解析統一呼叫 `hkjobs.aggregate.parse_date`（不再有第二套 regex），
+`age_days` 以該筆 `scraped_at` 為基準；但它以 `job_id` 去重，與聚合層的
+「URL／標題＋公司＋刊登日」去重鍵不同，兩邊筆數不必相等（見 `AGENTS.md`）。
 
 跑之前請先問自己：這一支請求，真的非打不可嗎？
 能從已存檔的回應或字典推理出來的，就不要驚動站方。

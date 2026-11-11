@@ -118,6 +118,20 @@ _ARTICLE_DELTA = {
     "week": timedelta(weeks=1), "month": timedelta(days=30),
     "year": timedelta(days=365),
 }
+# 舊存檔（moovup 等）與舊版儀表板留下的中文相對時間／`30d+`。
+# 儀表板過去自己養一套 parser，改用本函式時若少了這幾種格式，
+# 既有 output/ 裡的舊職位會突然變成「日期未知」，故在此補齊成單一來源。
+_REL_CN = re.compile(r"(\d+)\s*(分鐘|小時|星期|個月|時|天|日|週|周|月|年)前")
+_CN_DELTA = {
+    "分鐘": timedelta(minutes=1),
+    "小時": timedelta(hours=1), "時": timedelta(hours=1),
+    "天": timedelta(days=1), "日": timedelta(days=1),
+    "週": timedelta(weeks=1), "周": timedelta(weeks=1),
+    "星期": timedelta(weeks=1),
+    "個月": timedelta(days=30), "月": timedelta(days=30),
+    "年": timedelta(days=365),
+}
+_DAYS_PLUS = re.compile(r"^(\d+)\s*d\+$", re.I)
 _MMDD = re.compile(r"\bon\s+(\d{1,2})-(\d{1,2})\b")
 # 勞工處 gov_hk 詳情頁 #postedDt 的格式是 DD/MM/YYYY（日在前），依據：
 #   (1) scrapers/gov_hk.py:363 的實測註解與 days_since_posted() 的
@@ -153,7 +167,8 @@ def parse_date(raw: str, scraped_at: str = "") -> str:
     """轉成 ISO `YYYY-MM-DD`；無法解析回 `""`（原字串由呼叫端留在 posted_date_raw）。
 
     絕對日期涵蓋 `YYYY-MM-DD`、`DD/MM/YYYY`（勞工處詳情頁）、`D Mon YYYY`、
-    `YYYY/MM/DD`、`on MM-DD`；相對時間含 `19h ago`／`an hour ago` 等。
+    `YYYY/MM/DD`、`on MM-DD`；相對時間含 `19h ago`／`an hour ago`／
+    `7日前`／`2個月前`／`30d+` 等。
     """
     text = (raw or "").strip()
     if not text:
@@ -185,6 +200,14 @@ def parse_date(raw: str, scraped_at: str = "") -> str:
     m = _ARTICLE_REL.search(text)
     if m:
         return (ref - _ARTICLE_DELTA[m.group(1).lower().rstrip("s")]).date().isoformat()
+
+    m = _REL_CN.search(text)
+    if m:
+        return (ref - int(m.group(1)) * _CN_DELTA[m.group(2)]).date().isoformat()
+
+    m = _DAYS_PLUS.match(text)
+    if m:
+        return (ref - timedelta(days=int(m.group(1)))).date().isoformat()
 
     if re.search(r"just now|today|剛剛|今天", text, re.I):
         return ref.date().isoformat()
@@ -264,14 +287,25 @@ def has_numeric_salary(job: dict) -> bool:
 
 # ---- 去重 ----
 def deduplicate(jobs: list[dict]) -> tuple[list[dict], int]:
-    """URL 完全相同、或 (正規化標題, 正規化公司) 相同 → 視為同一職缺。
+    """重貼（不同刊登日的同一職位）是獨立職缺，不再被吞掉。
+
+    鍵的優先序：
+
+    1. URL 完全相同 → 合併（同一則貼文，與日期無關）。
+    2. (正規化標題, 正規化公司, **ISO 刊登日**) 三者相同 → 合併；
+       這涵蓋同日跨站張貼（如 recruit + jobmarket 的 procurement clerk）。
+    3. 刊登日不同 → **保留為獨立筆**，求職者才看得到「公司又重貼了一次」。
+    4. 兩筆日期都解析不出 → 退回舊的 (標題, 公司) 合併，避免列表層
+       （無日期欄）的資料重複爆炸。
 
     公司為空時只用 URL 判定，避免把不同僱主的「公司欄缺失」職位誤併。
-    合併只累加 `sources` / `urls`，其餘欄位取第一筆（跨站互補補齊屬下一輪，見 docs/）。
+    合併只累加 `sources` / `urls`，其餘欄位取第一筆
+    （跨站互補補齊屬下一輪，見 docs/）。
     """
     out: list[dict] = []
     by_url: dict[str, dict] = {}
-    by_tc: dict[tuple[str, str], dict] = {}
+    by_tcd: dict[tuple[str, str, str], dict] = {}   # 有日期：標題 + 公司 + ISO 日
+    by_tc: dict[tuple[str, str], dict] = {}         # 兩筆皆無日期：退回舊鍵
     merged = 0
 
     for job in jobs:
@@ -279,12 +313,15 @@ def deduplicate(jobs: list[dict]) -> tuple[list[dict], int]:
         title = _norm(str(job.get("title") or ""))
         company = _norm(str(job.get("company") or ""))
         tc = (title, company) if title and company else None
+        iso_date = str(job.get("posted_date") or "").strip()
 
         target = None
         if url and url in by_url:
             target = by_url[url]
-        elif tc and tc in by_tc:
-            target = by_tc[tc]
+        elif tc and iso_date:
+            target = by_tcd.get((title, company, iso_date))
+        elif tc and not iso_date:
+            target = by_tc.get(tc)
 
         if target is not None:
             _append_unique(target["sources"], job.get("sources") or [])
@@ -296,7 +333,10 @@ def deduplicate(jobs: list[dict]) -> tuple[list[dict], int]:
         if url:
             by_url[url] = job
         if tc:
-            by_tc[tc] = job
+            if iso_date:
+                by_tcd[(title, company, iso_date)] = job
+            else:
+                by_tc[tc] = job
     return out, merged
 
 

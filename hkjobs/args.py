@@ -116,8 +116,9 @@ def add_machine_arguments(p: argparse.ArgumentParser) -> None:
                         "無上限時以單點薪金計。時薪／日薪／年薪先換算成月薪再比。"
                         "人類輸出會標明本次依據，--json 記在 query.salaryBy。")
     p.add_argument("--no-dedup", action="store_true",
-                   help="關閉去重（預設開啟）：同 URL 或同標題＋同公司會合併成一筆，"
-                        "保留 sources / urls；summary.deduped 為被合併筆數。")
+                   help="關閉去重（預設開啟）：同 URL，或同標題＋同公司＋同一 ISO 刊登日"
+                        "才會合併成一筆，保留 sources / urls；不同刊登日的重貼視為獨立職缺，"
+                        "兩筆都沒日期時才退回「標題＋公司」。summary.deduped 為被合併筆數。")
     p.add_argument("--fill-gaps", action="store_true",
                    help="一鍵補齊各站已知缺口：gov_hk / moovup 自動開 --detail，"
                         "recruit 自動開 --fill-location；其餘站列表已完整或屬已知限制，會跳過並說明。"

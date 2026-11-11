@@ -236,6 +236,70 @@ class TestDeduplication(unittest.TestCase):
         self.assertEqual(off["summary"]["deduped"], 0)
         self.assertEqual(off["summary"]["total"], s["rawTotal"])
 
+    # ---- 2026-11-11 求職者回饋：不同刊登日的重貼不能合併 ----
+    def test_repost_with_different_dates_stays_separate(self):
+        """同標題＋同公司但相差 8 天 → 是兩次招聘，不是同一筆。"""
+        jobs = [
+            _v2(title="助理文員", company="某公司", url="u1",
+                posted_date="2026-11-10"),
+            _v2(title="助理文員", company="某公司", url="u2",
+                posted_date="2026-11-02"),
+        ]
+        out, n = aggregate.deduplicate(jobs)
+        self.assertEqual((len(out), n), (2, 0))
+        self.assertEqual([j["posted_date"] for j in out],
+                         ["2026-11-10", "2026-11-02"])
+
+    def test_same_day_cross_source_still_merges(self):
+        jobs = [
+            _v2(source="recruit", title="Procurement Clerk", company="High Win",
+                url="u1", posted_date="2026-11-11"),
+            _v2(source="jobmarket", title="procurement clerk", company="HIGH WIN",
+                url="u2", posted_date="2026-11-11"),
+        ]
+        out, n = aggregate.deduplicate(jobs)
+        self.assertEqual((len(out), n), (1, 1))
+        self.assertEqual(out[0]["sources"], ["recruit", "jobmarket"])
+        self.assertEqual(out[0]["urls"], ["u1", "u2"])
+
+    def test_both_dates_missing_falls_back_to_old_key(self):
+        """列表層無日期欄時退回 (標題, 公司)，避免重複爆炸。"""
+        jobs = [_v2(title="文員", company="某公司", url=f"u{i}") for i in range(3)]
+        out, n = aggregate.deduplicate(jobs)
+        self.assertEqual((len(out), n), (1, 2))
+
+    def test_one_dated_one_undated_stays_separate(self):
+        jobs = [
+            _v2(title="文員", company="某公司", url="u1", posted_date="2026-11-10"),
+            _v2(title="文員", company="某公司", url="u2"),
+        ]
+        out, n = aggregate.deduplicate(jobs)
+        self.assertEqual((len(out), n), (2, 0))
+
+    def test_same_url_merges_even_when_dates_differ(self):
+        """URL 完全相同視為同一則貼文，優先於日期規則。"""
+        jobs = [
+            _v2(title="文員", company="某公司", url="same",
+                posted_date="2026-11-10"),
+            _v2(title="文員", company="某公司", url="same",
+                posted_date="2026-10-01"),
+        ]
+        out, n = aggregate.deduplicate(jobs)
+        self.assertEqual((len(out), n), (1, 1))
+
+    def test_real_196_baseline_keeps_seven_reposts(self):
+        """離線真實基準：舊規則 187/deduped=9，新規則應保留 7 筆重貼。"""
+        path = os.path.join(os.path.dirname(__file__), "..", "output",
+                            "all_baseline.json")
+        if not os.path.exists(path):
+            self.skipTest("缺少 output/all_baseline.json")
+        with open(path, encoding="utf-8") as fh:
+            envelope = json.load(fh)
+        jobs = [aggregate.to_v2(j) for j in envelope["jobs"]]
+        out, n = aggregate.deduplicate(jobs)
+        self.assertEqual(len(jobs), 196)
+        self.assertEqual((len(out), n), (194, 2))
+
 
 # ---------------------------------------------------------------- P1-B eFC
 class TestEfcDefaultDistrict(unittest.TestCase):
@@ -339,8 +403,10 @@ class _SrcB:
 
     def scrape_all(self, **kwargs):
         return [
+            # 與 _SrcA 的「重複」同日（2026-11-01）：同日跨站才會合併；
+            # 不同刊登日的重貼應保留為獨立筆，見 TestDeduplication。
             _job(job_id="b::1", source="b", title="重複", company="C2",
-                 salary="$10K", posted_date="2026-10-20", url="u3"),
+                 salary="$10K", posted_date="2026-11-01", url="u3"),
             _job(job_id="b::2", source="b", title="無薪金", company="C3",
                  salary="TBD", posted_date="", url="u4"),
         ]

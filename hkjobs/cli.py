@@ -28,7 +28,9 @@ from hkjobs.contract import (
     now_iso,
     search_payload,
 )
+from hkjobs.guide import run_guide
 from hkjobs.options import load_dimension
+from hkjobs.validation import validate_dimensions
 from scrapers import SCRAPERS
 
 logger = logging.getLogger("hkjobs")
@@ -498,6 +500,17 @@ def cmd_search(args: argparse.Namespace) -> int:
         if args.source == "all"
         else [(args.source, True)]
     )
+    # 無效篩選值必須在發出任何請求之前擋下：否則 scraper 只印一行 WARNING、
+    # 回傳未過濾結果且 exit 0，求職者會以為篩到了目標職位。
+    # 這與「跨站不支援參數 → 警告後忽略」是不同情境，見 hkjobs/validation.py。
+    fatal, warnings = validate_dimensions(args, plan)
+    for line in warnings:
+        print(line, file=sys.stderr)
+    if fatal:
+        for line in fatal:
+            print(line, file=sys.stderr)
+        return _usage_error("篩選值無效；請修正後重試（未發出任何爬取請求）。")
+
     gap_flags: dict[str, str] = {}
     if args.fill_gaps:
         gap_flags, gap_lines, gap_total = _gap_fill_plan(args, plan)
@@ -582,7 +595,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="hkjobs", description="香港職位搜尋 CLI（agent 友善）"
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
-    sub = parser.add_subparsers(dest="command", required=True)
+    sub = parser.add_subparsers(dest="command", required=False)
 
     p_sources = sub.add_parser("sources", help="列出據點能力矩陣")
     p_sources.add_argument("--json", action="store_true", help="輸出 JSON")
@@ -605,7 +618,16 @@ def build_parser() -> argparse.ArgumentParser:
             "        可用 --salary-by min|mid|max 改取下限／上限。\n"
             "        --fill-gaps 會先列出額外請求數估算再問一次；--yes 或 --json 略過確認。\n"
             "探測請用 --pages 1；檔案已存在時加 --force 才會覆寫。\n"
-            "--out 的 CSV 為 schema v2 共 19 欄（UTF-8 BOM，Excel 可直接開）。"
+            "--out 的 CSV 為 schema v2 共 19 欄（UTF-8 BOM，Excel 可直接開）。\n"
+            "去重：同 URL，或同標題＋同公司＋同一 ISO 刊登日才合併；不同刊登日的重貼會保留，\n"
+            "      兩筆都沒日期才退回「標題＋公司」；--no-dedup 可關閉。\n"
+            "字典值（--district/--category/--industry）打錯會以 exit 2 擋下並給候選，\n"
+            "        不會回傳未過濾結果；該站不支援此參數時仍照舊警告後忽略。\n"
+            "        查有效值：hkjobs options --source <站> --dimension <維度>。\n"
+            "不知道怎麼下命令？直接執行 hkjobs（不加子命令）或 hkjobs guide 進入互動引導；\n"
+            "        Windows 也可雙擊 start.bat。\n"
+            "CLI 負責抓、HTML 負責讀：抓完跑 python build_dashboard.py 產生可雙擊的看板\n"
+            "        （認得 --json --out 的 v2 封套，含大字模式與鍵盤瀏覽）。"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -624,6 +646,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_options.add_argument("--json", action="store_true", help="輸出 JSON")
     p_options.set_defaults(handler=cmd_options)
 
+    p_guide = sub.add_parser(
+        "guide", help="互動引導：用編號選站、關鍵字、天數與補缺口（免背旗標）")
+    p_guide.set_defaults(handler=lambda _args: run_guide())
+
     return parser
 
 
@@ -633,6 +659,9 @@ def main(argv: list[str] | None = None) -> int:
     want_json = "--json" in raw
     try:
         args = build_parser().parse_args(raw)
+        # 不加子命令 = 給 CLI 新手的互動引導；既有旗標 API 完全不受影響。
+        if getattr(args, "command", None) is None:
+            return run_guide()
         return int(args.handler(args))
     except SystemExit as exc:
         return int(exc.code or 0)

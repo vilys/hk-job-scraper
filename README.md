@@ -49,6 +49,22 @@ python main.py --source all      --keyword "會計" --pages 1        # 全部「
 python main.py --help                                              # 完整參數
 ```
 
+### 🧭 不想背旗標？用引導模式
+
+```bash
+python -m hkjobs            # 不加任何參數：一題一題用編號選
+python -m hkjobs guide     # 同上，明確指定子命令
+```
+
+Windows 使用者可以直接**雙擊 `start.bat`**：它會自動找 `venv`／`.venv`、檢查依賴
+（缺了就提示 `pip install -r requirements.txt`），再進入同一個引導模式。全程用編號選站、
+選職能、選天數，不必記 `--source` 的名字，也不會打錯字典值；選完會**先印出完整命令**
+再問要不要執行，看過一次就能把那行學起來。引導模式固定 `--pages 1`，遵守速率禮節。
+
+> **分工**：`hkjobs` 負責「抓」，`build_dashboard.py` 負責「讀」。抓完執行
+> `python build_dashboard.py`，會把 `output/` 的結果聚合成一份可直接雙擊、
+> 有大字模式與鍵盤瀏覽的 HTML 看板（見「聚合儀表板」一節）。
+
 ### 🧩 想一次看全部來源？（聚合模式，`hkjobs` 專屬）
 
 ```bash
@@ -64,7 +80,7 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --ye
 | 跨站排序 | 預設按刊登日新→舊；`--sort-by salary` 改按**月薪中位數 `(min+max)/2`** 高→低（無上限時用單點薪金），可用 `--salary-by min\|mid\|max` 改取下限／上限。解析不出者排最後，**一筆都不丟**；人類輸出會標明本次依據 |
 | 日期正規化 | `19h ago`、`11 Nov 2026`、`Posted 3 months ago`、`on 11-10`，以及勞工處詳情頁的 `10/11/2026`（**DD/MM/YYYY，日在前**）一律變 `YYYY-MM-DD`；原文留在 `posted_date_raw` |
 | 薪金正規化 | `$15K - $17K` 另給 `salary_min=15000` / `salary_max=17000`；時薪／日薪／年薪換算成月薪並標 `salary_period` |
-| 去重 | 同 URL 或同「標題＋公司」合併成一筆，保留 `sources` / `urls`；`--no-dedup` 可關閉 |
+| 去重 | 同 URL、或同「標題＋公司＋**同一 ISO 刊登日**」才合併（保留 `sources` / `urls`）；**不同刊登日的重貼視為獨立職缺，不會被吞掉**；兩筆都沒有日期時才退回「標題＋公司」。`--no-dedup` 可關閉 |
 | 完整度小表 | 一眼看出哪一站缺公司／薪金／地區／日期，並給 `--detail`、`--fill-location` 等建議；`--fill-gaps` 可一鍵補齊 |
 
 #### 求職者情境食譜（可直接複製）
@@ -111,7 +127,11 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 >
 > **人類輸出顯示規則**：換算值一律標「約」並置於最前；站方原文以 `(原…)` 括號保留在後；單位詞（`原時薪`／`原日薪`／`原年薪`）提到括號最前，因此 36 格欄寬截斷時會先切掉原文尾段的數字，**單位詞仍看得見**。原文若用全形括號重複同一單位詞，顯示層去掉一次以免贅字；`salary` 欄位本身完整不變。例：`$60 - $65 （時薪）` → `約$10,560-11,440/月 (原時薪 $60 - $65)`，截斷後仍可見 `時薪`。
 
-2026-11-11 的 196 筆實測：去重後 187 筆（`deduped=9`，7 組重複，含 jobmarket 同一僱主 4 筆與跨站 procurement clerk）；`withSalary` 從 58 降到 55（`TBD` 不再算進去）。改中位數排序後，`$18,000-24,000`（中位數 21000）會排在 `$14K-27K`（中位數 20500）之前。
+2026-11-11 的 196 筆基準資料（**離線重播、零請求**）：現行去重規則下為 **194 筆（`deduped=2`）**、`withSalary=55`（`TBD` 不再算進去）。舊規則只看「標題＋公司」時是 187 筆／`deduped=9`；差別在於公司**不同日期重貼**的同一職位現在會保留下來，求職者才看得到「又貼了一次」。改中位數排序後，`$18,000-24,000`（中位數 21000）會排在 `$14K-27K`（中位數 20500）之前。
+
+> **兩套去重語義別混淆**：聚合層（`hkjobs search`）用「URL／標題＋公司＋刊登日」；
+> `build_dashboard.py` 是**多檔快照合併**，用 `job_id` 去重並保留描述較完整的一筆。
+> 兩者用途不同，數字不必相等。
 
 > ⚠️ `--source all` 一次跑九站，僅供驗證；平時一次一站、探測用 `--pages 1`。
 
@@ -126,7 +146,7 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 173 個測試、約 1.5 秒、零網路請求。
+> 220 個測試、約 6 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -273,14 +293,18 @@ hk-job-scraper/
 ├── job_model.py            # JobRecord 統一資料模型
 ├── exporter.py             # JSON / CSV 匯出（增量 + 去重）
 ├── base_scraper.py         # 爬蟲抽象基類（search / get_detail / scrape_all）
-├── build_dashboard.py      # 聚合 output/ 所有產出 → 單檔離線 HTML 儀表板
+├── build_dashboard.py      # 聚合 output/ 所有產出 → 單檔離線 HTML 儀表板（認得 v2 封套）
+├── start.bat              # Windows 一鍵啟動器：檢查依賴後進入 hkjobs guide
 ├── pyproject.toml          # 打包與 hkjobs console script
 ├── AGENTS.md               # 給 AI agent／程式呼叫的機器契約
-├── hkjobs/                 # agent 友善 CLI（search / sources / options）
-│   ├── cli.py              # 子命令分派
+├── hkjobs/                 # agent 友善 CLI（search / sources / options / guide）
+│   ├── cli.py              # 子命令分派（無子命令時進引導模式）
 │   ├── args.py             # 搜尋參數（main.py 共用）
 │   ├── capabilities.py     # 12 站能力矩陣
 │   ├── options.py          # 字典查詢 adapter
+│   ├── validation.py       # 無效字典值前置驗證（exit 2、零請求）
+│   ├── guide.py           # 互動引導模式（純標準庫）
+│   ├── aggregate.py        # 日期／薪金正規化、去重、排序、完整度
 │   └── contract.py         # JSON 封套與 exit code
 ├── LICENSE                 # MIT 授權
 ├── .gitattributes          # 換行符策略：全專案統一 LF（消除 Windows CRLF 警告）
@@ -315,6 +339,10 @@ hk-job-scraper/
 │   ├── test_exporter.py    # 去重 / BOM / 損毀備份
 │   ├── test_contracts.py   # 各站 CLI 契約（停用站、排序、提早停翻、輸出原子性）
 │   ├── test_cli_contract.py # hkjobs CLI 契約（封套 / exit code / 能力表 / 字典）
+│   ├── test_aggregation.py # 聚合管線（含去重保留重貼）
+│   ├── test_dimension_validation.py # 無效篩選值前置驗證
+│   ├── test_guide.py       # 引導模式與 start.bat
+│   ├── test_dashboard.py  # 儀表板 v2 輸入 / 無障礙 / --out
 │   └── test_dictionaries.py # 17 個字典的完整性與跨站隔離
 ├── docs/
 │   ├── moovup_地區編號對照表.md    # 人可直讀的 Moovup 地區↔編號對照表
@@ -396,6 +424,7 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 | 命令 | 用途 |
 |---|---|
 | `hkjobs search` | 搜尋；**不加旗標就直接列出前 20 筆職位**（標題／公司／地區／薪金／刊登日）+ 來源摘要 |
+| `hkjobs`／`hkjobs guide` | 互動引導模式（純標準庫、零新依賴）：用編號選，固定 `--pages 1`；只組出一般人類模式命令，**不影響 `--json` 契約與既有旗標 API** |
 | `hkjobs sources` | 能力矩陣（機器可讀版支援矩陣） |
 | `hkjobs options` | 字典值查詢（地區／職能／行業／排序，含別名與 ID） |
 
@@ -409,6 +438,8 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 | 勞工處公司欄全空 | 自動提示「列表頁不含公司名，需 `--detail`」 |
 | `--days` | 只做日期過濾，**保留站方相關性排序**；要日期排序請明確給 `--sort post_dt_desc` |
 | `--pages 0` | 視為用法錯誤 exit 2（不是「0 筆結果」） |
+| 字典值打錯（`--district`／`--category`／`--industry`） | **exit 2 且在發任何請求之前擋下**，印最接近的候選值與 `hkjobs options --source <站> --dimension <維度>`；不會「只印一行 WARNING 就回傳未過濾結果」 |
+| 該站不支援此參數 | 維持既有「警告後忽略」，不報錯、不影響他站；`--source all` 時部分站接受／部分站不接受也只提醒 |
 | `--source all` | 預設 `--sort-by date`、去重開啟、印「各站欄位完整度」小表；`--sort-by salary`／`--no-dedup` 可改 |
 | `--sort-by salary` | 依**月薪中位數** `(min+max)/2` 排序，摘要標明依據；`--salary-by min\|max` 可改取下限／上限 |
 | `--fill-gaps` | 執行前列出「約 N 支額外請求」估算並問一次；`--yes`／`--json` 略過確認。自動開 `gov_hk`／`moovup` 的 `--detail`、`recruit` 的 `--fill-location`；其餘站跳過並說明 |
@@ -418,7 +449,9 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 - `--out` 依副檔名：`.csv` 寫 CSV（UTF-8 BOM、**schema v2 共 19 欄**），其他寫 JSON；`--json --out` 仍維持可覆寫的既有契約。
 - `--fill-gaps` 的估算以「`--pages` × 各站每頁筆數 × 每筆 1 支」為上限（`--pages 1` 時約 57 支：moovup 12 + gov_hk 20 + recruit 25）；已給過的旗標不重複計，recruit 單一 `--district` 為 0 支。`--json` 的 `query.fillGaps` 記為 `true`，公告走 stderr 以免污染單一封套。
 - `--sort-by salary` 時 `query.salaryBy` 記錄 `min`／`mid`／`max`；`--source all` 的 date 排序封套逐鍵不變。**schemaVersion 仍為 2**（本輪沒有新增 `jobs[]` 欄位）。
-- `search --help` 附常用範例與各旗標預設值。
+- **篩選值驗證的兩種情境不可混用**：`options.load_dimension()` 回固定值域（該站**支援**此維度）而輸入不在值域內 → `exit 2`、零請求；回 `None`（不支援）或 `kind="free"`（自由文字）→ 沿用既有「警告後忽略」。`--sort`／`--days` 不屬字典維度，不在驗證範圍。
+- **去重新語義**：同 URL、或同「標題＋公司＋同一 ISO 刊登日」才合併；不同刊登日的重貼保留為獨立筆，兩筆日期皆空才退回「標題＋公司」。`--no-dedup` 可關閉。
+- `search --help` 附常用範例與各旗標預設值；`python build_dashboard.py` 可把 `output/` 的 v2 封套直接做成 HTML 看板（**CLI 抓、HTML 讀**）。
 - 完整契約與 agent 注意事項：見 [`AGENTS.md`](AGENTS.md)。
 
 ## 📖 完整命令列參數
@@ -822,32 +855,54 @@ JobsDB 使用**完全自有的 slug / 查詢體系**，與 Moovup 的 shortCode�
 ## 📊 聚合儀表板（`build_dashboard.py`）
 
 把 `output/` 裡**所有**爬蟲產出（各站、任意多次任務的 JSON/CSV）聚合成一個**單檔離線網頁**，
-直接雙擊就能開，不必起伺服器。
+直接雙擊就能開，不必起伺服器。職責分工是 **CLI 負責抓、HTML 負責讀**：
+
+```bash
+# 1) 抓（一次一站、--pages 1；此例用勞工處）
+python -m hkjobs search --source gov_hk --keyword 文員 --pages 1 --json --out output/x.json
+
+# 2) 讀（output/x.json 的職位會被算進看板）
+python build_dashboard.py --glob "output/x.json"
+```
+
+> 只想驗證管線、不想發請求時，直接對既有存檔跑第 2 步即可，不必重跑爬取。
 
 ```bash
 # 基本：掃 output/*.json + output/*.csv → 產生 output/dashboard.html
 python build_dashboard.py
 
-# 自訂輸出檔名
+# 自訂輸出檔名（純檔名一律放在 output/ 下）
 python build_dashboard.py --out 科技職缺總覽.html
+
+# 含目錄或絕對路徑：照給的路徑寫，不會再變成 output/output/x.html
+python build_dashboard.py --out output/reports/本週.html
 
 # 只吃 JSON（不吃 CSV，避開舊檔編碼問題）
 python build_dashboard.py --glob "output/*.json"
 ```
+
+`--out` 寫不進去（路徑權限不足、路徑中某一層是檔案……）時會印可讀訊息並回 **exit 2**，
+不會丟 traceback。
 
 ### 頁面功能
 - **搜尋**：關鍵字比對職稱 / 公司 / 地區 / 描述 / 行業 / 要求
 - **篩選**：據點（多選晶片）、地區下拉、刊登時間（3/7/14/30/90 天內）、只看有薪資
 - **排序**：最新 / 最舊 / 薪資高→低 / 依來源 / 依職稱
 - **圖表**：據點分佈長條圖、熱門地區 TOP 10
+- **無障礙**：預設字級 **16px**、可切「A+ 大字模式」（20px），全站用相對字級，
+  放大到 200% 不破版；「跳至主要內容」連結、`<main>`／`<article>`／`<h3>` 語義結構、
+  `aria-live` 狀態與 `aria-pressed` 來源晶片；篩選晶片是真正的 `<button>`，
+  **Tab 鍵可達、鍵盤可切換**，展開全文按鈕會維護 `aria-expanded`
 - **其他**：深淺主題切換、描述展開全文、職位標題直接連回原始網頁、分頁載入
 
 ### 資料處理（為什麼能混著吃各站的檔）
 | 議題 | 處理方式 |
 |------|----------|
-| 各站日期格式各異 | 統一折算 `age_days`（距今天數）：`23h ago` / `3d ago` / `30d+ ago` / `2 days ago` / `7日前` / `2個月前` / `10/07/2026` 全數支援 |
+| CLI 的 v2 封套 | 認得 `{"schemaVersion": 2, "jobs": [...]}`（`--json --out` 的直接產出），也認得舊的職位陣列與 CSV；非職位檔（地區統計等）自動略過 |
+| 各站日期格式各異 | 解析**統一交給 `hkjobs.aggregate.parse_date`**，不再養第二套 regex；`23h ago` / `3d ago` / `30d+` / `7日前` / `2個月前` / `10/11/2026`（DD/MM/YYYY，日在前）全數支援 |
+| 舊存檔越放越舊 | `age_days` 以**該筆自己的 `scraped_at`** 為基準，不是 `date.today()`；同一份快照離線重播會得到相同數字 |
 | 列表層抓取無刊登日 | 另計 `scraped_days`（抓取距今），卡片顯示「未知刊登日（抓取於 N 天前）」；套用時間篩選時這類會被排除 |
-| 同一職位重複出現在多檔 | 以 `job_id` 去重，保留描述較完整 / 抓取較新的一筆 |
+| 同一職位重複出現在多檔 | **以 `job_id` 去重**，保留描述較完整 / 抓取較新的一筆；這與 `hkjobs search` 的「URL／標題＋公司＋刊登日」去重語義不同，兩者數字不必相等 |
 | CSV 編碼不一（UTF-8 / BOM / Big5 / GB18030） | 逐個編碼嘗試；`ict_density_leaderboard.*` 等非職位檔自動略過 |
 | 薪資文字五花八門 | 解析出數值 + 單位（月/小時/年）供排序與「只看有薪資」；**不做跨單位換算**（時薪與月薪不可比） |
 
@@ -988,7 +1043,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 173 個測試，約 1.5 秒，零網路請求
+python -m unittest discover -s tests -v      # 220 個測試，約 6 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。

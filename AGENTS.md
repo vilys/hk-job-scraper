@@ -40,11 +40,12 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
   - `--salary-by min|mid|max`：配合 `--sort-by salary` 的取樣依據，**預設 `mid`（中位數 `(min+max)/2`，無 max 時用單點薪金）**；`min` 取下限、`max` 取上限（舊版行為）。設定的值記錄在 `query.salaryBy`，人類輸出會標明。
   - `--fill-gaps`：一鍵補齊各站已知缺口（`gov_hk`／`moovup` → `--detail`，`recruit` → `--fill-location`）。執行前列出額外請求數預估；`--yes` 或 `--json` 模式略過互動確認。`query.fillGaps` 為 `true`。
   - `--yes`：跳過 `--fill-gaps` 的互動確認（給腳本／agent 用）。
-  - `--no-dedup`：關閉去重。預設以「URL 完全相同」或「(正規化標題, 正規化公司) 相同」合併，保留 `sources` / `urls`。
+  - `--no-dedup`：關閉去重。預設以「URL 完全相同」或「(正規化標題, 正規化公司, **同一 ISO 刊登日**) 相同」合併，保留 `sources` / `urls`；**不同刊登日的重貼視為獨立職缺**，兩筆日期皆解析不出時才退回舊的 (標題, 公司) 鍵。
   - `-q`：日誌只留 ERROR。
   - **人類模式專用（不影響 `--json` 封套與 exit code）**：`--limit N`（預設 20，0 = 全部）、`--no-list`（只印摘要）、`--force`（允許 `--out` 覆蓋既有檔）。
 - `hkjobs sources [--json]`：能力矩陣。
 - `hkjobs options --source <站> [--dimension district|category|industry|sort] [--json]`：有效值。
+- `hkjobs guide` / `hkjobs`（無子命令）：互動引導模式，詳見下方專節。
 
 **人類模式（`--json` 缺席）才有的行為，agent 不必依賴：**
 
@@ -59,13 +60,57 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 - `--source all` 的人類摘要另印「各站欄位完整度」小表（公司／薪金／地區／日期命中數）與已知缺口建議；`--json` 對應 `summary.sources[].coverage`。
 - `efc` 未指定 `--district` 時預設 `Hong Kong`（原本會回 London／New York），stderr 與人類輸出皆提示可改。
 
+## 篩選值前置驗證（`hkjobs/validation.py`）
+
+`validate_dimensions(args, plan)` 在 `cmd_search()` 建立 plan 後、**發出任何爬取請求之前**執行，
+回 `(fatal, warnings)`；`fatal` 非空時 CLI 印到 stderr 並回 `exit 2`（無 JSON 封套）。
+
+| 情境 | 判定 | 行為 |
+|---|---|---|
+| 該站**支援**此維度且有固定值域（`options.load_dimension()` 非 `None` 且 `kind != "free"`），但輸入不在值域 | 篩選不會生效，卻會回傳未過濾結果（「假成功」） | **exit 2、零請求**；給最接近候選（`difflib`）與 `hkjobs options --source <站> --dimension <維度>` |
+| 該站**不支援**此維度（`None`）或 `kind="free"` | 既有設計 | 沿用「警告後忽略」，不報錯、不影響他站 |
+| `--source all` 且各站字典不一致 | 只有「所有支援此維度的站都判無效」才 fatal | 部分站接受／部分站不接受只印提醒，不誤傷跨站字典差異 |
+
+只驗證 `--district` / `--category` / `--industry` 三個字典維度；`--sort`（各站各自警告回退）與
+`--days`（非字典）不在範圍。中文地區「去／加區字尾」的合法別名刻意比 scraper 寬鬆，
+不會把合法值誤判成無效。
+
+## 互動引導與 Windows 啟動器
+
+- `hkjobs guide` 或 **`hkjobs`（無子命令）** → `hkjobs/guide.py`，純標準庫 `input()`、零新依賴。
+- 站別選項來自 `capabilities.SOURCES`，職能選項來自 `options.load_dimension()`；固定 `--pages 1`。
+- 選完先印**完整命令**（`display_command()`）再問 `Y/n`；取消或 EOF = 零請求、`exit 0`。
+- `run_guide(execute=...)` 可注入執行函式供零網路測試；引導模式只組出一般人類模式命令。
+- `start.bat`：ASCII-only、`chcp 65001`、自動找 `venv` / `.venv`、缺依賴提示
+  `pip install -r requirements.txt`，最後進 `python -m hkjobs guide`。
+- **不變**：既有旗標 API、`--json` 單一 JSON 封套、`python main.py` 舊入口、exit code 全部不受影響。
+
+## 兩套去重語義（勿混用）
+
+| 層 | 鍵 | 用途 |
+|---|---|---|
+| `contract.search_payload()` → `aggregate.deduplicate()` | 同 URL；或 (標題, 公司, **ISO 刊登日**) 相同；兩筆日期皆空退回 (標題, 公司) | 單次搜尋的跨站結果；**不同刊登日的重貼保留** |
+| `build_dashboard.py::collect()` | `job_id` | 多檔快照合併，保留描述較完整／抓取較新者 |
+
+現行 v1 基準（196 筆）離線重播：`total=194 / deduped=2 / rawTotal=196 / withSalary=55`；
+舊規則（只看標題＋公司）是 `187 / deduped=9`。兩套數字不必相等。
+
+## HTML 儀表板（`build_dashboard.py`）
+
+**CLI 抓、HTML 讀**：認得 CLI 的 `{"schemaVersion": 2, "jobs": [...]}` 封套、舊職位陣列與
+CSV；日期解析**唯一來源是 `hkjobs.aggregate.parse_date`**，`age_days` 以該筆 `scraped_at`
+為基準（不是 `date.today()`）。預設 16px、大字模式（20px）、skip link、`<main>`／`<article>`／
+`<h3>`、`aria-live`／`aria-pressed`／`aria-expanded`、鍵盤可達的 `<button>` 晶片。
+`--out` 純檔名放 `output/` 下；含目錄或絕對路徑照給；寫入失敗印可讀訊息並回 `exit 2`，
+不丟 traceback。
+
 ## 輸出契約（schemaVersion = 2，2026-11-11 起）
 
 成功：
 
 ```json
 {"schemaVersion":2,"command":"search","generatedAt":"…","query":{…,"sortBy":"date","dedup":true},
- "summary":{"total":187,"rawTotal":196,"deduped":9,"withSalary":55,"sortBy":"date",
+ "summary":{"total":194,"rawTotal":196,"deduped":2,"withSalary":55,"sortBy":"date",
    "sources":[{"name":"jobsdb","status":"ok","jobs":30,"error":null,
                "coverage":{"jobs":30,"company":30,"salary":10,"location":30,"date":30}}]},
  "jobs":[{"job_id":"jobsdb::123","source":"jobsdb","title":"…","company":"…",
@@ -138,9 +183,11 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 ## 修改本專案時
 
 - 新增／變更據點行為，必須同步更新：`hkjobs/capabilities.py`、README 的「各站功能支援矩陣」與該站技術筆記。
-- 變更多人類輸出／旗標，必須同步更新：`README.md` 的「給 AI agent／程式呼叫」章節、本文件命令段、`search --help` 的 epilog；若動到離線重播，另同步 `tools/replay_aggregation.py` 與 `tools/README.md`。薪金欄顯示格式另同步 README「薪金換算基準」與本文件「人類模式」段（含範例輸出字串）。
+- 變更多人類輸出／旗標，必須同步更新：`README.md` 的「給 AI agent／程式呼叫」章節、本文件命令段、`search --help` 的 epilog 與 `hkjobs/args.py` 的旗標說明；若動到離線重播，另同步 `tools/replay_aggregation.py` 與 `tools/README.md`。薪金欄顯示格式另同步 README「薪金換算基準」與本文件「人類模式」段（含範例輸出字串）。
 - 新增／調整旗標時，`hkjobs/capabilities.py` 是能力與薪金換算基準的單一資料源（`GAP_FILL_ACTIONS` / `SALARY_CONVERSION_BASIS`），不要在 CLI 裡另寫一份。
-- Windows cp950：所有人類輸出與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。
-- 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 173 個測試。
-- 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README。
+- 變更篩選值驗證、引導模式或啟動器，須同步 `hkjobs/validation.py`／`hkjobs/guide.py`／`start.bat`、`tests/test_dimension_validation.py`／`tests/test_guide.py`、本文件專節與 README「60 秒上手」。
+- 變更 HTML 看板，須同步 `build_dashboard.py`、`tests/test_dashboard.py`、README「聚合儀表板」章節；日期解析只能呼叫 `hkjobs/aggregate.py::parse_date`，不得再養第二套 regex。
+- Windows cp950：所有人類輸出、`build_dashboard.py` 與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。`start.bat` 必須維持全 ASCII。
+- 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。**但「該站支援且字典打錯」屬另一情境，須 exit 2 擋下**（見本文件「篩選值前置驗證」）。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 220 個測試。
+- 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README；去重數字改動時一併更新 `tools/README.md` 的基準說明。
