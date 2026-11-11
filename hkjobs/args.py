@@ -9,18 +9,21 @@ def add_search_arguments(
 ) -> None:
     """加入搜尋旗標。文字與預設值必須與舊 main.py 完全一致。"""
     p.add_argument("--source", default="moovup",
-                   help="爬蟲來源：moovup | gov_hk | jobsdb | linkedin | indeed | "
-                        "recruit | jobmarket | foundit | efc | liepin | zhipin | "
+                   help="爬蟲來源（預設 moovup）：moovup | gov_hk | jobsdb | linkedin | "
+                        "indeed | recruit | jobmarket | foundit | efc | liepin | zhipin | "
                         "offertoday | all")
     p.add_argument("--keyword", default="",
-                   help="搜尋關鍵字（留空 = 不限定關鍵字，僅依地區/類別瀏覽；"
+                   help="搜尋關鍵字（預設空 = 不限定關鍵字，僅依地區/類別瀏覽；"
                         "gov_hk 支援，moovup 建議仍給關鍵字）")
-    p.add_argument("--pages", type=int, default=3, help="最大翻頁數")
+    p.add_argument("--pages", type=int, default=3,
+                   help="最大翻頁數（預設 3；探測請用 1，0 為用法錯誤）")
     if include_output_flags:
         p.add_argument("--output", default="json",
                        choices=["json", "csv", "both"], help="輸出格式")
     p.add_argument("--detail", action="store_true",
-                   help="同時抓取職位詳情（職責/要求/發佈時間/刊登日期）")
+                   help="同時抓取職位詳情（職責/要求/刊登日期）；"
+                        "⚠️ 勞工處 gov_hk 的「公司名」只在詳情頁，列表階段拿不到，"
+                        "不加此旗標時 company 欄必為空。代價是每筆多 1 支請求。")
     p.add_argument("--fill-location", action="store_true",
                    help="列表階段補地區：僅 recruit 需要並支援（該站列表頁沒有地區欄）。"
                         "會對每筆多打 1 支輕量 AJAX 請求（25 筆/頁 → 25 支，含節流），故預設關閉。"
@@ -61,16 +64,18 @@ def add_search_arguments(
                         "JobsDB 與 LinkedIn 僅支援 post_dt_desc（JobsDB 對應 sortmode=ListedDate；"
                         "LinkedIn 對應 sortBy=DD，皆為新→舊），其餘選項為 gov_hk 專有，"
                         "JobsDB / LinkedIn 傳入會警告並回退網站預設排序。"
-                        "設 --days 時若未指定 --sort，自動套用 post_dt_desc。")
+                        "預設不指定＝保留站方相關性排序；--days 不會自動改排序，"
+                        "想按日期新→舊請明確指定 --sort post_dt_desc。")
     p.add_argument("--days", type=int, default=None,
-                   help="只保留最近 N 天內刊登的職位："
+                   help="只保留最近 N 天內刊登的職位（預設不過濾）："
                         "gov_hk 以站方 postedDtFr/To 過濾（結果已被切乾淨，但輸出不含 "
                         "posted_date，需要日期欄請加 --detail）；"
                         "JobsDB 與 LinkedIn 直接用列表相對刊登日過濾（不抓詳情）；"
                         "moovup 不支援（傳入會警告並忽略）；"
                         "offertoday 支援：送站方 publishTime 參數 + 客戶端再篩"
                         "（只有「on MM-DD」格式能算天數，其餘視為過舊淘汰）。"
-                        "預設按刊登日期由近至遠排序。")
+                        "⚠️ 只做日期過濾，不改排序；保留站方預設（相關性）順序。"
+                        "公司名需 --detail，日期欄在 gov_hk 亦需 --detail。")
 
 
 def build_search_argparser(
@@ -84,8 +89,16 @@ def build_search_argparser(
 def add_machine_arguments(p: argparse.ArgumentParser) -> None:
     """hkjobs 專屬輸出旗標（舊 main.py 不加入）。"""
     p.add_argument("--json", action="store_true",
-                   help="機器模式：stdout 輸出單一 JSON 封套、不寫檔；日誌走 stderr（預設 WARNING）")
+                   help="機器模式：stdout 輸出單一 JSON 封套；日誌走 stderr（預設 WARNING）。"
+                        "人類模式才會列印職位清單，--json 不受 --limit/--no-list/--force 影響")
     p.add_argument("--out", default=None, metavar="PATH",
                    help="顯式寫檔：.csv 寫職位 CSV（UTF-8 BOM）；其他副檔名寫 JSON"
-                        "（--json 時寫完整封套，否則寫職位陣列）")
+                        "（--json 時寫完整封套，否則寫職位陣列）。"
+                        "⚠️ 人類模式下目標檔已存在時不會覆蓋，需加 --force")
+    p.add_argument("--force", action="store_true",
+                   help="允許 --out 覆蓋既有檔案（僅人類模式需要；--json 模式維持原行為）")
+    p.add_argument("--limit", type=int, default=20, metavar="N",
+                   help="人類模式列出前 N 筆職位（預設 20；0 = 全部列出；僅影響螢幕輸出）")
+    p.add_argument("--no-list", action="store_true",
+                   help="人類模式不列職位清單，只印來源摘要（給既有的純摘要腳本用）")
     p.add_argument("-q", "--quiet", action="store_true", help="日誌只保留 ERROR")

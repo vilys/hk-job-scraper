@@ -53,7 +53,8 @@ SOURCES: dict[str, SourceInfo] = {
         supports={"district": True, "category": True, "industry": True,
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("gov_hk"),
-        notes="ASP.NET SSR；--days 走站方 postedDtFr/To；--sort 8 值全支援。",
+        notes="ASP.NET SSR；--days 走站方 postedDtFr/To 且不改排序；--sort 8 值全支援。"
+              "⚠️ 列表頁無僱主欄位，company 需 --detail（每筆多 1 支請求）。",
     ),
     "jobsdb": SourceInfo(
         name="jobsdb", label="JobsDB", enabled=True,
@@ -62,7 +63,9 @@ SOURCES: dict[str, SourceInfo] = {
         supports={"district": True, "category": True, "industry": False,
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("jobsdb"),
-        notes="列表含相對日期；--days 走站方 daterange（只吃 1/3/7/14/31，本模組向上取整）。",
+        notes="列表含相對日期但薪金常缺（實測 30 筆中 24 筆無薪金）；"
+              "--days 走站方 daterange（只吃 1/3/7/14/31，本模組向上取整）"
+              "且只做日期過濾、保留站方相關性排序。",
     ),
     "linkedin": SourceInfo(
         name="linkedin", label="LinkedIn", enabled=True,

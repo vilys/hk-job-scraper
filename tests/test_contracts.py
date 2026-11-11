@@ -93,10 +93,12 @@ class _Paged(BaseScraper):
             2: [JobRecord(job_id="dummy::2", source="dummy", title="new")],
         }
         self.visited: list[int] = []
+        self.sorts: list = []
 
     def search(self, keyword, page=1, district=None, category=None,
                industry=None, sort=None):
         self.visited.append(page)
+        self.sorts.append(sort)
         return self.pages.get(page, [])
 
     def get_detail(self, job_url):
@@ -116,8 +118,25 @@ class TestDaysEarlyStop(unittest.TestCase):
         self.assertEqual(s.visited, [1, 2])
         self.assertEqual([j.job_id for j in jobs], ["dummy::2"])
 
-    def test_sorted_desc_site_stops_early(self):
+    def test_sorted_desc_site_stops_early_when_sort_explicit(self):
+        # 明確要求日期排序時，站方保證新→舊 → 某頁全過期即可停翻。
         s = _Paged(sorted_desc=True)
+        jobs = s.scrape_all("x", max_pages=3, days=10, sort="post_dt_desc")
+        self.assertEqual(s.visited, [1])
+        self.assertEqual(jobs, [])
+
+    def test_days_alone_does_not_impose_date_sort(self):
+        # P1-1：--days 只做過濾，不得偷改排序，也不得假定日期順序而提早停翻。
+        s = _Paged(sorted_desc=True)
+        jobs = s.scrape_all("x", max_pages=3, days=10)
+        self.assertEqual(s.sorts, [None, None, None])
+        self.assertEqual(s.visited, [1, 2, 3])
+        self.assertEqual([j.job_id for j in jobs], ["dummy::2"])
+
+    def test_default_sorted_desc_site_still_stops_early(self):
+        # JobMarket / gov_hk 這類「站方預設即日期順序」的站不受影響。
+        s = _Paged(sorted_desc=True)
+        s.list_default_sorted_desc = True
         jobs = s.scrape_all("x", max_pages=3, days=10)
         self.assertEqual(s.visited, [1])
         self.assertEqual(jobs, [])

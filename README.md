@@ -23,9 +23,10 @@ python main.py --source gov_hk --keyword "會計" --pages 1
 
 結果會寫到 `output/gov_hk_會計.json`；想要 Excel 可直接開的格式，把結尾換成 `--output csv`。
 
-> 📌 **第一次看到「公司」欄位是空的，不是壞了。** 列表頁本身只有標題／地區／薪資／連結，
-> 公司名稱、職責描述、刊登日期要進詳情頁才拿得到。加上 `--detail` 就會補齊，
-> 代價是**每筆多 1 支請求**——所以預設關閉，請自行斟酌量。
+> 📌 **第一次看到「公司」欄位是空的，不是壞了。** 勞工處列表頁實測（2026-11-11）只有
+> 標題／薪金／地區／職位編號，**沒有僱主欄位**；公司名稱、職責描述、刊登日期要進詳情頁
+> 才拿得到。加上 `--detail` 就會補齊，代價是**每筆多 1 支請求**——所以預設關閉，請自行斟酌量。
+> `hkjobs` 的人類模式會在清單下方自動提示這件事，不必自己猜。
 
 **為什麼第一支建議用 `gov_hk`？** 它是政府網站，ASP.NET 伺服器渲染、沒有 Cloudflare、不需要登入，
 是全專案門檻最低的據點。先用它確認環境沒問題，再去挑戰需要瀏覽器的站——這樣出錯時，
@@ -49,6 +50,9 @@ python main.py --help                                              # 完整參�
 ```
 
 > 🤖 **給 AI agent／程式呼叫**：`pip install -e .`（或 `pipx install .`）後可用 `hkjobs` 命令。
+> ⚠️ 若終端機顯示 `command not found`：先啟用虛擬環境（Windows：`.venv\Scripts\activate`；
+> macOS/Linux：`source .venv/bin/activate`），或直接呼叫 `.venv\Scripts\hkjobs.exe`。
+> 不想管 PATH 時，`python -m hkjobs ...` 永遠可用。裝完請用 **`hkjobs --version`** 驗證。
 > 探索順序：`hkjobs sources --json` → `hkjobs options --source <站> --json` → `hkjobs search ... --json`。
 > 完整機器契約（JSON 封套、exit code、速率禮節）見 [`AGENTS.md`](AGENTS.md)。舊 `python main.py` 用法完全不變。
 
@@ -56,7 +60,7 @@ python main.py --help                                              # 完整參�
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 72 個測試、約 1 秒、零網路請求。
+> 106 個測試、約 1.5 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -267,13 +271,21 @@ hk-job-scraper/
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
-# 2. 安裝依賴
-pip install -r requirements.txt
+# 2. 安裝依賴（含 hkjobs 命令）
+pip install -e .
 
-# 3. 安裝 Playwright 瀏覽器（首次必需，只需一次）
+# 3. 驗證 hkjobs 命令真的在 PATH 上
+hkjobs --version                 # 若 command not found，見下方說明
+
+# 4. 安裝 Playwright 瀏覽器（要跑 JobsDB 等站才需要，只需一次）
 playwright install chromium
 ```
 
+> ⚠️ **`pip install -e .` 裝完卻找不到 `hkjobs`？** 最常見原因是沒有啟用 venv，
+> 或該 venv 的 `Scripts/`（Windows）／`bin/`（macOS、Linux）不在 PATH。
+> 三個解法任選一個：① 啟用 venv 後再開終端；② 直接呼叫 `.venv\Scripts\hkjobs.exe`；
+> ③ 用 `python -m hkjobs ...`，完全不依賴 PATH。想省事可用 `pipx install .`（自動隔離並註冊命令）。
+>
 > 依賴：`requests`、`beautifulsoup4`、`lxml`、`playwright`
 > （後續階段的 gov.hk 等不需要 Playwright，屆時可只裝基礎套件。）
 
@@ -306,6 +318,7 @@ python main.py --source linkedin --keyword "data engineer" --pages 3
 
 ```bash
 pip install -e .        # 或 pipx install .
+hkjobs --version        # 先驗證命令在 PATH 上；失敗時改用 python -m hkjobs
 hkjobs sources --json   # 12 站能力矩陣（啟用/瀏覽器/每頁/支援維度/近 N 天機制）
 hkjobs options --source jobsdb --json          # 該站有效地區/職能/行業/排序值
 hkjobs search --source jobsdb --keyword data --days 7 --json   # 結果只印 stdout，不寫檔
@@ -314,12 +327,24 @@ hkjobs search --source gov_hk --keyword 會計 --out result.json # 要存檔才�
 
 | 命令 | 用途 |
 |---|---|
-| `hkjobs search` | 搜尋；`--json` 輸出單一封套、日誌走 stderr、預設零寫檔 |
+| `hkjobs search` | 搜尋；**不加旗標就直接列出前 20 筆職位**（標題／公司／地區／薪金／刊登日）+ 來源摘要 |
 | `hkjobs sources` | 能力矩陣（機器可讀版支援矩陣） |
 | `hkjobs options` | 字典值查詢（地區／職能／行業／排序，含別名與 ID） |
 
-- `--json` 的 exit code：`0` 成功、`2` 參數錯、`3` 部分失敗、`4` 全失敗、`5` 零結果、`1` 未預期。
-- `--out` 依副檔名：`.csv` 寫 CSV（UTF-8 BOM），其他寫 JSON。
+**人類模式（不加 `--json`）的行為**
+
+| 情況 | 行為 |
+|---|---|
+| 預設 | 列出前 20 筆；摘要顯示 `N/M 筆有薪金`；被截斷時告訴你怎麼拿到剩下的 |
+| `--limit N` / `--limit 0` | 改列印筆數／全部印出（`--no-list` 則只印摘要） |
+| `--out PATH` 且檔案已存在 | **不覆蓋**，直接回 exit 2；確認後加 `--force` 才覆寫（在發請求前就擋下） |
+| 勞工處公司欄全空 | 自動提示「列表頁不含公司名，需 `--detail`」 |
+| `--days` | 只做日期過濾，**保留站方相關性排序**；要日期排序請明確給 `--sort post_dt_desc` |
+| `--pages 0` | 視為用法錯誤 exit 2（不是「0 筆結果」） |
+
+- `--json` 的 exit code：`0` 成功、`2` 參數錯、`3` 部分失敗、`4` 全失敗、`5` 零結果、`1` 未預期；封套 `schemaVersion=1` 欄位不變，不受上述人類模式旗標影響。
+- `--out` 依副檔名：`.csv` 寫 CSV（UTF-8 BOM），其他寫 JSON；`--json --out` 仍維持可覆寫的既有契約。
+- `search --help` 附 3 行常用範例與各旗標預設值。
 - 完整契約與 agent 注意事項：見 [`AGENTS.md`](AGENTS.md)。
 
 ## 📖 完整命令列參數
@@ -335,8 +360,8 @@ hkjobs search --source gov_hk --keyword 會計 --out result.json # 要存檔才�
 | `--district` | 否 | 無 | 地區篩選，**多數據點已接上**（支援的站與格式見矩陣「地區」列）。例：JobsDB 用中文名或 slug（`荃灣` \| `tsuen-wan`，見 `scrapers/jobsdb_districts.json`）；勞工處用數字 ID 或中文；Moovup 用 shortCode。**各站字典獨立，不可混用**；逗號分隔時 JobsDB 僅取第一個。 |
 | `--category` | 否 | 無 | 工作種類 / 職能篩選（支援：勞工處、JobsDB、Recruit、JobMarket、OfferToday，見矩陣）。例：JobsDB 用中文名 / 英文 / slug（見 `scrapers/jobsdb_classifications.json`）。**各站字典獨立**。 |
 | `--industry` | 否 | 無 | 行業篩選（支援：勞工處、JobMarket、OfferToday）。JobsDB 無獨立行業維度，傳入會被忽略並提示。 |
-| `--sort` | 否 | 無 | 排序：**gov_hk 全選項支援**（`post_dt_desc`(新→舊) / `post_dt_asc`(舊→新) / `salary_desc`·`salary_asc`(月薪) / `yr_exp_asc`·`yr_exp_desc`(經驗) / `edu_lvl_asc`·`edu_lvl_desc`(學歷)）；**JobsDB 與 LinkedIn 僅支援 `post_dt_desc`**（新→舊），其餘選項為 gov_hk 專有、傳入會警告並回退預設。設 `--days` 未指定 `--sort` 時自動套 `post_dt_desc` |
-| `--days` | 否 | 無 | 只保留最近 N 天內刊登的職位。各站實作不同：勞工處 / JobsDB / LinkedIn / OfferToday 有**站方端**日期參數；Moovup 不支援（警告後忽略）；獵聘以 `refreshTime`（刷新日）近似。詳見矩陣「近期」列。 |
+| `--sort` | 否 | 無（站方相關性） | 排序：**gov_hk 全選項支援**（`post_dt_desc`(新→舊) / `post_dt_asc`(舊→新) / `salary_desc`·`salary_asc`(月薪) / `yr_exp_asc`·`yr_exp_desc`(經驗) / `edu_lvl_asc`·`edu_lvl_desc`(學歷)）；**JobsDB 與 LinkedIn 僅支援 `post_dt_desc`**（新→舊），其餘選項為 gov_hk 專有、傳入會警告並回退預設。⚠️ **2026-11-11 起 `--days` 不再自動套 `post_dt_desc`**（舊行為會讓 `analyst` 搜尋被剛刊登的 Dealer／會計淹沒）；想按日期排請明確指定。 |
+| `--days` | 否 | 無 | 只保留最近 N 天內刊登的職位，**只做日期過濾、不改排序**。各站實作不同：勞工處 / JobsDB / LinkedIn / OfferToday 有**站方端**日期參數；Moovup 不支援（警告後忽略）；獵聘以 `refreshTime`（刷新日）近似。勞工處結果不含 `posted_date`、亦不含公司名，兩者都需 `--detail`。詳見矩陣「近期」列。 |
 
 ### 📊 各站功能支援矩陣（重要：功能互不相連）
 
@@ -359,7 +384,15 @@ hkjobs search --source gov_hk --keyword 會計 --out result.json # 要存檔才�
 
 > 圖例：✅ 完全支援　⚠️ 部分 / 有限支援　❌ 不適用（傳入會警告並忽略）
 
-> 🤖 機器可讀版本：`hkjobs sources --json`（能力表由 `hkjobs/capabilities.py` 提供，與本表同步維護）。
+**欄位可得性補充（2026-11-11 實測）**
+
+| 欄位 | 勞工處 `gov_hk` | JobsDB | 影響 |
+|---|---|---|---|
+| `company` | ❌ 列表頁無僱主欄位，需 `--detail`（每筆多 1 支請求） | ✅ 列表即有 | `hkjobs` 人類模式在公司欄全空時會自動提示，不是爬蟲壞掉 |
+| `salary` | ✅ 列表即有 | ⚠️ 列表常缺（實測 30 筆中 24 筆無薪金） | 人類摘要改顯示 `N/M 筆有薪金`，不再只給一個數字 |
+| `posted_date` | ❌ 列表無日期（`--days` 下推站方，需 `--detail` 才有值） | ✅ 相對日期 | 人類清單的刊登日欄在勞工處顯示 `—` |
+
+> 🤖 機器可讀版本：`hkjobs sources --json`（能力表由 `hkjobs/capabilities.py` 提供，與本表同步維護；各站 `notes` 亦收錄上述限制）。
 
 ### 使用範例
 

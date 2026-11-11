@@ -60,6 +60,57 @@ def _pad(text: str, width: int, *, align: str = "left") -> str:
     return (" " * gap + text) if align == "right" else (text + " " * gap)
 
 
+def _truncate(text: str, width: int) -> str:
+    """依顯示寬度截斷並補省略號，避免長標題把整張表格擠歪。"""
+    if _disp_width(text) <= width:
+        return text
+    out = ""
+    for ch in text:
+        if _disp_width(out + ch) > width - 1:
+            break
+        out += ch
+    return out + "…"
+
+
+# 人類模式職位清單的欄寬（顯示寬度，CJK 算 2）
+JOB_COLUMNS = (
+    ("#", 3, "right"),
+    ("標題", 34, "left"),
+    ("公司", 20, "left"),
+    ("地區", 14, "left"),
+    ("薪金", 28, "left"),
+    ("刊登日", 11, "left"),
+)
+
+
+def _print_jobs_table(jobs: list, *, limit: int) -> int:
+    """印出職位清單，回傳「未列出」的筆數。
+
+    `limit <= 0` 表示全部列出。欄位固定為標題／公司／地區／薪金／刊登日，
+    空值一律顯示 `—`，不讓求職者誤以為是程式壞了。
+    """
+    shown = jobs if limit <= 0 else jobs[:limit]
+    hidden = len(jobs) - len(shown)
+    header = "  ".join(_pad(name, w, align=align) for name, w, align in JOB_COLUMNS)
+    print(f"\n職位清單（顯示 {len(shown)} 筆 / 共 {len(jobs)} 筆）")
+    print(header)
+    print("-" * _disp_width(header))
+    for idx, j in enumerate(shown, 1):
+        cells = (
+            str(idx),
+            (j.title or "").strip() or "—",
+            (j.company or "").strip() or "—",
+            (j.location or "").strip() or "—",
+            (j.salary or "").strip() or "—",
+            (j.posted_date or "").strip() or "—",
+        )
+        print("  ".join(
+            _pad(_truncate(cell, w), w, align=align)
+            for cell, (_, w, align) in zip(cells, JOB_COLUMNS)
+        ))
+    return hidden
+
+
 def _setup_logging(*, quiet: bool, json_mode: bool) -> None:
     level = logging.ERROR if quiet else (logging.WARNING if json_mode else logging.INFO)
     logging.basicConfig(
@@ -122,7 +173,8 @@ def _print_sources_table(rows: list[dict]) -> None:
             + _pad(str(r["perPage"]), PERPAGE_W, align="right")
             + f"  {'/'.join(dims) or '—'} / {r['daysMode']}"
         )
-    print("\n提示：加 --json 取得完整矩陣；有效值用 hkjobs options --source <站> --json")
+    print("\n提示：加 --json 取得完整矩陣與各站備註；有效值用 hkjobs options --source <站> --json")
+    print("備註：JobsDB 列表薪金常缺；勞工處列表無公司名（需 --detail）。")
 
 
 def _print_options(payload: dict) -> None:
@@ -213,7 +265,19 @@ def _run_one(source: str, args: argparse.Namespace) -> SourceResult:
             scraper.close()
 
 
-def _print_human(results: list[SourceResult], code: int) -> None:
+def _print_human(
+    results: list[SourceResult],
+    code: int,
+    *,
+    out_path: str | None = None,
+    list_limit: int = 20,
+    no_list: bool = False,
+) -> None:
+    """人類模式輸出：來源摘要 + 職位清單 + 下一步提示。
+
+    提示只講「下一步」，不重複已完成的事：已寫檔就顯示實際路徑，
+    列滿了就告訴使用者怎麼拿到剩下的，而不是又叫他去加 --out。
+    """
     print(_pad("來源", LABEL_W) + _pad("筆數", 6, align="right") + "  狀態")
     for result in results:
         label = {"ok": "ok", "failed": "失敗", "skipped": "略過"}[result.status]
@@ -223,16 +287,35 @@ def _print_human(results: list[SourceResult], code: int) -> None:
             + _pad(str(len(result.jobs)), 6, align="right")
             + f"  {label}{extra}"
         )
-    total = sum(len(r.jobs) for r in results if r.status == "ok")
-    with_salary = sum(
-        1 for r in results if r.status == "ok" for j in r.jobs if j.salary
-    )
-    print(f"\n總計：{total} 筆（{with_salary} 筆有薪資）")
+    jobs = [j for r in results if r.status == "ok" for j in r.jobs]
+    total = len(jobs)
+    with_salary = sum(1 for j in jobs if j.salary)
+    salary_note = f"{with_salary}/{total} 筆有薪金" if total else "0 筆"
+    print(f"\n總計：{total} 筆（{salary_note}）")
+
+    hidden = 0
+    if not no_list and jobs:
+        hidden = _print_jobs_table(jobs, limit=list_limit)
+        # 勞工處列表頁沒有僱主欄位（實測 2026-11-11）；空公司名要說清楚，
+        # 否則求職者會以為爬蟲壞了。
+        if any(r.name == "gov_hk" and r.status == "ok" for r in results) \
+                and not any(j.company for j in jobs):
+            print("提示：勞工處列表頁不含公司名，公司欄為 —；加 --detail 才會補齊"
+                  "（每筆多 1 支請求，請斟酌量）。")
+        if hidden:
+            print(f"另有 {hidden} 筆未列出：用 --limit 0 全部印出，"
+                  "或加 --out result.csv 存成檔案。")
+
+    if out_path:
+        print(f"\n已儲存 {total} 筆至 {out_path}")
+        print("提示：加 --json 取得機器可讀 JSON；換條件再跑一次即可比較。")
+    else:
+        print("\n提示：加 --json 取得機器可讀 JSON；加 --out result.csv 儲存結果。")
+
     if code == EXIT_EMPTY:
         print("提示：0 筆結果。可放寬 --days、換 --keyword，或先跑 hkjobs sources 確認支援度。")
     elif code in (EXIT_PARTIAL, EXIT_ALL_FAILED):
         print("提示：有來源失敗。可稍後重試，或先跑 hkjobs sources 確認據點狀態。")
-    print("提示：加 --json 取得機器可讀 JSON；加 --out result.json 儲存結果。")
 
 
 def _write_out(path: Path, payload: dict, results: list[SourceResult], *, json_mode: bool) -> None:
@@ -252,6 +335,16 @@ def cmd_search(args: argparse.Namespace) -> int:
         return _usage_error(
             f"未知來源：{args.source}（可選：{', '.join(SOURCES)}, all）"
         )
+    # --pages 0 原本會跑出「0 筆結果 / exit 5」，那是把用法錯誤偽裝成查無結果。
+    if args.pages < 1:
+        return _usage_error("--pages 必須 ≥ 1（探測請用 1；0 不是「不翻頁」）")
+    # 覆蓋保護必須在發出任何請求之前：爬完才發現不能寫，等於白打一站的請求。
+    # --json 是既有 agent 契約，維持原行為（不加 --force 也能覆寫）。
+    if args.out and not args.json and not args.force and Path(args.out).exists():
+        return _usage_error(
+            f"檔案已存在：{args.out}。為避免蓋掉舊清單，請加 --force 覆寫，"
+            "或換一個 --out 路徑。"
+        )
 
     plan = (
         [(name, info.enabled) for name, info in SOURCES.items()]
@@ -266,7 +359,9 @@ def cmd_search(args: argparse.Namespace) -> int:
             continue
         results.append(_run_one(name, args))
 
-    effective_sort = args.sort or ("post_dt_desc" if args.days is not None else None)
+    # --days 只做日期過濾，不再偷偷改成刊登日期排序（會淹沒相關性）。
+    # query.sort 忠實反映「實際送給站方的排序」，沒有就是 null。
+    effective_sort = args.sort
     query = {
         "source": args.source,
         "keyword": args.keyword,
@@ -287,7 +382,12 @@ def cmd_search(args: argparse.Namespace) -> int:
     if args.json:
         emit_json(payload)
     else:
-        _print_human(results, code)
+        _print_human(
+            results, code,
+            out_path=args.out,
+            list_limit=args.limit,
+            no_list=args.no_list,
+        )
     return code
 
 
@@ -302,7 +402,20 @@ def build_parser() -> argparse.ArgumentParser:
     p_sources.add_argument("--json", action="store_true", help="輸出 JSON")
     p_sources.set_defaults(handler=cmd_sources)
 
-    p_search = sub.add_parser("search", help="搜尋職位（agent 請用 --json）")
+    p_search = sub.add_parser(
+        "search",
+        help="搜尋職位（agent 請用 --json）",
+        description="搜尋香港職位；不加任何輸出旗標就會直接列出職位清單。",
+        epilog=(
+            "常用範例：\n"
+            "  hkjobs search --source gov_hk --keyword 文員 --days 7 --pages 1\n"
+            "  hkjobs search --source jobsdb --keyword analyst --pages 1 --out analyst.csv\n"
+            "  hkjobs search --source linkedin --keyword \"data engineer\" --json\n\n"
+            "預設值：來源 moovup、關鍵字空、3 頁、列出前 20 筆、不寫檔、不抓詳情。\n"
+            "探測請用 --pages 1；檔案已存在時加 --force 才會覆寫。"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     add_search_arguments(p_search, include_output_flags=False)
     add_machine_arguments(p_search)
     p_search.set_defaults(handler=cmd_search)

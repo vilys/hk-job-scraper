@@ -34,6 +34,10 @@ class BaseScraper(ABC):
     # 提早停翻（後面的頁只會更舊）。回傳順序依相關性 / 推薦 / 固定 SEO 的站點為 False，
     # 否則會靜默漏抓：某頁剛好沒有 10 天內的職位，不代表後面幾頁也沒有。
     list_sorted_desc: bool = False
+    # 站方的「預設排序」本身是否即新→舊（不需顯式 --sort）。
+    # 只有這類站點能在 --days 且未指定 --sort 時照樣提早停翻；
+    # 其餘站點 --days 不再自動改排序（見下方 date_sorted），相關性順序下不可早停。
+    list_default_sorted_desc: bool = False
     # 模組是否可預設執行。--source all 只跑 enabled 的站；
     # 已判定不可行（登入牆 / 無香港職缺）或具 IP 封鎖風險的站設 False，
     # 仍可用 --source <name> 單獨指定。
@@ -165,12 +169,16 @@ class BaseScraper(ABC):
                 logger.warning("[%s] 站方端日期過濾設定失敗：%s", self.source, e)
 
         # 按日期篩選：若列表頁已含日期（list_has_date），直接以列表資料過濾；
-        # 否則必須抓詳情以取得 posted_date。預設按刊登日期由近至遠排序。
-        if days is not None:
-            if not self.list_has_date:
-                with_detail = True
-            if sort is None:
-                sort = "post_dt_desc"
+        # 否則必須抓詳情以取得 posted_date。
+        # ⚠️ --days 只做「日期過濾」，不再自動把排序改成 post_dt_desc：
+        # 那會讓 JobsDB 的 analyst 搜尋被「1 分鐘前刊登」的 Dealer／會計淹沒。
+        # 想按日期排，請明確指定 --sort post_dt_desc。
+        if days is not None and not self.list_has_date:
+            with_detail = True
+        date_sorted = (
+            sort == "post_dt_desc"
+            or (sort is None and self.list_default_sorted_desc)
+        )
 
         all_jobs: list[JobRecord] = []
         for page in range(1, max_pages + 1):
@@ -229,11 +237,9 @@ class BaseScraper(ABC):
                     )
                 jobs = kept
                 if not jobs:
-                    # 只有「站方保證新→舊」且本次確實是日期排序時，後面的頁才必然更舊
-                    sorted_desc = (
-                        self.list_sorted_desc
-                        and (sort or "post_dt_desc").strip().lower() == "post_dt_desc"
-                    )
+                    # 只有「站方保證新→舊」且本次確實是日期排序時，後面的頁才必然更舊。
+                    # 未指定 --sort 時不可再假定 post_dt_desc（見上方 date_sorted）。
+                    sorted_desc = self.list_sorted_desc and date_sorted
                     if sorted_desc:
                         logger.info(
                             "[%s] 本頁已無 %d 天內的職位，停止翻頁。", self.source, days

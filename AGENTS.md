@@ -8,10 +8,14 @@
 
 ```bash
 pipx install .        # 推薦：隔離環境，取得 hkjobs 命令
-pip install -e .      # 開發用
+pip install -e .      # 開發用（裝完請先啟用 venv）
+hkjobs --version      # 驗證命令真的在 PATH 上
 ```
 
-不需安裝時，在 repo 根目錄可用 `python -m hkjobs`。
+⚠️ 若 `hkjobs` 顯示 `command not found`：先啟用 venv（Windows `.venv\Scripts\activate`；
+macOS/Linux `source .venv/bin/activate`），或直接呼叫 `.venv\Scripts\hkjobs.exe`。
+**不需安裝、也不依賴 PATH 的可靠入口**：在 repo 根目錄用 `python -m hkjobs`。
+
 需要瀏覽器的據點另外安裝：`pip install ".[browser]" && playwright install chromium`。
 部分據點另需本機 Google Chrome（看 `sources` 的 `needsChrome`）。
 
@@ -30,11 +34,20 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 ## 命令
 
 - `hkjobs search`：參數同 `python main.py`（`--source/--keyword/--pages/--days/--district/--category/--industry/--sort/--detail/--fill-location`），另有：
-  - `--json`：stdout 只輸出單一 JSON 封套；**不寫檔**；日誌走 stderr（預設 WARNING）。
+  - `--json`：stdout 只輸出單一 JSON 封套；**不主動寫檔**（除非同時給 `--out`）；日誌走 stderr（預設 WARNING）。
   - `--out PATH`：顯式寫檔；`.csv` 寫職位 CSV（UTF-8 BOM），其他副檔名寫 JSON（`--json` 時為完整封套）。
   - `-q`：日誌只留 ERROR。
+  - **人類模式專用（不影響 `--json` 封套與 exit code）**：`--limit N`（預設 20，0 = 全部）、`--no-list`（只印摘要）、`--force`（允許 `--out` 覆蓋既有檔）。
 - `hkjobs sources [--json]`：能力矩陣。
 - `hkjobs options --source <站> [--dimension district|category|industry|sort] [--json]`：有效值。
+
+**人類模式（`--json` 缺席）才有的行為，agent 不必依賴：**
+
+- 預設列出前 20 筆職位（標題／公司／地區／薪金／刊登日）+ 來源摘要；摘要顯示 `N/M 筆有薪金`。
+- `--out` 目標檔已存在時**拒絕覆蓋並回 exit 2**（在發任何請求之前），需 `--force`；`--json --out` 維持既有可覆寫行為。
+- `--pages 0` 回 exit 2（用法錯誤），不再是「0 筆結果 / exit 5」。
+- 勞工處 `gov_hk` 列表頁沒有公司名也沒有刊登日，兩者都需 `--detail`；公司欄全空時人類輸出會提示。
+- **`--days` 只做日期過濾，不改排序**（2026-11-11 起）；`query.sort` 為 `null` 表示保留站方相關性排序。要日期排序請明確指定 `--sort post_dt_desc`。
 
 ## 輸出契約（schemaVersion = 1）
 
@@ -90,5 +103,6 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 ## 修改本專案時
 
 - 新增／變更據點行為，必須同步更新：`hkjobs/capabilities.py`、README 的「各站功能支援矩陣」與該站技術筆記。
+- 變更多人類輸出／旗標，必須同步更新：`README.md` 的「給 AI agent／程式呼叫」章節、本文件命令段、`search --help` 的 epilog。
 - 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 106 個測試。

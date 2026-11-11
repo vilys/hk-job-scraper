@@ -165,6 +165,7 @@ class GovHkScraper(BaseScraper):
     # --days 一律下推成站方 postedDtFr/To，回傳集合本身已被日期切乾淨，
     # 因此某頁為空即代表區間內已無職位，可安全停翻（與列表內部排序無關）。
     list_sorted_desc = True
+    list_default_sorted_desc = True  # 站方已切過日期，未指定 --sort 也可早停
 
     def __init__(self, headers: dict | None = None):
         super().__init__(headers)
