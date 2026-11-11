@@ -35,7 +35,9 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 
 - `hkjobs search`：參數同 `python main.py`（`--source/--keyword/--pages/--days/--district/--category/--industry/--sort/--detail/--fill-location`），另有：
   - `--json`：stdout 只輸出單一 JSON 封套；**不主動寫檔**（除非同時給 `--out`）；日誌走 stderr（預設 WARNING）。
-  - `--out PATH`：顯式寫檔；`.csv` 寫職位 CSV（UTF-8 BOM），其他副檔名寫 JSON（`--json` 時為完整封套）。
+  - `--out PATH`：顯式寫檔；`.csv` 寫職位 CSV（UTF-8 BOM、**schema v2 共 19 欄**），其他副檔名寫 JSON（`--json` 時為完整封套）。
+  - `--sort-by date|salary`：**跨站排序**。`--source all` 預設 `date`（刊登日新→舊）；單站預設不排序，保留站方相關性。解析不出日期／薪金者排最後，不丟棄。
+  - `--no-dedup`：關閉去重。預設以「URL 完全相同」或「(正規化標題, 正規化公司) 相同」合併，保留 `sources` / `urls`。
   - `-q`：日誌只留 ERROR。
   - **人類模式專用（不影響 `--json` 封套與 exit code）**：`--limit N`（預設 20，0 = 全部）、`--no-list`（只印摘要）、`--force`（允許 `--out` 覆蓋既有檔）。
 - `hkjobs sources [--json]`：能力矩陣。
@@ -48,30 +50,54 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 - `--pages 0` 回 exit 2（用法錯誤），不再是「0 筆結果 / exit 5」。
 - 勞工處 `gov_hk` 列表頁沒有公司名也沒有刊登日，兩者都需 `--detail`；公司欄全空時人類輸出會提示。
 - **`--days` 只做日期過濾，不改排序**（2026-11-11 起）；`query.sort` 為 `null` 表示保留站方相關性排序。要日期排序請明確指定 `--sort post_dt_desc`。
+- JobsDB 站方 `daterange` 只吃 1/3/7/14/31；`--days 10` 會送 `daterange=14`，**客戶端再篩回 10 天**，人類輸出會明確提示，不會靜默放寬。
+- `--source all` 的人類摘要另印「各站欄位完整度」小表（公司／薪金／地區／日期命中數）與已知缺口建議；`--json` 對應 `summary.sources[].coverage`。
+- `efc` 未指定 `--district` 時預設 `Hong Kong`（原本會回 London／New York），stderr 與人類輸出皆提示可改。
 
-## 輸出契約（schemaVersion = 1）
+## 輸出契約（schemaVersion = 2，2026-11-11 起）
 
 成功：
 
 ```json
-{"schemaVersion":1,"command":"search","generatedAt":"…","query":{…},
- "summary":{"total":37,"withSalary":12,
-   "sources":[{"name":"jobsdb","status":"ok","jobs":37,"error":null}]},
+{"schemaVersion":2,"command":"search","generatedAt":"…","query":{…,"sortBy":"date","dedup":true},
+ "summary":{"total":187,"rawTotal":196,"deduped":9,"withSalary":55,"sortBy":"date",
+   "sources":[{"name":"jobsdb","status":"ok","jobs":30,"error":null,
+               "coverage":{"jobs":30,"company":30,"salary":10,"location":30,"date":30}}]},
  "jobs":[{"job_id":"jobsdb::123","source":"jobsdb","title":"…","company":"…",
-          "location":"…","salary":"…","job_type":"…","industry":"…",
+          "location":"…","salary":"$15K - $17K","job_type":"…","industry":"…",
           "description":"…","requirements":"…","url":"…",
-          "posted_date":"…","scraped_at":"…"}]}
+          "posted_date":"2026-11-10","scraped_at":"…",
+          "salary_min":15000,"salary_max":17000,"salary_period":"month",
+          "posted_date_raw":"19h ago","sources":["jobsdb"],"urls":["…"]}]}
 ```
 
 失敗（exit ≠ 0 時）：
 
 ```json
-{"schemaVersion":1,"command":"search","generatedAt":"…",
+{"schemaVersion":2,"command":"search","generatedAt":"…",
  "error":{"code":"partial_failure","message":"部分來源失敗：jobsdb"},
  "summary":{…},"jobs":[…]}
 ```
 
 `code` ∈ `partial_failure` / `all_sources_failed` / `no_results` / `unexpected`。
+
+### v1 → v2 新舊欄位對照
+
+| 位置 | v1 | v2 | 說明 |
+|---|---|---|---|
+| 根 | `schemaVersion: 1` | `schemaVersion: 2` | `sources` / `options` 封套同步為 2 |
+| `jobs[]` | `posted_date` 原字串（6 種格式） | `posted_date` **一律 ISO `YYYY-MM-DD`** | 相對時間以該筆 `scraped_at` 換算；無法解析給 `""` |
+| `jobs[]` | — | `posted_date_raw` | 保留站方原文，方便除錯與回溯 |
+| `jobs[]` | — | `salary_min` / `salary_max` | **整數月薪**；解析不出為 `null` |
+| `jobs[]` | — | `salary_period` | `month` \| `hour` \| `day` \| `year`；換算係數：時薪 ×176、日薪 ×22、年薪 ÷12 |
+| `jobs[]` | — | `sources` / `urls` | 去重合併後的所有來源與連結（陣列；CSV 中以 `\|` 分隔） |
+| `summary` | `withSalary` 計所有非空字串 | **只計 `salary` 含阿拉伯數字者** | `TBD` / `Competitive` / `Negotiable` / `面議` 不再計入 |
+| `summary` | — | `deduped` / `rawTotal` | 被合併筆數／原始筆數；`total + deduped == rawTotal` |
+| `summary` | — | `sortBy` | `date` \| `salary` \| `null`（單站不排序） |
+| `summary.sources[]` | — | `coverage` | `{jobs, company, salary, location, date}` 命中數；僅 `status=ok` 有 |
+| `query` | — | `sortBy` / `dedup` | 反映本次實際設定 |
+
+**相容性承諾**：exit code（0/1/2/3/4/5）、`error.code`、命令名稱、既有 13 個 `jobs[]` 欄位名稱、`python main.py` 的輸出（仍為 v1 的 13 欄）全部不變。`--out` 的 CSV 由 13 欄增為 19 欄（UTF-8 BOM 不變）。
 
 ## exit code
 
@@ -105,4 +131,5 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 - 新增／變更據點行為，必須同步更新：`hkjobs/capabilities.py`、README 的「各站功能支援矩陣」與該站技術筆記。
 - 變更多人類輸出／旗標，必須同步更新：`README.md` 的「給 AI agent／程式呼叫」章節、本文件命令段、`search --help` 的 epilog。
 - 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 106 個測試。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 137 個測試。
+- 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README。

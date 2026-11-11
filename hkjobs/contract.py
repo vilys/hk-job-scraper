@@ -6,9 +6,13 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
+from hkjobs import aggregate
 from job_model import JobRecord
 
-SCHEMA_VERSION = 1
+# v2（2026-11-11）：jobs 新增 salary_min/max/period、posted_date_raw、sources、urls；
+# summary 新增 deduped / sortBy / sources[].coverage；posted_date 一律 ISO。
+# exit code、其餘欄位與命令不變，見 AGENTS.md 的新舊欄位對照表。
+SCHEMA_VERSION = 2
 
 EXIT_OK = 0
 EXIT_UNEXPECTED = 1
@@ -57,25 +61,61 @@ def exit_code_for(results: list[SourceResult]) -> int:
     return EXIT_OK if total else EXIT_EMPTY
 
 
-def search_payload(query: dict, results: list[SourceResult], code: int) -> dict:
-    jobs = [j.to_dict() for r in results if r.status == "ok" for j in r.jobs]
+def search_payload(
+    query: dict,
+    results: list[SourceResult],
+    code: int,
+    *,
+    dedup: bool = True,
+    sort_by: str | None = None,
+) -> dict:
+    """組出 schema v2 封套。
+
+    聚合管線：v1 dict → 正規化 → 去重 → 跨站排序 → summary。
+    `rawTotal` 讓呼叫端能直接查核 `total + deduped == rawTotal`。
+    """
+    v1 = [j.to_dict() for r in results if r.status == "ok" for j in r.jobs]
+    raw_total = len(v1)
+    jobs = [aggregate.to_v2(j) for j in v1]
+    if dedup:
+        jobs, deduped = aggregate.deduplicate(jobs)
+    else:
+        deduped = 0
+    if sort_by:
+        jobs = aggregate.sort_jobs(jobs, sort_by)
+
+    source_rows = []
+    for r in results:
+        row = {
+            "name": r.name,
+            "status": r.status,
+            "jobs": len(r.jobs),
+            "error": r.error,
+        }
+        if r.status == "ok":
+            row["coverage"] = aggregate.coverage(
+                [aggregate.to_v2(j.to_dict()) for j in r.jobs]
+            )
+        source_rows.append(row)
+
     summary = {
         "total": len(jobs),
-        "withSalary": sum(1 for j in jobs if j.get("salary")),
-        "sources": [
-            {"name": r.name, "status": r.status, "jobs": len(r.jobs), "error": r.error}
-            for r in results
-        ],
+        "rawTotal": raw_total,
+        "deduped": deduped,
+        "withSalary": sum(1 for j in jobs if aggregate.has_numeric_salary(j)),
+        "sortBy": sort_by,
+        "sources": source_rows,
+    }
+    envelope = {
+        "schemaVersion": SCHEMA_VERSION,
+        "command": "search",
+        "generatedAt": now_iso(),
+        "query": {**query, "sortBy": sort_by, "dedup": dedup},
+        "summary": summary,
+        "jobs": jobs,
     }
     if code == EXIT_OK:
-        return {
-            "schemaVersion": SCHEMA_VERSION,
-            "command": "search",
-            "generatedAt": now_iso(),
-            "query": query,
-            "summary": summary,
-            "jobs": jobs,
-        }
+        return envelope
 
     failed = [r.name for r in results if r.status == "failed"]
     messages = {
@@ -83,17 +123,11 @@ def search_payload(query: dict, results: list[SourceResult], code: int) -> dict:
         EXIT_ALL_FAILED: f"所有來源均失敗：{', '.join(failed)}",
         EXIT_EMPTY: "查詢成功但 0 筆結果",
     }
-    return {
-        "schemaVersion": SCHEMA_VERSION,
-        "command": "search",
-        "generatedAt": now_iso(),
-        "error": {
-            "code": _ERROR_CODES.get(code, "unexpected"),
-            "message": messages.get(code, "未知錯誤"),
-        },
-        "summary": summary,
-        "jobs": jobs,
+    envelope["error"] = {
+        "code": _ERROR_CODES.get(code, "unexpected"),
+        "message": messages.get(code, "未知錯誤"),
     }
+    return envelope
 
 
 def emit_json(payload: dict) -> None:

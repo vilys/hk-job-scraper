@@ -44,7 +44,8 @@ SOURCES: dict[str, SourceInfo] = {
         supports={"district": True, "category": False, "industry": False,
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("moovup"),
-        notes="Cloudflare Turnstile 需 Playwright；列表無公司/日期，--detail 才補；不支援 --days。",
+        notes="Cloudflare Turnstile 需 Playwright；列表無日期（實測 0/12），--detail 才補；"
+              "不支援 --days。薪金含時薪寫法（如 $45-50/小時），聚合時換算為月薪。",
     ),
     "gov_hk": SourceInfo(
         name="gov_hk", label="勞工處", enabled=True,
@@ -74,7 +75,8 @@ SOURCES: dict[str, SourceInfo] = {
         supports={"district": True, "category": False, "industry": False,
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("linkedin"),
-        notes="訪客模式；首頁 ~58、續頁 ~10；深翻頁可設 LINKEDIN_LI_AT。",
+        notes="訪客模式；首頁 ~58、續頁 ~10；深翻頁可設 LINKEDIN_LI_AT。"
+              "列表不提供薪金（實測 0/59），聚合時列為已知缺口。",
     ),
     "indeed": SourceInfo(
         name="indeed", label="Indeed", enabled=False,
@@ -101,7 +103,8 @@ SOURCES: dict[str, SourceInfo] = {
         supports={"district": True, "category": True, "industry": True,
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("jobmarket"),
-        notes="純 requests；站方預設大致新→舊（頂部推廣／置頂區塊不排序，偏舊故不影響提早停翻）；無 --sort 參數。",
+        notes="純 requests；站方預設大致新→舊（頂部推廣／置頂區塊不排序，偏舊故不影響提早停翻）；"
+              "無 --sort 參數。列表不提供薪金（實測 0/20），且同站重複職缺常見，聚合時會去重。",
     ),
     "foundit": SourceInfo(
         name="foundit", label="foundit", enabled=True,
@@ -110,7 +113,8 @@ SOURCES: dict[str, SourceInfo] = {
         supports={"district": True, "category": False, "industry": False,
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("foundit"),
-        notes="需本機 Google Chrome（內建 Chromium 被 WAF 403）；SEO 瀏覽頁固定排序。",
+        notes="需本機 Google Chrome（內建 Chromium 被 WAF 403）；SEO 瀏覽頁固定排序。"
+              "列表不提供薪金（實測 0/20）。",
     ),
     "efc": SourceInfo(
         name="efc", label="eFinancialCareers", enabled=True,
@@ -119,7 +123,9 @@ SOURCES: dict[str, SourceInfo] = {
         supports={"district": True, "category": False, "industry": False,
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("efc"),
-        notes="純 JSON API；地區僅 3 大區（細分區站方回 0 筆）。",
+        notes="純 JSON API；地區僅 3 大區（細分區站方回 0 筆）。"
+              "2026-11-11 起未指定 --district 時預設 Hong Kong（原會回 London／New York 等全球職缺）；"
+              "薪金多為 Competitive／Negotiable，不計入 withSalary。",
     ),
     "liepin": SourceInfo(
         name="liepin", label="獵聘", enabled=False,

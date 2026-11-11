@@ -49,6 +49,27 @@ python main.py --source all      --keyword "會計" --pages 1        # 全部「
 python main.py --help                                              # 完整參數
 ```
 
+### 🧩 想一次看全部來源？（聚合模式，`hkjobs` 專屬）
+
+```bash
+python -m hkjobs search --source all --keyword 文員 --pages 1 --limit 20
+python -m hkjobs search --source all --keyword 文員 --pages 1 --sort-by salary --limit 20
+```
+
+跑完直接列出職位，而且不是「九站各貼一段」那種堆疊：
+
+| 能力 | 說明 |
+|---|---|
+| 跨站排序 | 預設按刊登日新→舊；`--sort-by salary` 改按月薪高→低。解析不出者排最後，**一筆都不丟** |
+| 日期正規化 | `19h ago`、`11 Nov 2026`、`Posted 3 months ago` 一律變 `YYYY-MM-DD`；原文留在 `posted_date_raw` |
+| 薪金正規化 | `$15K - $17K` 另給 `salary_min=15000` / `salary_max=17000`；時薪／日薪／年薪換算成月薪並標 `salary_period` |
+| 去重 | 同 URL 或同「標題＋公司」合併成一筆，保留 `sources` / `urls`；`--no-dedup` 可關閉 |
+| 完整度小表 | 一眼看出哪一站缺公司／薪金／地區／日期，並給 `--detail`、`--fill-location` 等建議 |
+
+2026-11-11 的 196 筆實測：去重後 187 筆（`deduped=9`，7 組重複，含 jobmarket 同一僱主 4 筆與跨站 procurement clerk）；`withSalary` 從 58 降到 55（`TBD` 不再算進去）。
+
+> ⚠️ `--source all` 一次跑九站，僅供驗證；平時一次一站、探測用 `--pages 1`。
+
 > 🤖 **給 AI agent／程式呼叫**：`pip install -e .`（或 `pipx install .`）後可用 `hkjobs` 命令。
 > ⚠️ 若終端機顯示 `command not found`：先啟用虛擬環境（Windows：`.venv\Scripts\activate`；
 > macOS/Linux：`source .venv/bin/activate`），或直接呼叫 `.venv\Scripts\hkjobs.exe`。
@@ -60,7 +81,7 @@ python main.py --help                                              # 完整參�
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 106 個測試、約 1.5 秒、零網路請求。
+> 137 個測試、約 1.5 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -335,16 +356,18 @@ hkjobs search --source gov_hk --keyword 會計 --out result.json # 要存檔才�
 
 | 情況 | 行為 |
 |---|---|
-| 預設 | 列出前 20 筆；摘要顯示 `N/M 筆有薪金`；被截斷時告訴你怎麼拿到剩下的 |
+| 預設 | 列出前 20 筆；摘要顯示 `N/M 筆有薪金`（**只計含數字者**）；被截斷時告訴你怎麼拿到剩下的 |
 | `--limit N` / `--limit 0` | 改列印筆數／全部印出（`--no-list` 則只印摘要） |
 | `--out PATH` 且檔案已存在 | **不覆蓋**，直接回 exit 2；確認後加 `--force` 才覆寫（在發請求前就擋下） |
 | 勞工處公司欄全空 | 自動提示「列表頁不含公司名，需 `--detail`」 |
 | `--days` | 只做日期過濾，**保留站方相關性排序**；要日期排序請明確給 `--sort post_dt_desc` |
 | `--pages 0` | 視為用法錯誤 exit 2（不是「0 筆結果」） |
+| `--source all` | 預設 `--sort-by date`、去重開啟、印「各站欄位完整度」小表；`--sort-by salary`／`--no-dedup` 可改 |
+| `efc` 未給 `--district` | 預設 `Hong Kong`（避免回 London／New York），並提示可改 |
 
-- `--json` 的 exit code：`0` 成功、`2` 參數錯、`3` 部分失敗、`4` 全失敗、`5` 零結果、`1` 未預期；封套 `schemaVersion=1` 欄位不變，不受上述人類模式旗標影響。
-- `--out` 依副檔名：`.csv` 寫 CSV（UTF-8 BOM），其他寫 JSON；`--json --out` 仍維持可覆寫的既有契約。
-- `search --help` 附 3 行常用範例與各旗標預設值。
+- `--json` 的 exit code：`0` 成功、`2` 參數錯、`3` 部分失敗、`4` 全失敗、`5` 零結果、`1` 未預期；**封套已升 `schemaVersion=2`**（新增 `salary_min/max/period`、`posted_date_raw`、`sources`、`urls`、`summary.deduped/rawTotal/sortBy`、`summary.sources[].coverage`），新舊欄位對照見 [`AGENTS.md`](AGENTS.md)，人類模式旗標不影響封套。
+- `--out` 依副檔名：`.csv` 寫 CSV（UTF-8 BOM、**schema v2 共 19 欄**），其他寫 JSON；`--json --out` 仍維持可覆寫的既有契約。
+- `search --help` 附常用範例與各旗標預設值。
 - 完整契約與 agent 注意事項：見 [`AGENTS.md`](AGENTS.md)。
 
 ## 📖 完整命令列參數
@@ -391,6 +414,22 @@ hkjobs search --source gov_hk --keyword 會計 --out result.json # 要存檔才�
 | `company` | ❌ 列表頁無僱主欄位，需 `--detail`（每筆多 1 支請求） | ✅ 列表即有 | `hkjobs` 人類模式在公司欄全空時會自動提示，不是爬蟲壞掉 |
 | `salary` | ✅ 列表即有 | ⚠️ 列表常缺（實測 30 筆中 24 筆無薪金） | 人類摘要改顯示 `N/M 筆有薪金`，不再只給一個數字 |
 | `posted_date` | ❌ 列表無日期（`--days` 下推站方，需 `--detail` 才有值） | ✅ 相對日期 | 人類清單的刊登日欄在勞工處顯示 `—` |
+
+**各站欄位完整度（`--source all --keyword 文員 --pages 1`，2026-11-11 實測 196 筆）**
+
+| 來源 | 筆數 | 公司 | 薪金 | 地區 | 日期 | 已知缺口 |
+|---|---:|---:|---:|---:|---:|---|
+| moovup | 12 | 12 | 12 | 12 | 0 | 日期需 `--detail` |
+| gov_hk | 20 | 0 | 20 | 20 | 0 | 列表無僱主欄位，公司需 `--detail` |
+| jobsdb | 30 | 30 | 10 | 30 | 30 | 站方列表薪金常缺 |
+| linkedin | 59 | 59 | 0 | 59 | 59 | 站方列表不提供薪金 |
+| recruit | 25 | 25 | 6 | **0** | 25 | 地區需 `--fill-location` |
+| jobmarket | 20 | 20 | 0 | 17 | 20 | 站方列表不提供薪金 |
+| foundit | 20 | 20 | 0 | 20 | 20 | 站方列表不提供薪金 |
+| offertoday | 10 | 10 | 10 | 10 | 10 | —（`TBD` 不計入有薪金） |
+| efc | 0 | — | — | — | — | 金融站，對「文員」0 筆屬正常 |
+
+`hkjobs --source all` 的人類摘要會自動印出這張表並給建議；`--json` 的 `summary.sources[].coverage` 可程式讀取。
 
 > 🤖 機器可讀版本：`hkjobs sources --json`（能力表由 `hkjobs/capabilities.py` 提供，與本表同步維護；各站 `notes` 亦收錄上述限制）。
 
@@ -898,7 +937,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 72 個測試，約 1 秒，零網路請求
+python -m unittest discover -s tests -v      # 137 個測試，約 1.5 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。
@@ -1544,6 +1583,8 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - **搜尋參數（實測）**：`q`（關鍵字，**可空**＝純瀏覽）、`location`（自由文字地名，**40km 半徑模糊地理搜尋**）、`countryCode2=HK`、`radius`/`radiusUnit`、`page`、`pageSize`（站方 15；**實測 50 / 100 都接受**，本程式用 50）、`facets`（原樣保留站方清單）、`sortBy`（**僅 `relevance` 有效**，其他值被靜默忽略）。
 - **回應結構**：`data[]`（每筆 `jobId` / `title` / `detailsPageUrl` / `jobLocation{city,state,country}` / `postedDate`（**ISO 時間戳**） / `salary` / `minSalary`/`maxSalary` / `companyName` / `employmentType` / `positionType` / `sectors[]` / `summary` / `description`）、`meta.totalResults` / `pageCount`。
 - **地區過濾實測（重要限制）**：`location=Hong Kong` → 578 筆（engineer）✅、`Hong Kong Island` ✅、`Kowloon` ✅；但 **細分區（`Yuen Long` / `Sha Tin` / `Tsuen Wan`…）全部回 0 筆**——站方地區索引只到大區級 → `efc_geo.json` 只收錄 3 大區。
+- **2026-11-11 修正（香港求職站的錯誤預設）**：不給 `location` 參數時，站方回的是**全球**職缺——實測 `analyst` 50 筆混入 `London, United Kingdom` ×2、`New York, United States`、`Gurugram, India`、`Dallas, United States`；補 `location=Hong Kong` 後 50/50 全在香港（含 `Mongkok, Hong Kong`）。故 `EfcScraper.search()` 在未指定 `--district` 時一律送 `location=Hong Kong`，並以 `logger.info` 提示可改；傳入無效地區亦回退至此預設，不再靜默撈回全球職缺。
+- **薪金可得性**：列表 `salary` 多半是 `Competitive`／`Negotiable`（實測 50/50 無數字），聚合層 `withSalary` 不計入；需要數字薪金時得進詳情頁的 ld+json `baseSalary`。
 - **詳情頁**：`requests` GET 詳情網址 → **ld+json `JobPosting`**（`description` 完整描述 / `baseSalary{value{minValue,maxValue,currency}}` / `skills` / `datePosted` / `validThrough`）。⚠️ ld+json 的 `identifier` 是**另一套 API hash id**（如 `oPTJ3NGIwowU`），**job_id 以詳情網址的 `.idNNNNN` 為準**（= API `jobId`，與列表一致）。
 - **`--days` 行為**：`list_has_date=True`（API `postedDate` ISO 時間戳），由列表直接過濾，瞬時。
 - **各欄位資料來源總表（eFC → JobRecord）**：

@@ -8,10 +8,10 @@ import sys
 import unicodedata
 from pathlib import Path
 
-from exporter import export_csv
-from hkjobs import __version__
+from hkjobs import __version__, aggregate
 from hkjobs.args import add_machine_arguments, add_search_arguments
 from hkjobs.capabilities import SOURCES
+from job_model import JobRecord
 from hkjobs.contract import (
     EXIT_ALL_FAILED,
     EXIT_EMPTY,
@@ -83,7 +83,7 @@ JOB_COLUMNS = (
 )
 
 
-def _print_jobs_table(jobs: list, *, limit: int) -> int:
+def _print_jobs_table(jobs: list[dict], *, limit: int) -> int:
     """印出職位清單，回傳「未列出」的筆數。
 
     `limit <= 0` 表示全部列出。欄位固定為標題／公司／地區／薪金／刊登日，
@@ -98,11 +98,11 @@ def _print_jobs_table(jobs: list, *, limit: int) -> int:
     for idx, j in enumerate(shown, 1):
         cells = (
             str(idx),
-            (j.title or "").strip() or "—",
-            (j.company or "").strip() or "—",
-            (j.location or "").strip() or "—",
-            (j.salary or "").strip() or "—",
-            (j.posted_date or "").strip() or "—",
+            (j.get("title") or "").strip() or "—",
+            (j.get("company") or "").strip() or "—",
+            (j.get("location") or "").strip() or "—",
+            (j.get("salary") or "").strip() or "—",
+            (j.get("posted_date") or "").strip() or "—",
         )
         print("  ".join(
             _pad(_truncate(cell, w), w, align=align)
@@ -174,7 +174,8 @@ def _print_sources_table(rows: list[dict]) -> None:
             + f"  {'/'.join(dims) or '—'} / {r['daysMode']}"
         )
     print("\n提示：加 --json 取得完整矩陣與各站備註；有效值用 hkjobs options --source <站> --json")
-    print("備註：JobsDB 列表薪金常缺；勞工處列表無公司名（需 --detail）。")
+    print("備註：JobsDB 列表薪金常缺；勞工處列表無公司名（需 --detail）；"
+          "eFC 未指定 --district 時預設 Hong Kong。")
 
 
 def _print_options(payload: dict) -> None:
@@ -265,15 +266,55 @@ def _run_one(source: str, args: argparse.Namespace) -> SourceResult:
             scraper.close()
 
 
+def _print_coverage_table(results: list[SourceResult]) -> None:
+    """--source all 專用：讓求職者一眼看出哪一站的哪個欄位是空的。"""
+    rows = []
+    for r in results:
+        if r.status != "ok":
+            continue
+        cov = aggregate.coverage([aggregate.to_v2(j.to_dict()) for j in r.jobs])
+        rows.append((r.name, cov))
+    if not rows:
+        return
+    name_w = max([LABEL_W] + [_disp_width(n) for n, _ in rows])
+    header = (
+        _pad("來源", name_w) + " " + _pad("筆數", 5, align="right") + " "
+        + _pad("公司", 8, align="right") + " " + _pad("薪金", 8, align="right")
+        + " " + _pad("地區", 8, align="right") + " " + _pad("日期", 8, align="right")
+    )
+    print("\n各站欄位完整度（命中／筆數）")
+    print(header)
+    print("-" * _disp_width(header))
+    for name, c in rows:
+        cell = lambda k: f"{c[k]}/{c['jobs']}"  # noqa: E731
+        print(
+            _pad(name, name_w) + " " + _pad(str(c["jobs"]), 5, align="right") + " "
+            + _pad(cell("company"), 8, align="right") + " "
+            + _pad(cell("salary"), 8, align="right") + " "
+            + _pad(cell("location"), 8, align="right") + " "
+            + _pad(cell("date"), 8, align="right")
+        )
+    advice = aggregate.coverage_advice(results)
+    if advice:
+        print("已知缺口與建議：")
+        for line in advice:
+            print(line)
+
+
 def _print_human(
     results: list[SourceResult],
     code: int,
     *,
+    jobs: list[dict],
     out_path: str | None = None,
     list_limit: int = 20,
     no_list: bool = False,
+    sort_by: str | None = None,
+    deduped: int = 0,
+    raw_total: int = 0,
+    show_coverage: bool = False,
 ) -> None:
-    """人類模式輸出：來源摘要 + 職位清單 + 下一步提示。
+    """人類模式輸出：來源摘要 + 職位清單 + 完整度 + 下一步提示。
 
     提示只講「下一步」，不重複已完成的事：已寫檔就顯示實際路徑，
     列滿了就告訴使用者怎麼拿到剩下的，而不是又叫他去加 --out。
@@ -287,24 +328,33 @@ def _print_human(
             + _pad(str(len(result.jobs)), 6, align="right")
             + f"  {label}{extra}"
         )
-    jobs = [j for r in results if r.status == "ok" for j in r.jobs]
     total = len(jobs)
-    with_salary = sum(1 for j in jobs if j.salary)
+    with_salary = sum(1 for j in jobs if aggregate.has_numeric_salary(j))
     salary_note = f"{with_salary}/{total} 筆有薪金" if total else "0 筆"
     print(f"\n總計：{total} 筆（{salary_note}）")
+    if deduped:
+        print(f"去重：合併 {deduped} 筆重複職缺（原始 {raw_total} 筆；"
+              "--no-dedup 可保留原始筆數）")
+    if sort_by:
+        print(f"排序依據：{aggregate.SORT_LABELS[sort_by]}；"
+              "解析不出日期／薪金的職位排最後，沒有丟棄任何一筆。")
 
     hidden = 0
     if not no_list and jobs:
         hidden = _print_jobs_table(jobs, limit=list_limit)
         # 勞工處列表頁沒有僱主欄位（實測 2026-11-11）；空公司名要說清楚，
-        # 否則求職者會以為爬蟲壞了。
-        if any(r.name == "gov_hk" and r.status == "ok" for r in results) \
-                and not any(j.company for j in jobs):
+        # 否則求職者會以為爬蟲壞了。只看該站自己的資料，別被他站的公司名掩蓋。
+        gov = next((r for r in results
+                    if r.name == "gov_hk" and r.status == "ok"), None)
+        if gov and not any(j.company for j in gov.jobs):
             print("提示：勞工處列表頁不含公司名，公司欄為 —；加 --detail 才會補齊"
                   "（每筆多 1 支請求，請斟酌量）。")
         if hidden:
             print(f"另有 {hidden} 筆未列出：用 --limit 0 全部印出，"
                   "或加 --out result.csv 存成檔案。")
+
+    if show_coverage:
+        _print_coverage_table(results)
 
     if out_path:
         print(f"\n已儲存 {total} 筆至 {out_path}")
@@ -318,15 +368,15 @@ def _print_human(
         print("提示：有來源失敗。可稍後重試，或先跑 hkjobs sources 確認據點狀態。")
 
 
-def _write_out(path: Path, payload: dict, results: list[SourceResult], *, json_mode: bool) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+def _write_out(path: Path, payload: dict, *, json_mode: bool) -> None:
+    """--out 一律寫 schema v2；CSV 固定 19 欄、UTF-8 BOM（Excel 直接開）。"""
     if path.suffix.lower() == ".csv":
-        jobs = [j for r in results if r.status == "ok" for j in r.jobs]
-        export_csv(jobs, str(path), incremental=False)
+        aggregate.write_csv(
+            payload["jobs"], path, aggregate.csv_fields(JobRecord.FIELDS)
+        )
         return
     data = payload if json_mode else payload["jobs"]
-    with path.open("w", encoding="utf-8") as fh:
-        json.dump(data, fh, ensure_ascii=False, indent=2)
+    aggregate.write_json(data, path)
 
 
 def cmd_search(args: argparse.Namespace) -> int:
@@ -375,19 +425,39 @@ def cmd_search(args: argparse.Namespace) -> int:
         "fillLocation": bool(args.fill_location),
     }
     code = exit_code_for(results)
-    payload = search_payload(query, results, code)
+    # 跨站排序只對 --source all 有意義；單站保留站方相關性順序，不干擾上一輪修好的行為。
+    sort_by = args.sort_by or ("date" if args.source == "all" else None)
+    dedup = not args.no_dedup
+    payload = search_payload(query, results, code, dedup=dedup, sort_by=sort_by)
+    summary = payload["summary"]
 
     if args.out:
-        _write_out(Path(args.out), payload, results, json_mode=args.json)
+        _write_out(Path(args.out), payload, json_mode=args.json)
     if args.json:
         emit_json(payload)
     else:
         _print_human(
             results, code,
+            jobs=payload["jobs"],
             out_path=args.out,
             list_limit=args.limit,
             no_list=args.no_list,
+            sort_by=sort_by,
+            deduped=summary["deduped"],
+            raw_total=summary["rawTotal"],
+            show_coverage=(args.source == "all"),
         )
+        if args.source == "efc" and not args.district:
+            print("提示：eFC 未指定 --district，已預設 Hong Kong；"
+                  '可改用 --district "Hong Kong Island" 或 "Kowloon"。')
+        # JobsDB 站方 daterange 只吃 1/3/7/14/31；不靜默放寬，講清楚「送了什麼、補了什麼」。
+        if args.days and args.days not in (1, 3, 7, 14, 31) \
+                and args.source in ("jobsdb", "all"):
+            picked = next((v for v in (1, 3, 7, 14, 31) if v >= args.days), None)
+            if picked:
+                print(f"提示：JobsDB 站方 daterange 只吃 1/3/7/14/31，"
+                      f"本次 --days {args.days} 實際送 daterange={picked}；"
+                      f"客戶端已再篩回 {args.days} 天，不會混入較舊職位。")
     return code
 
 
@@ -410,9 +480,12 @@ def build_parser() -> argparse.ArgumentParser:
             "常用範例：\n"
             "  hkjobs search --source gov_hk --keyword 文員 --days 7 --pages 1\n"
             "  hkjobs search --source jobsdb --keyword analyst --pages 1 --out analyst.csv\n"
-            "  hkjobs search --source linkedin --keyword \"data engineer\" --json\n\n"
-            "預設值：來源 moovup、關鍵字空、3 頁、列出前 20 筆、不寫檔、不抓詳情。\n"
-            "探測請用 --pages 1；檔案已存在時加 --force 才會覆寫。"
+            "  hkjobs search --source linkedin --keyword \"data engineer\" --json\n"
+            "  hkjobs search --source all --keyword 文員 --pages 1 --sort-by salary --limit 20\n\n"
+            "預設值：來源 moovup、關鍵字空、3 頁、列出前 20 筆、不寫檔、不抓詳情、\n"
+            "        去重開啟；--source all 另預設 --sort-by date（刊登日新→舊）。\n"
+            "探測請用 --pages 1；檔案已存在時加 --force 才會覆寫。\n"
+            "--out 的 CSV 為 schema v2 共 19 欄（UTF-8 BOM，Excel 可直接開）。"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

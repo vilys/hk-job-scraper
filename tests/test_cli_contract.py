@@ -80,7 +80,7 @@ class TestContract(unittest.TestCase):
         code = contract.exit_code_for(results)
         self.assertEqual(code, contract.EXIT_PARTIAL)
         payload = contract.search_payload({"source": "all"}, results, code)
-        self.assertEqual(payload["schemaVersion"], 1)
+        self.assertEqual(payload["schemaVersion"], 2)
         self.assertEqual(payload["command"], "search")
         self.assertEqual(payload["summary"]["total"], 1)
         self.assertEqual(payload["summary"]["withSalary"], 1)
@@ -89,7 +89,10 @@ class TestContract(unittest.TestCase):
             ["ok", "failed", "skipped"],
         )
         self.assertEqual(payload["error"]["code"], "partial_failure")
-        self.assertEqual(set(payload["jobs"][0]), set(JobRecord.FIELDS))
+        self.assertEqual(
+            set(payload["jobs"][0]),
+            set(JobRecord.FIELDS) | set(contract.aggregate.V2_EXTRA_FIELDS),
+        )
 
     def test_search_payload_no_error_on_success(self):
         results = [contract.SourceResult("a", "ok", [self._job()])]
@@ -205,7 +208,7 @@ class TestSourcesCommand(unittest.TestCase):
         code, out, _ = run_cli(["sources", "--json"])
         self.assertEqual(code, 0)
         payload = json.loads(out)
-        self.assertEqual(payload["schemaVersion"], 1)
+        self.assertEqual(payload["schemaVersion"], 2)
         self.assertEqual(payload["command"], "sources")
         self.assertEqual(len(payload["sources"]), 12)
         self.assertEqual(
@@ -322,7 +325,10 @@ class TestSearchCommand(unittest.TestCase):
         payload = json.loads(out)
         self.assertEqual(payload["summary"]["total"], 1)
         self.assertEqual(payload["summary"]["sources"][0]["status"], "ok")
-        self.assertEqual(set(payload["jobs"][0]), set(JobRecord.FIELDS))
+        self.assertEqual(
+            set(payload["jobs"][0]),
+            set(JobRecord.FIELDS) | set(cli.aggregate.V2_EXTRA_FIELDS),
+        )
         self.assertNotIn("error", payload)
         self.assertEqual(payload["query"]["sort"], None)
 

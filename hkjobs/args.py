@@ -38,6 +38,8 @@ def add_search_arguments(
                         "JobsDB 用中文名或 slug（如 荃灣 | tsuen-wan，見 scrapers/jobsdb_districts.json）；"
                         "moovup 用 shortCode；"
                         "LinkedIn 用自由文字（如 Hong Kong | Tsuen Wan，預設 Hong Kong）；"
+                        "eFC 未指定時預設 Hong Kong（該站 API 不給 location 會回全球職缺，"
+                        "可改 Hong Kong Island / Kowloon）；"
                         "offertoday 用中文/英文區名或子區名（如 元朗 | 天水圍 | Yuen Long）。"
                         "各站體系獨立，不可混用。")
     p.add_argument("--category", default=None,
@@ -92,8 +94,8 @@ def add_machine_arguments(p: argparse.ArgumentParser) -> None:
                    help="機器模式：stdout 輸出單一 JSON 封套；日誌走 stderr（預設 WARNING）。"
                         "人類模式才會列印職位清單，--json 不受 --limit/--no-list/--force 影響")
     p.add_argument("--out", default=None, metavar="PATH",
-                   help="顯式寫檔：.csv 寫職位 CSV（UTF-8 BOM）；其他副檔名寫 JSON"
-                        "（--json 時寫完整封套，否則寫職位陣列）。"
+                   help="顯式寫檔：.csv 寫職位 CSV（UTF-8 BOM、schema v2 共 19 欄）；"
+                        "其他副檔名寫 JSON（--json 時寫完整封套，否則寫職位陣列）。"
                         "⚠️ 人類模式下目標檔已存在時不會覆蓋，需加 --force")
     p.add_argument("--force", action="store_true",
                    help="允許 --out 覆蓋既有檔案（僅人類模式需要；--json 模式維持原行為）")
@@ -101,4 +103,11 @@ def add_machine_arguments(p: argparse.ArgumentParser) -> None:
                    help="人類模式列出前 N 筆職位（預設 20；0 = 全部列出；僅影響螢幕輸出）")
     p.add_argument("--no-list", action="store_true",
                    help="人類模式不列職位清單，只印來源摘要（給既有的純摘要腳本用）")
+    p.add_argument("--sort-by", choices=["date", "salary"], default=None, metavar="WHEN",
+                   help="跨站排序：date=刊登日新→舊 | salary=月薪高→低。"
+                        "--source all 預設 date；單站預設不排序（保留站方相關性）。"
+                        "解析不出日期／薪金的職位排最後，一筆都不會丟。")
+    p.add_argument("--no-dedup", action="store_true",
+                   help="關閉去重（預設開啟）：同 URL 或同標題＋同公司會合併成一筆，"
+                        "保留 sources / urls；summary.deduped 為被合併筆數。")
     p.add_argument("-q", "--quiet", action="store_true", help="日誌只保留 ERROR")

@@ -243,11 +243,17 @@ class TestUsageEdges(unittest.TestCase):
         self.assertEqual(json.loads(out)["query"]["sort"], "post_dt_desc")
 
     def test_json_envelope_unchanged_on_human_defaults(self):
+        """人類模式旗標不得滲入 --json；封套欄位數隨 schema v2 升為 19。"""
+        from hkjobs import aggregate
         with _patched():
             code, out, _ = _run(["search", "--source", "fake", "--json"])
         payload = json.loads(out)
-        self.assertEqual(payload["schemaVersion"], 1)
-        self.assertEqual(set(payload["jobs"][0]), set(JobRecord.FIELDS))
+        self.assertEqual(code, 0)
+        self.assertEqual(payload["schemaVersion"], 2)
+        self.assertEqual(
+            set(payload["jobs"][0]),
+            set(JobRecord.FIELDS) | set(aggregate.V2_EXTRA_FIELDS),
+        )
 
 
 class TestHelpExamples(unittest.TestCase):

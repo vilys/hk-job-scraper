@@ -42,6 +42,11 @@ _FACETS = (
 
 _PAGE_SIZE = 50  # 實測 100 也接受，取 50 兼顧單頁大小與請求次數
 
+# 2026-11-11 實測：不給 location 參數時站方回「全球」職缺
+# （`analyst` 50 筆混入 London ×2 / New York / Gurugram / Dallas）。
+# 這是香港求職站，故未指定 --district 時一律限縮到 Hong Kong。
+_DEFAULT_LOCATION = "Hong Kong"
+
 # ---- 地區字典 ----
 _GEO_FILE = Path(__file__).with_name("efc_geo.json")
 _GEO: dict[str, str] = {}
@@ -99,11 +104,16 @@ class EfcScraper(BaseScraper):
             if not loc:
                 logger.warning(
                     "[efc] --district %r 不在 efc_geo.json 內（站方地區索引僅支援"
-                    " Hong Kong / Hong Kong Island / Kowloon 大區），已忽略", district,
+                    " Hong Kong / Hong Kong Island / Kowloon 大區），"
+                    "已回退預設 location=Hong Kong", district,
                 )
-                loc = None
+                loc = _DEFAULT_LOCATION
         else:
-            loc = None
+            loc = _DEFAULT_LOCATION
+            logger.info(
+                "[efc] 未指定 --district，已預設 location=%s（避免回全球職缺）；"
+                "可改用 --district \"Hong Kong Island\" / \"Kowloon\"", loc,
+            )
         if category:
             logger.warning("[efc] 不支援 --category（該站無職能 facet 篩選參數），已忽略")
         if industry:
