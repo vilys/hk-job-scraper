@@ -68,11 +68,13 @@ def search_payload(
     *,
     dedup: bool = True,
     sort_by: str | None = None,
+    salary_by: str = "mid",
 ) -> dict:
     """組出 schema v2 封套。
 
     聚合管線：v1 dict → 正規化 → 去重 → 跨站排序 → summary。
     `rawTotal` 讓呼叫端能直接查核 `total + deduped == rawTotal`。
+    `salary_by` 只在 `sort_by == "salary"` 時生效並寫入 `query.salaryBy`。
     """
     v1 = [j.to_dict() for r in results if r.status == "ok" for j in r.jobs]
     raw_total = len(v1)
@@ -82,7 +84,7 @@ def search_payload(
     else:
         deduped = 0
     if sort_by:
-        jobs = aggregate.sort_jobs(jobs, sort_by)
+        jobs = aggregate.sort_jobs(jobs, sort_by, salary_by=salary_by)
 
     source_rows = []
     for r in results:
@@ -106,11 +108,15 @@ def search_payload(
         "sortBy": sort_by,
         "sources": source_rows,
     }
+    envelope_query = {**query, "sortBy": sort_by, "dedup": dedup}
+    if sort_by == "salary":
+        # 只在薪金排序時多這一個鍵；date／不排序的封套與上一版逐鍵相同。
+        envelope_query["salaryBy"] = salary_by
     envelope = {
         "schemaVersion": SCHEMA_VERSION,
         "command": "search",
         "generatedAt": now_iso(),
-        "query": {**query, "sortBy": sort_by, "dedup": dedup},
+        "query": envelope_query,
         "summary": summary,
         "jobs": jobs,
     }

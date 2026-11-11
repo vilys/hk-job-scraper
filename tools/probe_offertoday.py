@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 """OfferToday round 8：驗證職能/行業篩選格式 + 偵測普通 requests 能否直打 API。
 
-🐢 1 次導航 + 2 支瀏覽器內 POST（間隔 8s） + 1 支冷 requests（無 cookie）＝ 3 支 API 請求。
-🛑 安全閥：code != 0 / status != 200 / 驗證碼徵兆 → 立即中止本輪。
+慢速：1 次導航 + 2 支瀏覽器內 POST（間隔 8s） + 1 支冷 requests（無 cookie）＝ 3 支 API 請求。
+安全閥：code != 0 / status != 200 / 驗證碼徵兆 → 立即中止本輪。
 每支請求直接判讀「真命中（suppleCard=false）vs 遞補推薦（true）」並交叉驗證篩選是否生效。
 """
 import sys, json, time
-sys.stdout.reconfigure(encoding="utf-8")
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError, OSError):
+        pass
 from playwright.sync_api import sync_playwright
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "

@@ -1,4 +1,4 @@
-"""LinkedIn 訪客分頁端點探針（🐢 一次一支，手動指定 start）。
+"""LinkedIn 訪客分頁端點探針（慢速：一次一支，手動指定 start）。
 
 假說：訪客模式下 /jobs/search/?start=N 不穩定（隨機化/AB），
 但 /jobs-guest/jobs/api/seeMoreJobPostings/search 是訪客專用分頁端點，
@@ -15,6 +15,13 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+
+# Windows cp950 主控台：先把兩個輸出串流設為 UTF-8，避免探針輸出直接 crash。
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError, OSError):
+        pass
 
 PROBE = Path(__file__).resolve().parents[1] / "output" / "_probe"
 PROBE.mkdir(parents=True, exist_ok=True)

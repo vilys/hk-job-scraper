@@ -16,6 +16,13 @@ import time
 
 from playwright.sync_api import sync_playwright
 
+# Windows cp950 主控台：先把兩個輸出串流設為 UTF-8，避免探針輸出直接 crash。
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError, OSError):
+        pass
+
 DEFAULT_URL = "https://www.liepin.com/zhaopin/?city=320&dq=320&currentPage=0"
 
 CARD_SELECTORS = [

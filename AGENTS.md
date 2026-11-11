@@ -37,6 +37,9 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
   - `--json`：stdout 只輸出單一 JSON 封套；**不主動寫檔**（除非同時給 `--out`）；日誌走 stderr（預設 WARNING）。
   - `--out PATH`：顯式寫檔；`.csv` 寫職位 CSV（UTF-8 BOM、**schema v2 共 19 欄**），其他副檔名寫 JSON（`--json` 時為完整封套）。
   - `--sort-by date|salary`：**跨站排序**。`--source all` 預設 `date`（刊登日新→舊）；單站預設不排序，保留站方相關性。解析不出日期／薪金者排最後，不丟棄。
+  - `--salary-by min|mid|max`：配合 `--sort-by salary` 的取樣依據，**預設 `mid`（中位數 `(min+max)/2`，無 max 時用單點薪金）**；`min` 取下限、`max` 取上限（舊版行為）。設定的值記錄在 `query.salaryBy`，人類輸出會標明。
+  - `--fill-gaps`：一鍵補齊各站已知缺口（`gov_hk`／`moovup` → `--detail`，`recruit` → `--fill-location`）。執行前列出額外請求數預估；`--yes` 或 `--json` 模式略過互動確認。`query.fillGaps` 為 `true`。
+  - `--yes`：跳過 `--fill-gaps` 的互動確認（給腳本／agent 用）。
   - `--no-dedup`：關閉去重。預設以「URL 完全相同」或「(正規化標題, 正規化公司) 相同」合併，保留 `sources` / `urls`。
   - `-q`：日誌只留 ERROR。
   - **人類模式專用（不影響 `--json` 封套與 exit code）**：`--limit N`（預設 20，0 = 全部）、`--no-list`（只印摘要）、`--force`（允許 `--out` 覆蓋既有檔）。
@@ -46,6 +49,7 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 **人類模式（`--json` 缺席）才有的行為，agent 不必依賴：**
 
 - 預設列出前 20 筆職位（標題／公司／地區／薪金／刊登日）+ 來源摘要；摘要顯示 `N/M 筆有薪金`。
+- 薪金欄若顯示 `約$8,800-10,560/月 (原 $50 - $60 （時薪）)`，表示那是**換算估算**、不是實領月薪；基準每日 8 小時 × 每月 22 個工作日（時薪 ×176、日薪 ×22、年薪 ÷12）。原生月薪照原文顯示，表格下方會再印一次基準。
 - `--out` 目標檔已存在時**拒絕覆蓋並回 exit 2**（在發任何請求之前），需 `--force`；`--json --out` 維持既有可覆寫行為。
 - `--pages 0` 回 exit 2（用法錯誤），不再是「0 筆結果 / exit 5」。
 - 勞工處 `gov_hk` 列表頁沒有公司名也沒有刊登日，兩者都需 `--detail`；公司欄全空時人類輸出會提示。
@@ -86,16 +90,20 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 | 位置 | v1 | v2 | 說明 |
 |---|---|---|---|
 | 根 | `schemaVersion: 1` | `schemaVersion: 2` | `sources` / `options` 封套同步為 2 |
-| `jobs[]` | `posted_date` 原字串（6 種格式） | `posted_date` **一律 ISO `YYYY-MM-DD`** | 相對時間以該筆 `scraped_at` 換算；無法解析給 `""` |
+| `jobs[]` | `posted_date` 原字串（6 種格式） | `posted_date` **一律 ISO `YYYY-MM-DD`** | 相對時間以該筆 `scraped_at` 換算；無法解析給 `""`。2026-11-11 起另支援勞工處詳情頁 `DD/MM/YYYY`（**日在前**，如 `10/11/2026` → `2026-11-10`）；與 `on MM-DD` 是不同格式，不混用 |
 | `jobs[]` | — | `posted_date_raw` | 保留站方原文，方便除錯與回溯 |
-| `jobs[]` | — | `salary_min` / `salary_max` | **整數月薪**；解析不出為 `null` |
-| `jobs[]` | — | `salary_period` | `month` \| `hour` \| `day` \| `year`；換算係數：時薪 ×176、日薪 ×22、年薪 ÷12 |
+| `jobs[]` | — | `salary_min` / `salary_max` | **整數月薪估算**；解析不出為 `null` |
+| `jobs[]` | — | `salary_period` | `month` \| `hour` \| `day` \| `year`；換算基準**每日 8 小時、每月 22 個工作日**：時薪 ×176、日薪 ×22、年薪 ÷12。`salary` 原文不變，非原生月薪者不可讀成實領月薪 |
 | `jobs[]` | — | `sources` / `urls` | 去重合併後的所有來源與連結（陣列；CSV 中以 `\|` 分隔） |
 | `summary` | `withSalary` 計所有非空字串 | **只計 `salary` 含阿拉伯數字者** | `TBD` / `Competitive` / `Negotiable` / `面議` 不再計入 |
 | `summary` | — | `deduped` / `rawTotal` | 被合併筆數／原始筆數；`total + deduped == rawTotal` |
 | `summary` | — | `sortBy` | `date` \| `salary` \| `null`（單站不排序） |
 | `summary.sources[]` | — | `coverage` | `{jobs, company, salary, location, date}` 命中數；僅 `status=ok` 有 |
 | `query` | — | `sortBy` / `dedup` | 反映本次實際設定 |
+| `query` | — | `salaryBy`（僅 `--sort-by salary` 時） | `min` \| `mid` \| `max`；`date`／不排序的封套逐鍵不變 |
+| `query` | — | `fillGaps` | `--fill-gaps` 是否啟用（布林） |
+
+**schemaVersion 維持 2**：本輪沒有新增／改動任何 `jobs[]` 欄位；`query` 本來就是動態反映參數的物件，新增的鍵舊客戶端可忽略。若未來新增 `jobs[]` 欄位才需升 v3 並補對照表。
 
 **相容性承諾**：exit code（0/1/2/3/4/5）、`error.code`、命令名稱、既有 13 個 `jobs[]` 欄位名稱、`python main.py` 的輸出（仍為 v1 的 13 欄）全部不變。`--out` 的 CSV 由 13 欄增為 19 欄（UTF-8 BOM 不變）。
 
@@ -129,7 +137,9 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 ## 修改本專案時
 
 - 新增／變更據點行為，必須同步更新：`hkjobs/capabilities.py`、README 的「各站功能支援矩陣」與該站技術筆記。
-- 變更多人類輸出／旗標，必須同步更新：`README.md` 的「給 AI agent／程式呼叫」章節、本文件命令段、`search --help` 的 epilog。
+- 變更多人類輸出／旗標，必須同步更新：`README.md` 的「給 AI agent／程式呼叫」章節、本文件命令段、`search --help` 的 epilog；若動到離線重播，另同步 `tools/replay_aggregation.py` 與 `tools/README.md`。
+- 新增／調整旗標時，`hkjobs/capabilities.py` 是能力與薪金換算基準的單一資料源（`GAP_FILL_ACTIONS` / `SALARY_CONVERSION_BASIS`），不要在 CLI 裡另寫一份。
+- Windows cp950：所有人類輸出與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。
 - 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 137 個測試。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 167 個測試。
 - 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README。

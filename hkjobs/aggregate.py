@@ -119,6 +119,14 @@ _ARTICLE_DELTA = {
     "year": timedelta(days=365),
 }
 _MMDD = re.compile(r"\bon\s+(\d{1,2})-(\d{1,2})\b")
+# 勞工處 gov_hk 詳情頁 #postedDt 的格式是 DD/MM/YYYY（日在前），依據：
+#   (1) scrapers/gov_hk.py:363 的實測註解與 days_since_posted() 的
+#       strptime(s, "%d/%m/%Y")；
+#   (2) 2026-11-11 真跑 `--source gov_hk --category 打字 --detail --days 30`
+#       的 output/打字_30天.csv：12/12 筆 posted_date_raw 皆如 `10/11/2026`。
+# 與 _MMDD（`on 11-10`，站方另一種「月-日」相對寫法）是不同來源、不同格式，
+# 不可混用；本專案只處理勞工處，故遇斜線一律以 DD/MM 解讀。
+_DDMMYYYY = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
 _DMONTH_YEAR = re.compile(r"^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})$")
 _MONTHS = {m.lower(): i for i, m in enumerate(
     ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -142,7 +150,11 @@ def _reference(scraped_at: str) -> datetime:
 
 
 def parse_date(raw: str, scraped_at: str = "") -> str:
-    """轉成 ISO `YYYY-MM-DD`；無法解析回 `""`（原字串由呼叫端留在 posted_date_raw）。"""
+    """轉成 ISO `YYYY-MM-DD`；無法解析回 `""`（原字串由呼叫端留在 posted_date_raw）。
+
+    絕對日期涵蓋 `YYYY-MM-DD`、`DD/MM/YYYY`（勞工處詳情頁）、`D Mon YYYY`、
+    `YYYY/MM/DD`、`on MM-DD`；相對時間含 `19h ago`／`an hour ago` 等。
+    """
     text = (raw or "").strip()
     if not text:
         return ""
@@ -183,6 +195,15 @@ def parse_date(raw: str, scraped_at: str = "") -> str:
         year = ref.year
         if (month, day) > (ref.month, ref.day):
             year -= 1  # 尚未到達的月日 → 去年
+        try:
+            return datetime(year, month, day).date().isoformat()
+        except ValueError:
+            return ""
+
+    m = _DDMMYYYY.match(text)
+    if m:
+        # 日在前（勞工處）；datetime 會擋掉 32/13/2026 之類的非法日期
+        day, month, year = (int(x) for x in m.groups())
         try:
             return datetime(year, month, day).date().isoformat()
         except ValueError:
@@ -285,8 +306,43 @@ SORT_LABELS = {
     "salary": "月薪（高→低）",
 }
 
+# 薪金排序的取樣依據。求職者看到「14K 起跳」排在「18K 起跳」前面會覺得不可信，
+# 故預設改用中位數 (min+max)/2；仍可用 --salary-by min|mid|max 切回下限／上限。
+SALARY_BY_CHOICES: tuple[str, ...] = ("min", "mid", "max")
+SALARY_BY_LABELS = {
+    "min": "月薪下限",
+    "mid": "月薪中位數 (min+max)/2",
+    "max": "月薪上限",
+}
 
-def sort_jobs(jobs: list[dict], by: str | None) -> list[dict]:
+
+def salary_sort_value(job: dict, salary_by: str = "mid") -> float | None:
+    """回傳該筆用於排序的月薪值；沒有可比較數字回 `None`（排最後，不丟棄）。
+
+    `min` / `max` 缺一側時用另一側補；`mid` 無 max 時視為單點薪金，直接用 min。
+    """
+    if salary_by not in SALARY_BY_CHOICES:
+        raise ValueError(f"未知的薪金排序依據：{salary_by}")
+    low, high = job.get("salary_min"), job.get("salary_max")
+    if low is None and high is None:
+        return None
+    low = high if low is None else low
+    high = low if high is None else high
+    if salary_by == "min":
+        return float(low)
+    if salary_by == "max":
+        return float(high)
+    return (low + high) / 2
+
+
+def sort_label(by: str, salary_by: str = "mid") -> str:
+    """人類模式「排序依據」那一行；把取樣依據寫清楚，不讓人猜。"""
+    if by == "salary":
+        return f"{SALARY_BY_LABELS[salary_by]}（高→低）"
+    return SORT_LABELS[by]
+
+
+def sort_jobs(jobs: list[dict], by: str | None, *, salary_by: str = "mid") -> list[dict]:
     """無日期／無數字的排最後，且一筆都不丟。"""
     if not by:
         return list(jobs)
@@ -296,9 +352,11 @@ def sort_jobs(jobs: list[dict], by: str | None) -> list[dict]:
         valued.sort(key=lambda j: j["posted_date"], reverse=True)
         return valued + missing
     if by == "salary":
-        valued = [j for j in jobs if j.get("salary_max") is not None]
-        missing = [j for j in jobs if j.get("salary_max") is None]
-        valued.sort(key=lambda j: j["salary_max"], reverse=True)
+        valued, missing = [], []
+        for j in jobs:
+            value = salary_sort_value(j, salary_by)
+            (missing if value is None else valued).append(j)
+        valued.sort(key=lambda j: salary_sort_value(j, salary_by), reverse=True)
         return valued + missing
     raise ValueError(f"未知的排序依據：{by}")
 

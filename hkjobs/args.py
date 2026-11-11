@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 
+from hkjobs import aggregate
+
 
 def add_search_arguments(
     p: argparse.ArgumentParser, *, include_output_flags: bool = True
@@ -22,7 +24,7 @@ def add_search_arguments(
                        choices=["json", "csv", "both"], help="輸出格式")
     p.add_argument("--detail", action="store_true",
                    help="同時抓取職位詳情（職責/要求/刊登日期）；"
-                        "⚠️ 勞工處 gov_hk 的「公司名」只在詳情頁，列表階段拿不到，"
+                        "注意：勞工處 gov_hk 的「公司名」只在詳情頁，列表階段拿不到，"
                         "不加此旗標時 company 欄必為空。代價是每筆多 1 支請求。")
     p.add_argument("--fill-location", action="store_true",
                    help="列表階段補地區：僅 recruit 需要並支援（該站列表頁沒有地區欄）。"
@@ -76,7 +78,7 @@ def add_search_arguments(
                         "moovup 不支援（傳入會警告並忽略）；"
                         "offertoday 支援：送站方 publishTime 參數 + 客戶端再篩"
                         "（只有「on MM-DD」格式能算天數，其餘視為過舊淘汰）。"
-                        "⚠️ 只做日期過濾，不改排序；保留站方預設（相關性）順序。"
+                        "注意：只做日期過濾，不改排序；保留站方預設（相關性）順序。"
                         "公司名需 --detail，日期欄在 gov_hk 亦需 --detail。")
 
 
@@ -96,7 +98,7 @@ def add_machine_arguments(p: argparse.ArgumentParser) -> None:
     p.add_argument("--out", default=None, metavar="PATH",
                    help="顯式寫檔：.csv 寫職位 CSV（UTF-8 BOM、schema v2 共 19 欄）；"
                         "其他副檔名寫 JSON（--json 時寫完整封套，否則寫職位陣列）。"
-                        "⚠️ 人類模式下目標檔已存在時不會覆蓋，需加 --force")
+                        "注意：人類模式下目標檔已存在時不會覆蓋，需加 --force")
     p.add_argument("--force", action="store_true",
                    help="允許 --out 覆蓋既有檔案（僅人類模式需要；--json 模式維持原行為）")
     p.add_argument("--limit", type=int, default=20, metavar="N",
@@ -107,7 +109,21 @@ def add_machine_arguments(p: argparse.ArgumentParser) -> None:
                    help="跨站排序：date=刊登日新→舊 | salary=月薪高→低。"
                         "--source all 預設 date；單站預設不排序（保留站方相關性）。"
                         "解析不出日期／薪金的職位排最後，一筆都不會丟。")
+    p.add_argument("--salary-by", choices=list(aggregate.SALARY_BY_CHOICES),
+                   default="mid", metavar="HOW",
+                   help="配合 --sort-by salary 的取樣依據（預設 mid）："
+                        "mid=中位數 (min+max)/2 | min=下限 | max=上限；"
+                        "無上限時以單點薪金計。時薪／日薪／年薪先換算成月薪再比。"
+                        "人類輸出會標明本次依據，--json 記在 query.salaryBy。")
     p.add_argument("--no-dedup", action="store_true",
                    help="關閉去重（預設開啟）：同 URL 或同標題＋同公司會合併成一筆，"
                         "保留 sources / urls；summary.deduped 為被合併筆數。")
+    p.add_argument("--fill-gaps", action="store_true",
+                   help="一鍵補齊各站已知缺口：gov_hk / moovup 自動開 --detail，"
+                        "recruit 自動開 --fill-location；其餘站列表已完整或屬已知限制，會跳過並說明。"
+                        "執行前先列出「約 N 支額外請求」的估算並要求確認（--yes 或 --json 可略過）。"
+                        "--json 的 query.fillGaps 會記為 true。")
+    p.add_argument("--yes", action="store_true",
+                   help="跳過 --fill-gaps 的互動確認（給腳本與 agent 用）；"
+                        "--json 模式本來就不會停下來等輸入。")
     p.add_argument("-q", "--quiet", action="store_true", help="日誌只保留 ERROR")

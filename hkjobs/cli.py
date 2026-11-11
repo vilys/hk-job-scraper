@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import logging
 import sys
@@ -10,7 +11,7 @@ from pathlib import Path
 
 from hkjobs import __version__, aggregate
 from hkjobs.args import add_machine_arguments, add_search_arguments
-from hkjobs.capabilities import SOURCES
+from hkjobs.capabilities import GAP_FILL_ACTIONS, SALARY_CONVERSION_BASIS, SOURCES
 from job_model import JobRecord
 from hkjobs.contract import (
     EXIT_ALL_FAILED,
@@ -73,14 +74,31 @@ def _truncate(text: str, width: int) -> str:
 
 
 # 人類模式職位清單的欄寬（顯示寬度，CJK 算 2）
+# 薪金欄要放得下「約$7,920-8,800/月 (原 $45-50/小時)」，
+# 故由 28 放寬到 36，並從標題／公司／地區各挪 2 格回來（總寬仍約 122）。
 JOB_COLUMNS = (
     ("#", 3, "right"),
-    ("標題", 34, "left"),
-    ("公司", 20, "left"),
-    ("地區", 14, "left"),
-    ("薪金", 28, "left"),
+    ("標題", 32, "left"),
+    ("公司", 18, "left"),
+    ("地區", 12, "left"),
+    ("薪金", 36, "left"),
     ("刊登日", 11, "left"),
 )
+
+
+def _salary_cell(job: dict) -> str:
+    """原生月薪照原文顯示；換算而來的月薪前面標「約」，避免被讀成實領月薪。
+
+    換算值放前面，長原文被 `_truncate` 截掉時求職者仍看得到這是估算值。
+    """
+    raw = (job.get("salary") or "").strip() or "—"
+    period = job.get("salary_period")
+    low, high = job.get("salary_min"), job.get("salary_max")
+    if period in ("hour", "day", "year") and low is not None:
+        high = low if high is None else high
+        money = f"${low:,}" if low == high else f"${low:,}-{high:,}"
+        return f"約{money}/月 (原 {raw})"
+    return raw
 
 
 def _print_jobs_table(jobs: list[dict], *, limit: int) -> int:
@@ -101,13 +119,16 @@ def _print_jobs_table(jobs: list[dict], *, limit: int) -> int:
             (j.get("title") or "").strip() or "—",
             (j.get("company") or "").strip() or "—",
             (j.get("location") or "").strip() or "—",
-            (j.get("salary") or "").strip() or "—",
+            _salary_cell(j),
             (j.get("posted_date") or "").strip() or "—",
         )
         print("  ".join(
             _pad(_truncate(cell, w), w, align=align)
             for cell, (_, w, align) in zip(cells, JOB_COLUMNS)
         ))
+    if any(j.get("salary_period") in ("hour", "day", "year")
+           and j.get("salary_min") is not None for j in shown):
+        print(f"薪金欄標「約…/月」者為換算估算，非實際月薪；基準：{SALARY_CONVERSION_BASIS}。")
     return hidden
 
 
@@ -266,6 +287,71 @@ def _run_one(source: str, args: argparse.Namespace) -> SourceResult:
             scraper.close()
 
 
+_GAP_FLAG_LABELS = {"detail": "--detail", "fillLocation": "--fill-location"}
+
+
+def _gap_fill_plan(args: argparse.Namespace, plan: list[tuple[str, bool]]):
+    """回傳 `(各站要自動開啟的旗標, 估算說明行, 額外請求數估算)`。
+
+    資料源是 `capabilities.GAP_FILL_ACTIONS`，估算為 `--pages × per_page × 每筆請求數`
+    的上限預估；已明確給過的旗標不重複計費。recruit 若只篩單一地區，既有行為是
+    零請求直接回填（見 `--fill-location` 的 help），故估算為 0。
+    """
+    flags: dict[str, str] = {}
+    lines: list[str] = []
+    skipped: list[str] = []
+    total = 0
+    for name, enabled in plan:
+        if not enabled:
+            continue
+        action = GAP_FILL_ACTIONS.get(name)
+        if not action:
+            skipped.append(name)
+            continue
+        flag, field, per_job = action
+        already = args.detail if flag == "detail" else args.fill_location
+        info = SOURCES.get(name)
+        est = 0 if already else (info.per_page if info else 0) * args.pages * per_job
+        if name == "recruit" and args.district and "," not in str(args.district):
+            est = 0
+        flags[name] = flag
+        total += est
+        tag = "（旗標已給，不額外計）" if already else ""
+        lines.append(
+            f"  {_pad(name, 12)} → {_pad(_GAP_FLAG_LABELS[flag], 18)} "
+            f"補 {_pad(field, 24)} 約 {est} 支{tag}"
+        )
+    if skipped:
+        lines.append(
+            f"  略過 {len(skipped)} 站（{'/'.join(skipped)}）：列表已完整或站方不提供該欄位"
+            "（屬已知限制），不會白打請求。"
+        )
+    return flags, lines, total
+
+
+def _announce_gap_fill(args: argparse.Namespace, lines: list[str], total: int) -> int | None:
+    """執行前公告並確認；回傳非 None 代表中止（該值即 exit code）。"""
+    # --json 的 stdout 只能是單一封套，公告一律走 stderr；人類模式走 stdout。
+    stream = sys.stderr if args.json else sys.stdout
+    print(f"--fill-gaps 將補齊各站缺口，預估額外約 {total} 支請求"
+          "（依 --pages × 每頁筆數估算，實際以結果筆數為準）：", file=stream)
+    for line in lines:
+        print(line, file=stream)
+    if args.json:
+        print("--json 模式略過互動確認；想先試算請用人類模式不加 --yes。", file=stream)
+        return None
+    if args.yes:
+        return None
+    try:
+        answer = input("繼續？（y/N）")
+    except EOFError:
+        answer = ""
+    if answer.strip().lower() not in ("y", "yes"):
+        return _usage_error("已取消 --fill-gaps（未發出任何爬取請求）；"
+                            "確定要執行請加 --yes，或改用 --json。")
+    return None
+
+
 def _print_coverage_table(results: list[SourceResult]) -> None:
     """--source all 專用：讓求職者一眼看出哪一站的哪個欄位是空的。"""
     rows = []
@@ -310,6 +396,7 @@ def _print_human(
     list_limit: int = 20,
     no_list: bool = False,
     sort_by: str | None = None,
+    salary_by: str = "mid",
     deduped: int = 0,
     raw_total: int = 0,
     show_coverage: bool = False,
@@ -336,7 +423,7 @@ def _print_human(
         print(f"去重：合併 {deduped} 筆重複職缺（原始 {raw_total} 筆；"
               "--no-dedup 可保留原始筆數）")
     if sort_by:
-        print(f"排序依據：{aggregate.SORT_LABELS[sort_by]}；"
+        print(f"排序依據：{aggregate.sort_label(sort_by, salary_by)}；"
               "解析不出日期／薪金的職位排最後，沒有丟棄任何一筆。")
 
     hidden = 0
@@ -401,13 +488,29 @@ def cmd_search(args: argparse.Namespace) -> int:
         if args.source == "all"
         else [(args.source, True)]
     )
+    gap_flags: dict[str, str] = {}
+    if args.fill_gaps:
+        gap_flags, gap_lines, gap_total = _gap_fill_plan(args, plan)
+        abort = _announce_gap_fill(args, gap_lines, gap_total)
+        if abort is not None:
+            return abort
+
     results: list[SourceResult] = []
     for name, enabled in plan:
         if not enabled:
             logger.warning("[%s] 停用，略過（可用 --source %s 單獨執行）", name, name)
             results.append(SourceResult(name, "skipped"))
             continue
-        results.append(_run_one(name, args))
+        run_args = args
+        flag = gap_flags.get(name)
+        if flag:
+            # 只改這一份副本，別把 gov_hk 的 --detail 帶去 recruit。
+            run_args = copy.copy(args)
+            if flag == "detail":
+                run_args.detail = True
+            else:
+                run_args.fill_location = True
+        results.append(_run_one(name, run_args))
 
     # --days 只做日期過濾，不再偷偷改成刊登日期排序（會淹沒相關性）。
     # query.sort 忠實反映「實際送給站方的排序」，沒有就是 null。
@@ -423,12 +526,14 @@ def cmd_search(args: argparse.Namespace) -> int:
         "sort": effective_sort,
         "detail": bool(args.detail),
         "fillLocation": bool(args.fill_location),
+        "fillGaps": bool(args.fill_gaps),
     }
     code = exit_code_for(results)
     # 跨站排序只對 --source all 有意義；單站保留站方相關性順序，不干擾上一輪修好的行為。
     sort_by = args.sort_by or ("date" if args.source == "all" else None)
     dedup = not args.no_dedup
-    payload = search_payload(query, results, code, dedup=dedup, sort_by=sort_by)
+    payload = search_payload(query, results, code, dedup=dedup,
+                             sort_by=sort_by, salary_by=args.salary_by)
     summary = payload["summary"]
 
     if args.out:
@@ -443,6 +548,7 @@ def cmd_search(args: argparse.Namespace) -> int:
             list_limit=args.limit,
             no_list=args.no_list,
             sort_by=sort_by,
+            salary_by=args.salary_by,
             deduped=summary["deduped"],
             raw_total=summary["rawTotal"],
             show_coverage=(args.source == "all"),
@@ -481,9 +587,13 @@ def build_parser() -> argparse.ArgumentParser:
             "  hkjobs search --source gov_hk --keyword 文員 --days 7 --pages 1\n"
             "  hkjobs search --source jobsdb --keyword analyst --pages 1 --out analyst.csv\n"
             "  hkjobs search --source linkedin --keyword \"data engineer\" --json\n"
-            "  hkjobs search --source all --keyword 文員 --pages 1 --sort-by salary --limit 20\n\n"
+            "  hkjobs search --source all --keyword 文員 --pages 1 --sort-by salary --limit 20\n"
+            "  hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes\n\n"
             "預設值：來源 moovup、關鍵字空、3 頁、列出前 20 筆、不寫檔、不抓詳情、\n"
             "        去重開啟；--source all 另預設 --sort-by date（刊登日新→舊）。\n"
+            "        --sort-by salary 預設以「月薪中位數 (min+max)/2」排序，\n"
+            "        可用 --salary-by min|mid|max 改取下限／上限。\n"
+            "        --fill-gaps 會先列出額外請求數估算再問一次；--yes 或 --json 略過確認。\n"
             "探測請用 --pages 1；檔案已存在時加 --force 才會覆寫。\n"
             "--out 的 CSV 為 schema v2 共 19 欄（UTF-8 BOM，Excel 可直接開）。"
         ),

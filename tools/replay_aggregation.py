@@ -8,14 +8,15 @@
 用現行的 `contract.search_payload()` 與 `cli._print_human()` 重算一次，
 產出 v2 封套（`output/all.json`）與人類輸出。零網路請求。
 
-⚠️ 這是「離線重播」，不是二次真實爬取。程式管線是真的，資料也是真的，
+注意：這是「離線重播」，不是二次真實爬取。程式管線是真的，資料也是真的，
    但 `generatedAt` 之外的所有職位內容都來自基準檔，不會反映站方最新變動。
 
 用法
 ----
     python tools/replay_aggregation.py                       # 產出 output/all.json
     python tools/replay_aggregation.py --human --limit 20   # 另印人類模式輸出
-    python tools/replay_aggregation.py --sort-by salary     # 改按月薪排序
+    python tools/replay_aggregation.py --sort-by salary     # 改按月薪中位數排序
+    python tools/replay_aggregation.py --sort-by salary --salary-by max  # 改用上限
     python tools/replay_aggregation.py --no-dedup           # 關閉去重
 """
 from __future__ import annotations
@@ -30,7 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from hkjobs import cli, contract  # noqa: E402
+from hkjobs import aggregate, cli, contract  # noqa: E402
 from job_model import JobRecord   # noqa: E402
 
 
@@ -47,10 +48,17 @@ def _results(envelope: dict) -> list[contract.SourceResult]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
+    # argparse 的 --help 會直接寫 stdout；必須在 parse_args() 之前就把編碼設好，
+    # 否則 Windows cp950 主控台遇到說明文字裡的非 cp950 字元會直接 crash。
+    contract.configure_io()
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--baseline", default="output/all_baseline.json")
     ap.add_argument("--out", default="output/all.json")
     ap.add_argument("--sort-by", choices=["date", "salary"], default="date")
+    ap.add_argument("--salary-by", choices=list(aggregate.SALARY_BY_CHOICES),
+                    default="mid", help="配合 --sort-by salary：min|mid|max（預設 mid）")
     ap.add_argument("--no-dedup", action="store_true")
     ap.add_argument("--human", action="store_true")
     ap.add_argument("--limit", type=int, default=20)
@@ -63,6 +71,7 @@ def main() -> int:
     payload = contract.search_payload(
         envelope["query"], results, code,
         dedup=not args.no_dedup, sort_by=args.sort_by,
+        salary_by=args.salary_by,
     )
 
     out = ROOT / args.out
@@ -75,6 +84,8 @@ def main() -> int:
     print(f"  schemaVersion={payload['schemaVersion']}  "
           f"total={s['total']}  deduped={s['deduped']}  rawTotal={s['rawTotal']}  "
           f"withSalary={s['withSalary']}  sortBy={s['sortBy']}")
+    if args.sort_by == "salary":
+        print(f"  排序依據：{aggregate.sort_label('salary', args.salary_by)}")
 
     if args.human:
         cli._print_human(
@@ -82,6 +93,7 @@ def main() -> int:
             jobs=payload["jobs"],
             list_limit=args.limit,
             sort_by=args.sort_by,
+            salary_by=args.salary_by,
             deduped=s["deduped"],
             raw_total=s["rawTotal"],
             show_coverage=True,

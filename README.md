@@ -54,19 +54,22 @@ python main.py --help                                              # 完整參�
 ```bash
 python -m hkjobs search --source all --keyword 文員 --pages 1 --limit 20
 python -m hkjobs search --source all --keyword 文員 --pages 1 --sort-by salary --limit 20
+python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 ```
 
 跑完直接列出職位，而且不是「九站各貼一段」那種堆疊：
 
 | 能力 | 說明 |
 |---|---|
-| 跨站排序 | 預設按刊登日新→舊；`--sort-by salary` 改按月薪高→低。解析不出者排最後，**一筆都不丟** |
-| 日期正規化 | `19h ago`、`11 Nov 2026`、`Posted 3 months ago` 一律變 `YYYY-MM-DD`；原文留在 `posted_date_raw` |
+| 跨站排序 | 預設按刊登日新→舊；`--sort-by salary` 改按**月薪中位數 `(min+max)/2`** 高→低（無上限時用單點薪金），可用 `--salary-by min\|mid\|max` 改取下限／上限。解析不出者排最後，**一筆都不丟**；人類輸出會標明本次依據 |
+| 日期正規化 | `19h ago`、`11 Nov 2026`、`Posted 3 months ago`、`on 11-10`，以及勞工處詳情頁的 `10/11/2026`（**DD/MM/YYYY，日在前**）一律變 `YYYY-MM-DD`；原文留在 `posted_date_raw` |
 | 薪金正規化 | `$15K - $17K` 另給 `salary_min=15000` / `salary_max=17000`；時薪／日薪／年薪換算成月薪並標 `salary_period` |
 | 去重 | 同 URL 或同「標題＋公司」合併成一筆，保留 `sources` / `urls`；`--no-dedup` 可關閉 |
-| 完整度小表 | 一眼看出哪一站缺公司／薪金／地區／日期，並給 `--detail`、`--fill-location` 等建議 |
+| 完整度小表 | 一眼看出哪一站缺公司／薪金／地區／日期，並給 `--detail`、`--fill-location` 等建議；`--fill-gaps` 可一鍵補齊 |
 
-2026-11-11 的 196 筆實測：去重後 187 筆（`deduped=9`，7 組重複，含 jobmarket 同一僱主 4 筆與跨站 procurement clerk）；`withSalary` 從 58 降到 55（`TBD` 不再算進去）。
+> **薪金換算基準（重要）**：`salary_min`／`salary_max` 是為了跨站比較而正規化的**月薪估算**，不是僱主實際給付的月薪。基準為**每日 8 小時、每月 22 個工作日**：時薪 ×176、日薪 ×22、年薪 ÷12。例如 `$50 - $60 （時薪）` → `8800–10560`。人類清單會把這類職位標成 `約$8,800-10,560/月 (原 $50 - $60 （時薪）)`，原生月薪則照原文顯示；CSV／JSON 的完整原文永遠留在 `salary`，換算依據記在 `salary_period`。
+
+2026-11-11 的 196 筆實測：去重後 187 筆（`deduped=9`，7 組重複，含 jobmarket 同一僱主 4 筆與跨站 procurement clerk）；`withSalary` 從 58 降到 55（`TBD` 不再算進去）。改中位數排序後，`$18,000-24,000`（中位數 21000）會排在 `$14K-27K`（中位數 20500）之前。
 
 > ⚠️ `--source all` 一次跑九站，僅供驗證；平時一次一站、探測用 `--pages 1`。
 
@@ -81,7 +84,7 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --sort-by salary
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 137 個測試、約 1.5 秒、零網路請求。
+> 167 個測試、約 1.5 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -344,6 +347,8 @@ hkjobs sources --json   # 12 站能力矩陣（啟用/瀏覽器/每頁/支援維
 hkjobs options --source jobsdb --json          # 該站有效地區/職能/行業/排序值
 hkjobs search --source jobsdb --keyword data --days 7 --json   # 結果只印 stdout，不寫檔
 hkjobs search --source gov_hk --keyword 會計 --out result.json # 要存檔才加 --out
+hkjobs search --source all --keyword 文員 --pages 1 --sort-by salary --salary-by mid
+hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 ```
 
 | 命令 | 用途 |
@@ -363,10 +368,14 @@ hkjobs search --source gov_hk --keyword 會計 --out result.json # 要存檔才�
 | `--days` | 只做日期過濾，**保留站方相關性排序**；要日期排序請明確給 `--sort post_dt_desc` |
 | `--pages 0` | 視為用法錯誤 exit 2（不是「0 筆結果」） |
 | `--source all` | 預設 `--sort-by date`、去重開啟、印「各站欄位完整度」小表；`--sort-by salary`／`--no-dedup` 可改 |
+| `--sort-by salary` | 依**月薪中位數** `(min+max)/2` 排序，摘要標明依據；`--salary-by min\|max` 可改取下限／上限 |
+| `--fill-gaps` | 執行前列出「約 N 支額外請求」估算並問一次；`--yes`／`--json` 略過確認。自動開 `gov_hk`／`moovup` 的 `--detail`、`recruit` 的 `--fill-location`；其餘站跳過並說明 |
 | `efc` 未給 `--district` | 預設 `Hong Kong`（避免回 London／New York），並提示可改 |
 
 - `--json` 的 exit code：`0` 成功、`2` 參數錯、`3` 部分失敗、`4` 全失敗、`5` 零結果、`1` 未預期；**封套已升 `schemaVersion=2`**（新增 `salary_min/max/period`、`posted_date_raw`、`sources`、`urls`、`summary.deduped/rawTotal/sortBy`、`summary.sources[].coverage`），新舊欄位對照見 [`AGENTS.md`](AGENTS.md)，人類模式旗標不影響封套。
 - `--out` 依副檔名：`.csv` 寫 CSV（UTF-8 BOM、**schema v2 共 19 欄**），其他寫 JSON；`--json --out` 仍維持可覆寫的既有契約。
+- `--fill-gaps` 的估算以「`--pages` × 各站每頁筆數 × 每筆 1 支」為上限（`--pages 1` 時約 57 支：moovup 12 + gov_hk 20 + recruit 25）；已給過的旗標不重複計，recruit 單一 `--district` 為 0 支。`--json` 的 `query.fillGaps` 記為 `true`，公告走 stderr 以免污染單一封套。
+- `--sort-by salary` 時 `query.salaryBy` 記錄 `min`／`mid`／`max`；`--source all` 的 date 排序封套逐鍵不變。**schemaVersion 仍為 2**（本輪沒有新增 `jobs[]` 欄位）。
 - `search --help` 附常用範例與各旗標預設值。
 - 完整契約與 agent 注意事項：見 [`AGENTS.md`](AGENTS.md)。
 
@@ -937,7 +946,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 137 個測試，約 1.5 秒，零網路請求
+python -m unittest discover -s tests -v      # 167 個測試，約 1.5 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。

@@ -3,6 +3,8 @@
 可從 scraper class 讀到的欄位（enabled / needs_browser）由契約測試交叉核對；
 站方特有資訊（days_mode、sort_values、每頁筆數、needs_chrome）以 README
 「各站功能支援矩陣」為準。改動任何據點行為時，必須同步更新本表。
+`GAP_FILL_ACTIONS` 是 `--fill-gaps` 的單一資料源，`SALARY_CONVERSION_BASIS`
+是薪金換算基準的單一文字來源（CLI 人類輸出直接引用）。
 """
 from __future__ import annotations
 
@@ -18,6 +20,20 @@ ALL_SORT_VALUES: tuple[str, ...] = (
 )
 
 _ALL_SORTS = ALL_SORT_VALUES
+
+# `--fill-gaps` 的單一資料源：站名 → (要自動開啟的旗標, 補齊的欄位, 每筆額外請求數)。
+# 只列「站方列表頁實測全缺、且本專案已有補齊手段」的據點；其餘站不是列表已完整，
+# 就是站方根本不提供該欄位（COVERAGE_ADVICE 標為已知限制），硬打詳情也補不到。
+# 請求數估算用 SourceInfo.per_page × --pages，執行前會先列出並要求確認。
+GAP_FILL_ACTIONS: dict[str, tuple[str, str, int]] = {
+    "gov_hk": ("detail", "company / posted_date", 1),
+    "moovup": ("detail", "posted_date", 1),
+    "recruit": ("fillLocation", "location", 1),
+}
+
+# 時薪／日薪／年薪換算成「可比較月薪」的基準。與 aggregate.PERIOD_TO_MONTH 一致；
+# 這是估算值，不是僱主實際給付的月薪，人類輸出會逐筆標明。
+SALARY_CONVERSION_BASIS = "每日 8 小時、每月 22 個工作日（時薪 ×176、日薪 ×22、年薪 ÷12）"
 
 
 @dataclass(frozen=True)
@@ -45,7 +61,8 @@ SOURCES: dict[str, SourceInfo] = {
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("moovup"),
         notes="Cloudflare Turnstile 需 Playwright；列表無日期（實測 0/12），--detail 才補；"
-              "不支援 --days。薪金含時薪寫法（如 $45-50/小時），聚合時換算為月薪。",
+              "不支援 --days。薪金含時薪寫法（如 $45-50/小時），聚合時依 8h×22 日換算為月薪。"
+              "--fill-gaps 會自動開 --detail 補刊登日。",
     ),
     "gov_hk": SourceInfo(
         name="gov_hk", label="勞工處", enabled=True,
@@ -55,7 +72,9 @@ SOURCES: dict[str, SourceInfo] = {
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("gov_hk"),
         notes="ASP.NET SSR；--days 走站方 postedDtFr/To 且不改排序；--sort 8 值全支援。"
-              "⚠️ 列表頁無僱主欄位，company 需 --detail（每筆多 1 支請求）。",
+              "⚠️ 列表頁無僱主欄位，company 需 --detail（每筆多 1 支請求）。"
+              "詳情頁 #postedDt 為 DD/MM/YYYY（日在前），聚合層正規化為 ISO；"
+              "--fill-gaps 會自動開 --detail 補 company 與 posted_date。",
     ),
     "jobsdb": SourceInfo(
         name="jobsdb", label="JobsDB", enabled=True,
@@ -94,7 +113,8 @@ SOURCES: dict[str, SourceInfo] = {
         supports={"district": True, "category": True, "industry": False,
                   "detail": True, "fillLocation": True},
         request_delay=delay_for("recruit"),
-        notes="列表無地區欄；單區篩選零請求回填，多區/未篩選需 --fill-location；asc 排序以站方 desc 近似並警告。",
+        notes="列表無地區欄；單區篩選零請求回填，多區/未篩選需 --fill-location；"
+              "asc 排序以站方 desc 近似並警告。--fill-gaps 會自動開 --fill-location 補地區。",
     ),
     "jobmarket": SourceInfo(
         name="jobmarket", label="JobMarket 求職廣場", enabled=True,

@@ -3,10 +3,14 @@
 
 用法（請在專案根目錄執行）：python tools/probe_ot_cold.py <label> '<json override>' [<label2> '<json2>' ...]
 每支請求間隔 GAP 秒，不重試、不併發。
-🛑 安全閥：HTTP != 200 / code != 0 / 驗證碼徵兆 → 立即停手。
+安全閥：HTTP != 200 / code != 0 / 驗證碼徵兆 → 立即停手。
 """
 import sys, json, time
-sys.stdout.reconfigure(encoding="utf-8")
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError, OSError):
+        pass
 import requests
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
