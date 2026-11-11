@@ -49,7 +49,8 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 **人類模式（`--json` 缺席）才有的行為，agent 不必依賴：**
 
 - 預設列出前 20 筆職位（標題／公司／地區／薪金／刊登日）+ 來源摘要；摘要顯示 `N/M 筆有薪金`。
-- 薪金欄若顯示 `約$8,800-10,560/月 (原 $50 - $60 （時薪）)`，表示那是**換算估算**、不是實領月薪；基準每日 8 小時 × 每月 22 個工作日（時薪 ×176、日薪 ×22、年薪 ÷12）。原生月薪照原文顯示，表格下方會再印一次基準。
+- 薪金欄若顯示 `約$8,800-10,560/月 (原時薪 $50 - $60)`，表示那是**換算估算**、不是實領月薪；基準每日 8 小時 × 每月 22 個工作日（時薪 ×176、日薪 ×22、年薪 ÷12）。原生月薪照原文顯示，表格下方會再印一次基準。
+- 人類輸出的薪金欄顯示規則（**只影響表格**，不改 `jobs[]` 欄位、`CSV` 內容或 `schemaVersion`）：換算值標「約」置前、站方原文以 `(原…)` 括號保留在後、單位詞（`原時薪`／`原日薪`／`原年薪`）提到括號最前，故 36 格欄寬截斷後**單位詞仍可見**（舊寫法 `(原 $60 - $65 …` 會把「時薪」切掉）。原文重複的全形單位括號在顯示層去掉一次，`salary` 原文在 CSV／JSON 完整不變。
 - `--out` 目標檔已存在時**拒絕覆蓋並回 exit 2**（在發任何請求之前），需 `--force`；`--json --out` 維持既有可覆寫行為。
 - `--pages 0` 回 exit 2（用法錯誤），不再是「0 筆結果 / exit 5」。
 - 勞工處 `gov_hk` 列表頁沒有公司名也沒有刊登日，兩者都需 `--detail`；公司欄全空時人類輸出會提示。
@@ -137,9 +138,9 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 ## 修改本專案時
 
 - 新增／變更據點行為，必須同步更新：`hkjobs/capabilities.py`、README 的「各站功能支援矩陣」與該站技術筆記。
-- 變更多人類輸出／旗標，必須同步更新：`README.md` 的「給 AI agent／程式呼叫」章節、本文件命令段、`search --help` 的 epilog；若動到離線重播，另同步 `tools/replay_aggregation.py` 與 `tools/README.md`。
+- 變更多人類輸出／旗標，必須同步更新：`README.md` 的「給 AI agent／程式呼叫」章節、本文件命令段、`search --help` 的 epilog；若動到離線重播，另同步 `tools/replay_aggregation.py` 與 `tools/README.md`。薪金欄顯示格式另同步 README「薪金換算基準」與本文件「人類模式」段（含範例輸出字串）。
 - 新增／調整旗標時，`hkjobs/capabilities.py` 是能力與薪金換算基準的單一資料源（`GAP_FILL_ACTIONS` / `SALARY_CONVERSION_BASIS`），不要在 CLI 裡另寫一份。
 - Windows cp950：所有人類輸出與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。
 - 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 167 個測試。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 173 個測試。
 - 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README。

@@ -24,10 +24,69 @@ python tools/replay_aggregation.py --sort-by salary --salary-by max --out output
 python tools/replay_aggregation.py --no-dedup --out output/raw.json
 ```
 
-基準檔是 `output/all_baseline.json`（2026-11-11 真跑 `--source all` 的 196 筆 v1 封套）。
+基準檔是 `output/all_baseline.json`（2026-11-11 真跑 `--source all` 的 196 筆 **v1** 封套）。
 `--salary-by min|mid|max` 配合 `--sort-by salary`，預設 `mid`（中位數 `(min+max)/2`）。
 工具只是把真資料餵進現行 `contract.search_payload()` 與 `cli._print_human()`，
 `generatedAt` 之外的職位內容不會反映站方最新變動。
+
+#### 首次使用：基準檔不在 repo
+
+`output/` 列在 `.gitignore`，所以 fresh clone **不會**有 `output/all_baseline.json`；
+直接跑重播會得到 `FileNotFoundError`（exit 1）。先產生一份（**這是一次九站真爬取**，
+請遵守速率禮節：只跑一次、用 `--pages 1`，之後一律改用離線重播，
+不要為了驗證重跑 `--source all`）：
+
+```bash
+mkdir -p output                       # Windows cmd：if not exist output mkdir output
+python -m hkjobs search --source all --keyword 文員 --pages 1 --json --out output/latest_v2.json
+```
+
+本機沒有 `hkjobs` 指令時一律用 `python -m hkjobs`（見 README「60 秒上手」）。
+刻意存成 `latest_v2.json` 而不是直接叫 `all_baseline.json`，是為了避免把 v2 檔誤當成 v1 基準。
+
+#### 基準檔請用 v1 原始封套（v2 不等價）
+
+現行 CLI 的 `--json` 輸出是 **v2**（`schemaVersion=2`），上面那條指令產生的就是 v2。
+v2 拿去當 `--baseline` **機械上可跑（exit 0）**，但驗不到聚合最核心的解析路徑：
+
+| | v1 原始封套（建議） | v2 封套（現行 CLI 輸出） |
+|---|---|---|
+| 重播可否執行 | 可 | 可，exit 0 |
+| `jobs[].posted_date` | 站方原字串（`19h ago`、`10/11/2026`…） | 已是 ISO `YYYY-MM-DD` |
+| `posted_date_raw` | 沒有此欄 | 有，但重播時被丟掉 |
+| 會跑 `parse_date()` 的相對時間／`DD/MM/YYYY` 分支 | **會** | **不會**（ISO 原樣轉回） |
+| 去重與 `rawTotal` | 由 196 筆原始資料重算，`deduped=9` | 資料已去重過，只是 187 筆再算一次，`deduped=0` |
+
+原因：`tools/replay_aggregation.py` 用 `JobRecord.from_dict()` 重建職位，而
+`JobRecord.FIELDS` 只有 **v1 的 13 欄**——`posted_date_raw`、`salary_min/max/period`、
+`sources`、`urls` 全部被忽略。v2 的 `posted_date` 已是 ISO，`to_v2()` 只是把 ISO
+原樣放回去，相對時間與 `DD/MM/YYYY` 分支根本沒被執行。2026-11-11 實測：
+v1 基準有 **81 筆非 ISO 日期**、重播後 `deduped=9 / rawTotal=196`；
+v2 基準非 ISO **0 筆**、`deduped=0 / rawTotal=187`。
+
+**結論**：要驗證聚合解析（日期正規化、薪金解析、去重、排序）請用 **v1 原始封套**
+（從既有存檔取得，或由舊版 CLI 輸出）。**不要把隨便一份最新 `--json` 輸出當成等價基準**；
+它適合驗證顯示層／排序／薪金中位數，但不能據此宣稱日期解析沒壞。
+
+fresh clone 若手上只有 v2，有兩條零網路的路：
+
+1. 直接跑解析器單元測試：`python -m unittest tests.test_aggregate_v2_fixes -v`
+   （內含真實 12 筆 gov_hk `DD/MM/YYYY` 與相對時間案例，不需要基準檔）。
+2. 把 v2 降階成 v1：`posted_date_raw` 寫回 `posted_date`、刪掉 v2 專有欄位、
+   `schemaVersion` 改回 1。跨平台單行（離線、零請求，可直接貼進 cmd／PowerShell／bash）：
+
+```bash
+python -c "import json,pathlib; d=json.loads(pathlib.Path('output/latest_v2.json').read_text(encoding='utf-8')); V1=('job_id','source','title','company','location','salary','job_type','industry','description','requirements','url','posted_date','scraped_at'); [j.__setitem__('posted_date',j.pop('posted_date_raw',j['posted_date'])) for j in d['jobs']]; d['jobs']=[{k:j[k] for k in V1} for j in d['jobs']]; d['schemaVersion']=1; pathlib.Path('output/baseline_from_v2.json').write_text(json.dumps(d,ensure_ascii=False,indent=2),encoding='utf-8')"
+python tools/replay_aggregation.py --baseline output/baseline_from_v2.json --out output/replay_from_v2.json
+```
+
+> **別覆寫 `output/all_baseline.json`**：若手上已有真正的 196 筆 v1 基準，
+> 一覆寫就救不回被去重合併掉的 9 筆。降階檔請另存新名，用 `--baseline` 指定。
+>
+> 降階後 `posted_date_raw` 回到 `posted_date`，重播時確實會跑 `parse_date()`
+> （實測原始字串 `1h ago`、`49m ago` 重現、155/187 筆轉成 ISO）。但 v2 已經去重合併過，
+> 降階檔只有 187 筆、`deduped=0`，仍不等於原本 196 筆的 v1 基準：
+> **這條路適合驗解析，不適合驗去重**。
 
 ### Windows cp950 主控台
 

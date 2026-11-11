@@ -189,13 +189,13 @@ class TestConvertedSalaryIsVisible(unittest.TestCase):
         hourly = _v2(salary="$50 - $60 （時薪）")
         monthly = _v2(salary="$14,000 - $15,000 （月薪）")
         self.assertIn("約$8,800-10,560/月", cli._salary_cell(hourly))
-        self.assertIn("原 $50 - $60", cli._salary_cell(hourly))
+        self.assertIn("原時薪 $50 - $60", cli._salary_cell(hourly))
         self.assertEqual(cli._salary_cell(monthly), "$14,000 - $15,000 （月薪）")
         self.assertNotIn("約", cli._salary_cell(monthly))
 
     def test_single_point_and_unknown_salary(self):
         self.assertEqual(cli._salary_cell(_v2(salary="$400 （日薪）")),
-                         "約$8,800/月 (原 $400 （日薪）)")
+                         "約$8,800/月 (原日薪 $400)")
         self.assertEqual(cli._salary_cell(_v2(salary="Competitive")), "Competitive")
         self.assertEqual(cli._salary_cell(_v2(salary="")), "—")
 
@@ -214,6 +214,72 @@ class TestConvertedSalaryIsVisible(unittest.TestCase):
         with contextlib.redirect_stdout(out):
             cli._print_jobs_table([_v2(salary="$15K/月")], limit=1)
         self.assertNotIn("非實際月薪", out.getvalue())
+
+
+# ------------------------------------------- 用戶端覆核：薪金欄截斷單位詞
+class TestSalaryUnitSurvivesTruncation(unittest.TestCase):
+    """長原文被 36 格截斷時，單位詞（時薪／日薪／年薪）必須仍可見。
+
+    求職者實測（修正前）：`約$10,560-11,440/月 (原 $60 - $65 …` 看不出怎麼算糧。
+    顯示層把單位詞移到原文之前，截斷時先犧牲數字尾段而非單位。
+    """
+
+    WIDTH = 36
+
+    def test_long_hourly_raw_keeps_unit_after_truncation(self):
+        cell = cli._salary_cell(_v2(salary="$60 - $65 （時薪）"))
+        truncated = cli._truncate(cell, self.WIDTH)
+        self.assertGreater(cli._disp_width(cell), self.WIDTH, "這筆必須真的被截斷")
+        self.assertIn("時薪", truncated)
+        self.assertIn("約", truncated)
+
+    def test_all_periods_and_long_raws_keep_unit(self):
+        cases = {
+            "$65 - $100 （時薪）": "時薪",
+            "$400 - $500 （日薪）": "日薪",
+            "$200,000 - $250,000 （年薪）": "年薪",
+            "$50-60/小時": "時薪",   # 非全形括號寫法，靠前置單位詞標明
+        }
+        for raw, unit in cases.items():
+            with self.subTest(raw=raw):
+                cell = cli._salary_cell(_v2(salary=raw))
+                truncated = cli._truncate(cell, self.WIDTH)
+                self.assertIn(unit, truncated)
+                self.assertLessEqual(cli._disp_width(truncated), self.WIDTH)
+
+    def test_human_table_row_shows_the_unit(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            cli._print_jobs_table([_v2(salary="$60 - $65 （時薪）")], limit=1)
+        self.assertIn("原時薪", out.getvalue())
+
+    def test_short_raw_has_no_duplicated_unit(self):
+        cell = cli._salary_cell(_v2(salary="$80 （時薪）"))
+        self.assertEqual(cell, "約$14,080/月 (原時薪 $80)")
+        self.assertEqual(cell.count("時薪"), 1)
+
+    def test_display_change_does_not_touch_payload_contract(self):
+        """只改人類輸出：salary 原文、19 個 jobs[] 欄位、schemaVersion 全不變。"""
+        raw = "$60 - $65 （時薪）"
+        job = _v2(salary=raw)
+        before = dict(job)
+        cli._salary_cell(job)
+        self.assertEqual(job, before, "_salary_cell 不得改動傳入的 job")
+        payload = contract.search_payload(
+            {}, [contract.SourceResult("x", "ok", [_job(salary=raw)])],
+            contract.EXIT_OK,
+        )
+        v2job = payload["jobs"][0]
+        self.assertEqual(payload["schemaVersion"], 2)
+        self.assertEqual(len(v2job), 19)
+        self.assertEqual(v2job["salary"], raw)
+        self.assertEqual(v2job["salary_period"], "hour")
+        self.assertEqual((v2job["salary_min"], v2job["salary_max"]), (10560, 11440))
+
+    def test_cell_is_cp950_encodable(self):
+        for raw in ("$60 - $65 （時薪）", "$400 （日薪）", "$200,000 （年薪）"):
+            with self.subTest(raw=raw):
+                cli._salary_cell(_v2(salary=raw)).encode("cp950")
 
 
 # ---------------------------------------------------------------- P2-A

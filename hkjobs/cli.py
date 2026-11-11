@@ -74,7 +74,7 @@ def _truncate(text: str, width: int) -> str:
 
 
 # 人類模式職位清單的欄寬（顯示寬度，CJK 算 2）
-# 薪金欄要放得下「約$7,920-8,800/月 (原 $45-50/小時)」，
+# 薪金欄要放得下「約$7,920-8,800/月 (原時薪 $45-50/小時)」，
 # 故由 28 放寬到 36，並從標題／公司／地區各挪 2 格回來（總寬仍約 122）。
 JOB_COLUMNS = (
     ("#", 3, "right"),
@@ -85,19 +85,29 @@ JOB_COLUMNS = (
     ("刊登日", 11, "left"),
 )
 
+# 顯示層專用：把 salary_period 換成求職者看得懂的「怎麼算糧」。
+# 由 aggregate 的 period 推導，不去猜站方原文寫法（（時薪）／/小時／per hour…）。
+_PERIOD_UNIT = {"hour": "時薪", "day": "日薪", "year": "年薪"}
+
 
 def _salary_cell(job: dict) -> str:
     """原生月薪照原文顯示；換算而來的月薪前面標「約」，避免被讀成實領月薪。
 
-    換算值放前面，長原文被 `_truncate` 截掉時求職者仍看得到這是估算值。
+    括號內以「原時薪／原日薪／原年薪」開頭，站方原文接在後面：36 格欄寬
+    截斷時會先切掉原文尾段的數字，單位詞仍在，求職者看表格就能判斷這份工
+    實際怎麼算糧，不必另外開 CSV。原文若用全形括號重複同一單位詞，顯示層
+    去掉一次以免贅字；其他寫法（如 `$50-60/小時`）原樣保留。
+    這裡只改人類輸出，`salary` 原文在 CSV／JSON 欄位中完整不變。
     """
     raw = (job.get("salary") or "").strip() or "—"
     period = job.get("salary_period")
     low, high = job.get("salary_min"), job.get("salary_max")
-    if period in ("hour", "day", "year") and low is not None:
+    if period in _PERIOD_UNIT and low is not None:
         high = low if high is None else high
         money = f"${low:,}" if low == high else f"${low:,}-{high:,}"
-        return f"約{money}/月 (原 {raw})"
+        unit = _PERIOD_UNIT[period]
+        shown_raw = raw.replace(f"（{unit}）", "").strip() or raw
+        return f"約{money}/月 (原{unit} {shown_raw})"
     return raw
 
 

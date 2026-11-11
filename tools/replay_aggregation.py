@@ -8,6 +8,9 @@
 用現行的 `contract.search_payload()` 與 `cli._print_human()` 重算一次，
 產出 v2 封套（`output/all.json`）與人類輸出。零網路請求。
 
+基準檔不在 repo（output/ 被 gitignore），fresh clone 請先照 tools/README.md 產生。
+基準請用 v1 原始封套：v2 封套機械上可跑，但驗不到原始日期轉 ISO 的解析路徑。
+
 注意：這是「離線重播」，不是二次真實爬取。程式管線是真的，資料也是真的，
    但 `generatedAt` 之外的所有職位內容都來自基準檔，不會反映站方最新變動。
 
