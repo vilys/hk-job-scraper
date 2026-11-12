@@ -112,6 +112,19 @@ class TestStartBat(unittest.TestCase):
         self.assertIn("requirements.txt", text)
         self.assertIn("chcp 65001", text)
 
+    def test_launcher_checks_python_before_blaming_dependencies(self):
+        """沒裝 Python 時要明確請使用者裝 Python，不得誤報「缺套件」。"""
+        text = (ROOT / "start.bat").read_text(encoding="ascii")
+        for expected in ('"%PY%" --version', "goto :nopython", ":oldpython",
+                         "python.org", "Add python.exe to PATH",
+                         "Microsoft Store", "Python 3.10+ was not found"):
+            self.assertIn(expected, text)
+        # 前提檢查必須排在依賴檢查之前，順序一反就會回到原本的誤導訊息
+        self.assertLess(text.index('"%PY%" --version'),
+                        text.index("import requests, bs4, lxml"))
+        self.assertLess(text.index("goto :nopython"),
+                        text.index("Project dependencies are missing"))
+
 
 if __name__ == "__main__":
     unittest.main()

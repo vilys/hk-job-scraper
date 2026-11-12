@@ -15,6 +15,15 @@ echo hk-job-scraper / guided mode
 echo Python: %PY%
 echo.
 
+rem Check the interpreter itself BEFORE blaming dependencies. Without this,
+rem a missing python.exe fails the import check below and the launcher wrongly
+rem reports "dependencies are missing" and then "Install failed".
+"%PY%" --version >nul 2>&1
+if errorlevel 1 goto :nopython
+
+"%PY%" -c "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)" >nul 2>&1
+if errorlevel 1 goto :oldpython
+
 "%PY%" -c "import requests, bs4, lxml" >nul 2>&1
 if not errorlevel 1 goto :ready
 
@@ -26,6 +35,23 @@ if errorlevel 1 goto :fail
 
 :ready
 "%PY%" -m hkjobs guide
+goto :end
+
+:nopython
+echo Python 3.10+ was not found, or could not start.
+echo Please install Python 3.10+ from https://www.python.org/downloads/
+echo During setup, tick "Add python.exe to PATH", then reopen this window.
+echo If the Microsoft Store opened instead, that is only a Windows app alias:
+echo install the real Python from python.org (or switch the alias off).
+echo Looking for: %PY%
+goto :end
+
+:oldpython
+echo This project needs Python 3.10 or newer; the interpreter found did not
+echo pass the version check (it may be too old, or only a Store alias).
+echo Please install Python 3.10+ from https://www.python.org/downloads/
+echo and tick "Add python.exe to PATH" during setup.
+echo Looking for: %PY%
 goto :end
 
 :fail

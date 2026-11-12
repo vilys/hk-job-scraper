@@ -1,38 +1,149 @@
 # 香港求職網站自動搜尋程式 (HK Job Scraper)
 
-> 🚀 **第一次用？看這一節就夠，60 秒能跑出第一份結果。** 後面的技術筆記是給要改程式的人看的，不必先讀。
+> 🐢 **第一次用？從 [60 秒上手](#quickstart) 開始，讀完四節就夠。** 這份文件兩千多行，
+> 大半是給改程式的人看的各站逆向筆記；求職者不必碰。
 
-## ⚡ 60 秒上手
+<a id="routes"></a>
+
+## 🧭 我該讀哪裡？（受眾路由）
+
+| 你是 | 請讀這幾節 | 可以完全略過 |
+|---|---|---|
+| **求職者／第一次用** | [60 秒上手](#quickstart) → [求職者情境食譜](#recipes) → [聚合儀表板](#dashboard) → [速率禮節](#etiquette) | 技術筆記、參數表、開發規範、附錄 |
+| **視障求職者** | 同上；看板請看[大字模式與鍵盤瀏覽](#dashboard)（預設 16px、可切 20px、skip link、Tab 鍵可達） | 同上 |
+| **AI agent／程式呼叫** | [`AGENTS.md`](AGENTS.md)（機器契約）＋[給 AI agent／程式呼叫](#agent) | 技術筆記、求職者食譜 |
+| **要改站／加據點的開發者** | [開發規範](#rules) → [功能特性](#features) → [完整命令列參數](#params) → [附錄：各站技術筆記](#appendix) | 60 秒上手、食譜 |
+
+> 螢幕報讀器：本文以 `##` 分主章節、`###` 分小節，附錄內再降一層；目錄每個連結都有
+> 固定錨點，可直接跳。[附錄](#appendix) 開始處另有「求職者到此為止」的明顯標記。
+
+<a id="toc"></a>
+
+## 📚 目錄
+
+**求職者（讀這四節就夠）**
+- [⚡ 60 秒上手：從零到第一份結果](#quickstart)
+- [🍳 求職者情境食譜（可直接複製）](#recipes)
+- [📊 聚合儀表板（HTML 大字／鍵盤瀏覽）](#dashboard)
+- [🐢 速率禮節（請先讀）](#etiquette)
+
+**進階使用／agent**
+- [🧭 引導模式的兩個保證](#guide) · [🧩 聚合模式 `--source all`](#aggregate)
+- [🤖 給 AI agent／程式呼叫（hkjobs）](#agent) · [⚙️ 環境要求與安裝](#install)
+- [📖 完整命令列參數](#params) · [📊 各站功能支援矩陣](#matrix) · [使用範例](#examples)
+- [🗺️ 各站地區／字典章節](#geo) · [📊 輸出格式](#output) · [🧓 舊入口 `main.py` 範例（legacy）](#legacy)
+
+**開發者／附錄**
+- [📌 開發規範](#rules) · [✨ 功能特性](#features) · [📁 專案結構](#structure)
+- [🏗️ 架構設計](#architecture) · [⚠️ 已知限制](#limits) · [🩺 全站健康檢查](#health) · [🧪 離線測試](#tests)
+- [📚 附錄：各站技術筆記與字典（求職者可略過）](#appendix) · [🗺️ 路線圖](#roadmap)
+
+---
+
+<a id="quickstart"></a>
+
+## ⚡ 60 秒上手：從零到第一份結果
+
+全程**不必背旗標、不必先懂 pip**。四個步驟：
+
+### 第 1 步｜取得程式
+
+**方式 A：有 git（開發者）**
 
 ```bash
-# 1) 取得程式
 git clone https://github.com/vilys/hk-job-scraper.git
 cd hk-job-scraper
-
-# 2) 安裝依賴（先選 A 就好，想跑更多站再回頭裝 B）
-#    A. 最小安裝 —— 足夠跑「不需要瀏覽器」的據點
-pip install requests beautifulsoup4 lxml
-
-#    B. 完整安裝 —— 要跑 Moovup / JobsDB / foundit / 獵聘 等才需要
-# pip install -r requirements.txt
-# playwright install chromium        # 只需執行一次
-
-# 3) 跑第一支（推薦：勞工處。免瀏覽器、免登入、免 cookie）
-python main.py --source gov_hk --keyword "會計" --pages 1
 ```
 
-結果會寫到 `output/gov_hk_會計.json`；想要 Excel 可直接開的格式，把結尾換成 `--output csv`。
+**方式 B：沒有 git（推薦給非技術用戶）——下載 ZIP**
+
+1. 用瀏覽器開專案 GitHub 頁面，按綠色 **Code** → **Download ZIP**。
+   （若專案為 private，請先登入有存取權的 GitHub 帳號。）
+2. 把 ZIP **解壓縮**（Windows：右鍵 → 解壓縮全部；macOS：雙擊）。
+3. 進入解壓出來的資料夾（通常叫 `hk-job-scraper-master/`），接著做第 2 步／第 3 步。
+
+> ⚠️ **解壓後的路徑不要含空白或中文字元**，例如放在 `C:/jobs/hk-job-scraper/`
+> 或 `~/hk-job-scraper/` 最穩；放在「桌面／下載／我的文件」等中文路徑下，
+> 部分 Python 工具與 `start.bat` 容易踩到編碼或引號問題。
+
+### 第 2 步｜確認 Python 3.10+（前提，一次就好）
+
+```bash
+python --version
+```
+
+看到 `Python 3.10.x` 以上即可。若沒有：
+
+- 到 **python.org/downloads** 下載並安裝 Python 3.10+。
+- 安裝時**勾選 `Add python.exe to PATH`**，裝完**重開終端機**再跑一次 `python --version`。
+- ⚠️ 若輸入 `python` 後跳出 **Microsoft Store**，代表系統只有 Windows 的
+  App Execution Alias、**不是真的 Python**：回到 python.org 安裝，或到
+  「設定 → 應用程式 → 應用程式執行別名」把 `python.exe` 關掉。
+- macOS／Linux 請用 `python3 --version`，並把本文後續指令的 `python` 換成 `python3`。
+
+> 其他前提（Playwright、本機 Google Chrome）只影響**特定據點**，第一次用不到；
+> 需要時再看[環境要求與安裝](#install)。
+
+### 第 3 步｜Windows：直接雙擊 `start.bat`
+
+在剛剛解壓／clone 出來的資料夾裡**雙擊 `start.bat`**。它會依序：
+
+1. 確認 Python 3.10+ 真的能執行（沒裝會明確請你到 python.org，不會誤報「缺套件」）；
+2. 檢查 `requests` / `beautifulsoup4` / `lxml`，缺了就問一次要不要自動
+   `pip install -r requirements.txt`；
+3. 進入引導模式。
+
+**macOS／Linux，或想自己開終端機：**
+
+```bash
+python -m hkjobs          # 不加任何參數＝引導模式
+python -m hkjobs guide    # 同上，明確指定子命令
+```
+
+（`pip install -e .` 之後也可以直接用 `hkjobs`；`command not found` 的處理見[環境要求與安裝](#install)。）
+
+### 第 4 步｜用編號選，拿到第一份結果
+
+引導模式會一題一題問，全部用**數字**回答，不必記 `--source` 的名字：
+
+| 題目 | 建議 |
+|---|---|
+| 一、要搜尋哪一個站？ | 第一次選 **2）勞工處（gov_hk）** |
+| 二、關鍵字 | 例如 `文員`；直接 Enter = 不限定 |
+| 三、工作種類 | 選項來自該站字典，直接 Enter = 不指定 |
+| 四、最近幾天 | 選 **2）= 3 天內**（`1` 不限定、`3` = 7 天內、`4` = 14 天內、`5` = 30 天內） |
+| 五、補齊公司名／日期缺口 | 第一次選 **1）不需要**（較省請求） |
+
+選完會**先印出完整命令**再問 `執行？（Y/n）`。按 `Y` 就會抓一頁，把職位
+（標題／公司／地區／薪金／刊登日）列在終端機上——**這就是你的第一份結果**。
+
+> 📌 **引導模式只印在終端，不會寫檔**（它組出的命令刻意不含 `--out`）。
+> 想存成檔案、做成 HTML 看板，請照下面「想留一份檔案」的兩行指令。
+> 引導模式固定 `--pages 1`，一次只抓一頁，遵守[速率禮節](#etiquette)。
+
+**為什麼第一次建議選勞工處 `gov_hk`？** 它是政府網站，ASP.NET 伺服器渲染、
+沒有 Cloudflare、不需要登入，是全專案門檻最低的據點。先用它確認環境沒問題，
+再去挑戰需要瀏覽器的站——出錯時只需懷疑一件事，而不是三件。
 
 > 📌 **第一次看到「公司」欄位是空的，不是壞了。** 勞工處列表頁實測（2026-11-11）只有
 > 標題／薪金／地區／職位編號，**沒有僱主欄位**；公司名稱、職責描述、刊登日期要進詳情頁
 > 才拿得到。加上 `--detail` 就會補齊，代價是**每筆多 1 支請求**——所以預設關閉，請自行斟酌量。
 > `hkjobs` 的人類模式會在清單下方自動提示這件事，不必自己猜。
 
-**為什麼第一支建議用 `gov_hk`？** 它是政府網站，ASP.NET 伺服器渲染、沒有 Cloudflare、不需要登入，
-是全專案門檻最低的據點。先用它確認環境沒問題，再去挑戰需要瀏覽器的站——這樣出錯時，
-你只需要懷疑一件事，而不是三件。
+**想留一份檔案／做成 HTML 看板**（可選的下一步，此時才需要旗標）：
 
-**各站需要什麼？**
+```bash
+python -m hkjobs search --source gov_hk --pages 1 --keyword 文員 --out output/文員.json
+python build_dashboard.py
+```
+
+第一行把結果寫到 `output/文員.json`；第二行把 `output/` 裡的檔案聚合成
+`output/dashboard.html`，**直接雙擊就能開**（有大字模式與鍵盤瀏覽，見[聚合儀表板](#dashboard)）。
+這就是本專案的分工：**CLI 抓、HTML 讀**。
+
+> ⚠️ `--out` 的檔案已存在時會拒絕覆蓋並回 `exit 2`；確定要重寫才加 `--force`。
+
+**各站需要什麼？**（第一次用不到，想跑更多站再回頭看）
 
 | 需求 | 據點 |
 |---|---|
@@ -40,39 +151,34 @@ python main.py --source gov_hk --keyword "會計" --pages 1
 | 需要 Playwright + `playwright install chromium` | Moovup、JobsDB、Recruit、Indeed（停用中） |
 | **另需本機安裝 Google Chrome**（指紋辨識） | foundit、獵聘 `liepin`、BOSS直聘 |
 
-```bash
-# 其他常見用法
-python main.py --source gov_hk   --keyword "零售" --pages 2 --district 屯門 --days 7
-python main.py --source jobsdb   --keyword "data" --pages 2 --days 7 --output both
-python main.py --source moovup   --keyword "會計" --pages 3 --detail
-python main.py --source all      --keyword "會計" --pages 1        # 全部「已啟用」據點各跑 1 頁（自動略過停用來源）
-python main.py --help                                              # 完整參數
-```
+<a id="guide"></a>
 
-### 🧭 不想背旗標？用引導模式
+### 🧭 引導模式的兩個保證
 
-```bash
-python -m hkjobs            # 不加任何參數：一題一題用編號選
-python -m hkjobs guide     # 同上，明確指定子命令
-```
+- **中文關鍵字在 Windows 也不會踩雷**：`contract.configure_io()` 會把**被重定向**
+  的 stdin（管道／檔案）改用 UTF-8 讀取，`read_input()` 再修補萬一殘留的
+  lone surrogate。因此「用手在終端機打字」與「腳本／agent 用 `printf` 餵中文」
+  兩條路都正常，cp950 主控台下不會出現 `UnicodeEncodeError`。真實 console
+  走 Windows Unicode API，程式刻意不去 reconfigure 它。所有 `input()`
+  （引導模式各題、`--fill-gaps` 的 `y/N` 確認）共用同一套處理。
+- **完全不影響既有契約**：引導模式只組出一般的人類模式 `search` 命令；
+  `--json` 單一封套、exit code、旗標 API 與 `python main.py` 舊入口全部不變。
 
-Windows 使用者可以直接**雙擊 `start.bat`**：它會自動找 `venv`／`.venv`、檢查依賴
-（缺了就提示 `pip install -r requirements.txt`），再進入同一個引導模式。全程用編號選站、
-選職能、選天數，不必記 `--source` 的名字，也不會打錯字典值；選完會**先印出完整命令**
-再問要不要執行，看過一次就能把那行學起來。引導模式固定 `--pages 1`，遵守速率禮節。
+<a id="etiquette"></a>
 
-> 🐢 **中文關鍵字在 Windows 也不會踩雷**：`contract.configure_io()` 會把**被重定向**
-> 的 stdin（管道／檔案）改用 UTF-8 讀取，`read_input()` 再修補萬一殘留的
-> lone surrogate。因此「用手在終端機打字」與「腳本／agent 用 `printf` 餵中文」
-> 兩條路都正常，cp950 主控台下不會出現 `UnicodeEncodeError`。真實 console
-> 走 Windows Unicode API，程式刻意不去 reconfigure 它。所有 `input()`
-> （引導模式各題、`--fill-gaps` 的 `y/N` 確認）共用同一套處理。
+### 🐢 速率禮節（請先讀）
 
-> **分工**：`hkjobs` 負責「抓」，`build_dashboard.py` 負責「讀」。抓完執行
-> `python build_dashboard.py`，會把 `output/` 的結果聚合成一份可直接雙擊、
-> 有大字模式與鍵盤瀏覽的 HTML 看板（見「聚合儀表板」一節）。
+- **一次一站**：不要同時開兩個 `hkjobs`，也不要並行跑同一站。
+- **`--pages 1` 起跳**：引導模式已固定；手動下指令也請先 1 頁，確認結果再增加。
+- **`--source all` 偶爾用就好**：它會依序跑 9 站，別拿來天天巡檢。
+- **被擋就停**：出現驗證碼、403、非預期空結果，立刻停手，不要重試猛刷；被擋一次往往要等數天。
+- 站方請求間隔已寫死在 1.5–8 秒，請不要嘗試繞過。
 
-### 🧩 想一次看全部來源？（聚合模式，`hkjobs` 專屬）
+> 完整 SOP 見[全站健康檢查](#health)與 [`AGENTS.md`](AGENTS.md) 的「速率禮節」一節。
+
+<a id="aggregate"></a>
+
+## 🧩 想一次看全部來源？（聚合模式，`hkjobs` 專屬）
 
 ```bash
 python -m hkjobs search --source all --keyword 文員 --pages 1 --limit 20
@@ -90,7 +196,9 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --ye
 | 去重 | 同 URL、或同「標題＋公司＋**同一 ISO 刊登日**」才合併（保留 `sources` / `urls`）；**不同刊登日的重貼視為獨立職缺，不會被吞掉**；兩筆都沒有日期時才退回「標題＋公司」。`--no-dedup` 可關閉 |
 | 完整度小表 | 一眼看出哪一站缺公司／薪金／地區／日期，並給 `--detail`、`--fill-location` 等建議；`--fill-gaps` 可一鍵補齊 |
 
-#### 求職者情境食譜（可直接複製）
+<a id="recipes"></a>
+
+## 🍳 求職者情境食譜（可直接複製）
 
 上面三行是單一旗標展示；真正找工作時用下面三條**完整指令**即可，不必自己拼。
 指令以 `python -m hkjobs` 為準（fresh clone 免安裝就能跑）；已 `pip install -e .` 的人
@@ -153,7 +261,7 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 232 個測試、約 10 秒、零網路請求。
+> 233 個測試、約 11 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -197,6 +305,8 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 
 ---
 
+<a id="rules"></a>
+
 ## 📌 開發規範（重要！）
 
 > ⚠️ **用戶鐵律：每一家網站（每一座據點）都必須把「爬取方法」在文件上寫清楚，否則時間久了會混亂。**
@@ -218,6 +328,8 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 此外，**各站功能必須彼此隔離**：任一據點新增 / 修改某功能（如 `--sort` 選項、`--days` 行為、地區解析邏輯），不得影響其他據點的既有行為。每一項功能在各站是否支援、如何實作，均由該站爬蟲模組自行決定；不支援的功能應 `logger.warning` 後忽略並提示，絕不可報錯中斷或靜默改變其他站的輸出。新增據點時須同步更新下方「📊 各站功能支援矩陣」。
 
 ---
+
+<a id="features"></a>
 
 ## ✨ 功能特性
 
@@ -291,6 +403,8 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 
 ---
 
+<a id="structure"></a>
+
 ## 📁 專案結構
 
 ```
@@ -301,7 +415,7 @@ hk-job-scraper/
 ├── exporter.py             # JSON / CSV 匯出（增量 + 去重）
 ├── base_scraper.py         # 爬蟲抽象基類（search / get_detail / scrape_all）
 ├── build_dashboard.py      # 聚合 output/ 所有產出 → 單檔離線 HTML 儀表板（認得 v2 封套）
-├── start.bat              # Windows 一鍵啟動器：檢查依賴後進入 hkjobs guide
+├── start.bat              # Windows 新手入口：先驗 Python 3.10+、再檢查依賴 → hkjobs guide
 ├── pyproject.toml          # 打包與 hkjobs console script
 ├── AGENTS.md               # 給 AI agent／程式呼叫的機器契約
 ├── hkjobs/                 # agent 友善 CLI（search / sources / options / guide）
@@ -361,9 +475,11 @@ hk-job-scraper/
 
 ---
 
+<a id="install"></a>
+
 ## ⚙️ 環境要求與安裝
 
-- Python 3.10+
+- Python 3.10+（**第一次用請先照 [60 秒上手第 2 步](#quickstart) 跑 `python --version`**；Windows 的 Microsoft Store 別名坑也在那裡說明）
 - 需要 Playwright 的據點：**Moovup**（Cloudflare Turnstile）、**JobsDB**（Cloudflare）、**Indeed**（Cloudflare，⚠️ **須本機 `channel="chrome"`**）、**Recruit**（WebForms 翻頁需真瀏覽器）、**foundit**（⚠️ **須本機 `channel="chrome"`**，內建 Chromium 被 WAF 403）。**JobMarket / eFinancialCareers / OfferToday** 不需要（全程普通 requests）。
 - ⚠️ **foundit / 獵聘 / BOSS直聘 需要本機安裝 Google Chrome**：foundit 的 WAF 與獵聘、BOSS直聘的反爬均以指紋區分瀏覽器，模組以 `channel="chrome"`（系統 Chrome）headless 開啟；未安裝 Chrome 時會啟動失敗並提示。
 - 只需 `requests` + `beautifulsoup4`、不需瀏覽器的據點：**勞工處 gov.hk**、**LinkedIn**（訪客模式）。
@@ -393,28 +509,42 @@ playwright install chromium
 
 ---
 
-## 🚀 快速開始
+<a id="legacy"></a>
+
+## 🧓 舊入口 `main.py` 範例（相容保留 / legacy）
+
+> ⚠️ **`main.py` 是舊入口，新手請改用 [60 秒上手](#quickstart) 的 `start.bat`／引導模式。**
+> 本節只保留給既有腳本與既有習慣：參數、輸出路徑與行為**完全不變**，但舊入口**沒有**
+> `--json` 單一 JSON 封套、嚴格 exit code、引導模式與 `--source all` 聚合等 `hkjobs` 能力。
+> 完整機器契約見 [`AGENTS.md`](AGENTS.md)；`hkjobs` 旗標請看[給 AI agent／程式呼叫](#agent)
+> 與[完整命令列參數](#params)。
 
 ```bash
-# 搜尋「會計」，抓 3 頁，匯出 JSON（預設）
+# 以下全部是舊入口 main.py 的既有用法（相容保留，可照抄）
+# 基本：JSON（預設）
 python main.py --source moovup --keyword "會計" --pages 3
-
-# 同時匯出 JSON 與 CSV，並抓取每筆職位的詳情
+# 雙格式 + 詳情
 python main.py --source moovup --keyword "會計" --pages 5 --output both --detail
-
-# 勞工處 gov.hk：搜尋「會計」，抓 2 頁（每頁約 20 筆）
+# 勞工處 gov.hk：免瀏覽器、免登入
 python main.py --source gov_hk --keyword "會計" --pages 2
-
-# 勞工處 + 詳情 + 雙格式
 python main.py --source gov_hk --keyword "零售" --pages 3 --output both --detail
-
-# LinkedIn：訪客模式搜尋（無須登入），抓 3 頁
+# LinkedIn 訪客模式
 python main.py --source linkedin --keyword "data engineer" --pages 3
+# 其他常見用法
+python main.py --source gov_hk   --keyword "零售" --pages 2 --district 屯門 --days 7
+python main.py --source jobsdb   --keyword "data" --pages 2 --days 7 --output both
+python main.py --source moovup   --keyword "會計" --pages 3 --detail
+python main.py --source all      --keyword "會計" --pages 1        # 全部已啟用據點各跑 1 頁（自動略過停用來源）
+python main.py --help                                              # 完整參數
 ```
 
-抓取的結果會寫入 `output/<source>_<keyword>.json`（與 `.csv`），例如 `output/moovup_會計.json`、`output/gov_hk_會計.json`。
+抓取的結果會寫入 `output/<source>_<keyword>.json`（與 `.csv`），例如
+`output/moovup_會計.json`、`output/gov_hk_會計.json`；想要 Excel 可直接開的格式，
+把結尾換成 `--output csv`。
 
 ---
+
+<a id="agent"></a>
 
 ## 🤖 給 AI agent／程式呼叫（hkjobs）
 
@@ -462,6 +592,8 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 - `search --help` 附常用範例與各旗標預設值；`python build_dashboard.py` 可把 `output/` 的 v2 封套直接做成 HTML 看板（**CLI 抓、HTML 讀**）。
 - 完整契約與 agent 注意事項：見 [`AGENTS.md`](AGENTS.md)。
 
+<a id="params"></a>
+
 ## 📖 完整命令列參數
 
 | 參數 | 必填 | 預設 | 說明 |
@@ -477,6 +609,8 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 | `--industry` | 否 | 無 | 行業篩選（支援：勞工處、JobMarket、OfferToday）。JobsDB 無獨立行業維度，傳入會被忽略並提示。 |
 | `--sort` | 否 | 無（站方相關性） | 排序：**gov_hk 全選項支援**（`post_dt_desc`(新→舊) / `post_dt_asc`(舊→新) / `salary_desc`·`salary_asc`(月薪) / `yr_exp_asc`·`yr_exp_desc`(經驗) / `edu_lvl_asc`·`edu_lvl_desc`(學歷)）；**JobsDB 與 LinkedIn 僅支援 `post_dt_desc`**（新→舊），其餘選項為 gov_hk 專有、傳入會警告並回退預設。⚠️ **2026-11-11 起 `--days` 不再自動套 `post_dt_desc`**（舊行為會讓 `analyst` 搜尋被剛刊登的 Dealer／會計淹沒）；想按日期排請明確指定。 |
 | `--days` | 否 | 無 | 只保留最近 N 天內刊登的職位，**只做日期過濾、不改排序**。各站實作不同：勞工處 / JobsDB / LinkedIn / OfferToday 有**站方端**日期參數；Moovup 不支援（警告後忽略）；獵聘以 `refreshTime`（刷新日）近似。勞工處結果不含 `posted_date`、亦不含公司名，兩者都需 `--detail`。詳見矩陣「近期」列。 |
+
+<a id="matrix"></a>
 
 ### 📊 各站功能支援矩陣（重要：功能互不相連）
 
@@ -524,6 +658,8 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 `hkjobs --source all` 的人類摘要會自動印出這張表並給建議；`--json` 的 `summary.sources[].coverage` 可程式讀取。
 
 > 🤖 機器可讀版本：`hkjobs sources --json`（能力表由 `hkjobs/capabilities.py` 提供，與本表同步維護；各站 `notes` 亦收錄上述限制）。
+
+<a id="examples"></a>
 
 ### 使用範例
 
@@ -691,6 +827,8 @@ python main.py --source zhipin --keyword "engineer"
 
 ---
 
+<a id="geo"></a>
+
 ## 🗺️ 按地區篩選（Moovup）
 
 Moovup 的搜尋 API 原生支援 `district` 過濾。本程式已內建 32 個香港地區的對照字典，
@@ -831,6 +969,8 @@ JobsDB 使用**完全自有的 slug / 查詢體系**，與 Moovup 的 shortCode�
 
 ---
 
+<a id="output"></a>
+
 ## 📊 輸出格式
 
 ### JSON（`output/moovup_<keyword>.json`）
@@ -859,6 +999,8 @@ JobsDB 使用**完全自有的 slug / 查詢體系**，與 Moovup 的 shortCode�
 > **增量與去重**：重跑同一關鍵字會自動與舊檔合併，以 `job_id` 去重（後抓到的覆蓋舊值）。
 
 ---
+
+<a id="dashboard"></a>
 
 ## 📊 聚合儀表板（`build_dashboard.py`）
 
@@ -919,6 +1061,8 @@ python build_dashboard.py --glob "output/*.json"
 
 ---
 
+<a id="architecture"></a>
+
 ## 🏗️ 架構設計
 
 ```
@@ -941,6 +1085,8 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 `get_detail()`，再到 `scrapers/__init__.py` 的 `SCRAPERS` 註冊即可，無需改動主流程。
 
 ---
+
+<a id="limits"></a>
 
 ## ⚠️ 已知限制與注意事項
 
@@ -967,6 +1113,8 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 - **反爬禮貌**：預設已加入請求間隔與隨機抖動，請勿惡意高併發爬取。
 
 ---
+
+<a id="health"></a>
 
 ## 🩺 全站健康檢查（SOP + 基準）
 
@@ -1044,6 +1192,8 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 
 ---
 
+<a id="tests"></a>
+
 ## 🧪 離線測試（`tests/`）
 
 > 🐢 **為什麼要有測試**：這是爬蟲專案，任何驗證若只能靠真實請求，就與
@@ -1051,7 +1201,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 232 個測試，約 10 秒，零網路請求
+python -m unittest discover -s tests -v      # 233 個測試，約 11 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。
@@ -1104,7 +1254,29 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 
 ---
 
-## 🧭 技術筆記（Moovup 逆向要點）
+<a id="appendix"></a>
+
+## 📚 附錄：開發者專區（各站逆向技術筆記）
+
+> 🛑 **求職者讀到這裡就可以停了。** 以下約 900 行是給要改爬蟲、加據點的人看的：
+> 各站逆向技術筆記、地區字典與路線圖；**功能使用完全不需要讀**。
+> 依[開發規範](#rules)，每一座據點都必須在這裡留下爬取方法與地區字典說明，故內容刻意完整保留。
+
+**附錄分組**（皆為既有內容；本輪只加路由與標題層級，未刪改）：
+
+| 組 | 內容 |
+|---|---|
+| 逆向技術筆記 | Moovup、勞工處 gov.hk、JobsDB、LinkedIn、Indeed、Recruit、JobMarket、foundit、eFinancialCareers、獵聘、BOSS直聘、OfferToday |
+| 地區／字典章節 | 緊接在對應技術筆記之後（LinkedIn、Indeed、Recruit、JobMarket、foundit、eFinancialCareers、獵聘、OfferToday） |
+| 路線圖 | [🗺️ 路線圖（依計劃書）](#roadmap)，附錄最末 |
+
+> 標題層級：本附錄為 `##`，其下各站筆記為 `###`、小節為 `####`，供螢幕報讀器依層跳轉。
+> 附錄之前另有幾節 `## 🗺️ 按地區篩選`（Moovup／勞工處／JobsDB），屬[各站字典章節](#geo)，
+> 同為開發者向內容，求職者可略過。
+
+---
+
+### 🧭 技術筆記（Moovup 逆向要點）
 
 - 首頁 `https://moovup.com/hk/` 為 Nuxt SSR，職位結果由前端透過 GraphQL 取得：
   `POST https://api.moovup.com/v2/seeker`，查詢 `QueryJobs`。
@@ -1115,7 +1287,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 
 ---
 
-## 🧭 技術筆記（勞工處 gov.hk 逆向要點）
+### 🧭 技術筆記（勞工處 gov.hk 逆向要點）
 
 - 真實網站位於 **`www1.jobs.gov.hk`** 子域（首頁 `www.jobs.gov.hk` 會 307 跳轉過去）；語言路徑 `/0/tc/`。
 - 搜尋為 ASP.NET MVC 表單：**POST `/0/tc/jobseeker/jobsearch/search/`** 帶 `criteria.*` 欄位
@@ -1153,7 +1325,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 
 ---
 
-## 🧭 技術筆記（JobsDB 逆向要點）
+### 🧭 技術筆記（JobsDB 逆向要點）
 
 - **真實網域**：`https://hk.jobsdb.com`（首頁 `/` 會經 Cloudflare；搜尋結果在 `/jobs?keywords=K&page=N`）。
 - **反爬保護：Cloudflare**。實測**用真瀏覽器（Playwright Chromium）即可通過，不會跳出 Turnstile 挑戰**。
@@ -1232,7 +1404,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 
 ---
 
-## 🧭 技術筆記（LinkedIn 逆向要點）
+### 🧭 技術筆記（LinkedIn 逆向要點）
 
 - **真實網域**：`https://www.linkedin.com`（職位搜尋在 `/jobs/search/`；單筆詳情免登入 API 在 `/jobs-guest/jobs/api/jobPosting/<id>`）。站台會依訪客 IP 把網域導向地區鏡像（如 `hk.linkedin.com`），但路徑不變，不影響爬取。
 - **反爬保護**：
@@ -1305,7 +1477,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
   | `posted_date` | 列表 `<time datetime="YYYY-MM-DD">`（優先）／相對時間文字（備援）／詳情頂部相對時間；`days_since_posted()` 三種格式皆可解析 |
   | `scraped_at` | 抓取當下 `datetime.now()` |
 
-## 🗺️ 按地區篩選（LinkedIn）
+### 🗺️ 按地區篩選（LinkedIn）
 
 - LinkedIn 的 `location` 是**自由文字**，與 Moovup 的 shortCode、勞工處數字 ID、JobsDB 的 slug **三者完全獨立**，不可跨站混用。
 - **香港 18 區字典（2026-07-30 逆向）**：`scrapers/linkedin_geo.json` 收錄 18 區 + 全港，每區含中文區名 / 英文 / geoUrn / 別名。`--district` 命中字典時自動翻譯成**標準英文區名**餵給 `location=`（英文如 `Yuen Long` 命中較穩）：
@@ -1321,7 +1493,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 
 ---
 
-## 🧭 技術筆記（Indeed 逆向要點）
+### 🧭 技術筆記（Indeed 逆向要點）
 
   - 🐢 **2026-09-09 最新狀態：已定位根因，但最終卡在「IP 層級封鎖」（非程式可解）。**
     本次修復逐步排除三層防線，過程與結論如下（每層都有實測證據）：
@@ -1523,14 +1695,14 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
   | `posted_date` | **列表內嵌 `pubDate`（毫秒戳）折算「N day ago」**；`--detail` 時詳情面板 `age` / `datePublished` 亦可 |
   | `scraped_at` | 抓取當下 `datetime.now()` |
 
-## 🗺️ 按地區篩選（Indeed）
+### 🗺️ 按地區篩選（Indeed）
 
 - Indeed 的 `l` 是**自由文字**，與 Moovup 的 shortCode、勞工處數字 ID、JobsDB 的 slug、LinkedIn 的 `location` 文字**完全獨立**，不可跨站混用。
 - `--district` 直接作為 `l=` 文字傳入（預設 `Hong Kong`）。Indeed 會自行 geocode 成對應市場區。範例：
   - `python main.py --source indeed --keyword "data engineer" --district "Tsuen Wan"`（文字 `l=Tsuen Wan`）
   - `python main.py --source indeed --keyword "software engineer"`（不給 `--district`，預設 `Hong Kong`）
 
-## 🧭 技術筆記（Recruit 逆向要點）
+### 🧭 技術筆記（Recruit 逆向要點）
 
 - **真實網域**：`https://www.recruit.com.hk`（首頁 `/`，結果頁 `jobseeker/JobSearchResult.aspx`，詳情 `/job-detail/<公司slug>/<職稱slug>/<jobOrder>`，另有 `/jobseeker/JobDetail.aspx?jobOrder=<ID>` 相容網址）。
 - **技術棧**：**ASP.NET WebForms + Vue 3 混合站**。無 Cloudflare、無 CAPTCHA；robots 寬鬆（僅禁會員頁）。
@@ -1581,7 +1753,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
   | `posted_date` | 列表 `td.post-date-col`（`YYYY-MM-DD`）；`--detail` 時 JSON-LD `datePosted` 亦可 |
   | `scraped_at` | 抓取當下 `datetime.now()` |
 
-## 🗺️ 按地區篩選（Recruit）
+### 🗺️ 按地區篩選（Recruit）
 
 - Recruit 的地區篩選走 **hidden 欄位 `locationSearchHidden`（逗號分隔數字 ID）**，與 Moovup 的 shortCode、勞工處的數字 ID、JobsDB 的 slug、LinkedIn / Indeed 的自由文字**完全獨立**，不可跨站混用。
 - 本程式內建 `scrapers/recruit_districts.json`：**94 個地區**（英文原名 + 45 個中文別名）。中英文皆可輸入：
@@ -1603,7 +1775,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - ⚠️ `--fill-location` 目前**僅 recruit 支援**；傳給其他來源會 `logger.warning` 後忽略（那些站列表已含地區），不會中斷。
 - 職能篩選（`--category`）同理由 `recruit_categories.json`（34 大類 + 290 細類，中英雙語）解析成 `jobCatSearchHidden` / `jobFuncSearchHidden`；給細類時會**自動補上所屬大類**（站方要求 jobFunc 必須搭配 jobCat 才生效），如 `--category "DBA"` → 細類 56121 + 大類「資訊科技」26000。
 
-## 🧭 技術筆記（JobMarket 逆向要點）
+### 🧭 技術筆記（JobMarket 逆向要點）
 
 - **真實網域**：`https://www.jobmarket.com.hk`（搜尋殼頁 `/Jobs/search?...`；職位列表端點 `/Job/JobList`；詳情 `/Job/CurrentJob?Jobid=<id>`）。
 - **技術棧**：J2EE / JSP。**無 Cloudflare 挑戰**（頁面只載入 CF 腳本，內容正常回）、無 CAPTCHA；robots 極寬鬆（僅禁 `/UpFiles/`）。**全程普通 `requests` 即可，`use_browser=False`**。
@@ -1637,7 +1809,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
   | `posted_date` | 列表 `p.post-date`（`04 Sep 2026`）；`--detail` 時 `05-Sep-2026` 亦可 |
   | `scraped_at` | 抓取當下 `datetime.now()` |
 
-## 🗺️ 按地區篩選（JobMarket）
+### 🗺️ 按地區篩選（JobMarket）
 
 - JobMarket 的地區篩選走 **雙參數體系**：`AreaID`（5 大區：香港島 / 九龍 / 新界 / 離島 / 其他）與 `AreaLocationID`（75 子區，如元朗=68、屯門=67、沙田=59），可逗號多選。與 Moovup 的 shortCode、勞工處數字 ID、JobsDB slug、Recruit 數字 ID、LinkedIn / Indeed 自由文字**完全獨立**，不可跨站混用。
 - 本程式內建 `scrapers/jobmarket_districts.json`：**80 項**（5 AreaID + 75 AreaLocationID，中英雙語）。中英文皆可輸入：
@@ -1648,7 +1820,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - 未知地區 `logger.warning` 後忽略，不報錯。
 - 職能（`--category`）由 `jobmarket_categories.json`（28 大類 + 195 細類）解析成 `JobFunctionID` / `SubJobFunctionID`；行業（`--industry`）由 `jobmarket_industries.json`（30 楘）解析成 `JobIndustryID`。**細類可直接單送，無需搭配大類**（與 Recruit 不同）。
 
-## 🧭 技術筆記（foundit 逆向要點）
+### 🧭 技術筆記（foundit 逆向要點）
 
 - **品牌沿革**：`monster.com.hk` **301 → `www.foundit.hk`**（Monster 亞太區 2022 年重整品牌為 foundit）——模組命名 `foundit`，README 註明「原 Monster HK」。
 - **指紋 WAF（本站最關鍵）**：`/search/*` 路徑對 Python `requests` 與 **Playwright 內建 Chromium headless** 一律 `403 Access Denied`（302 bytes）；但 **`chromium.launch(channel="chrome")`（本機 Google Chrome 指紋）headless 可過**（200 / 126KB 起）。職位詳情 `/job/*`、首頁 `/`、`/xmlsitemap/*` **不在封鎖範圍**，普通 requests 直達。
@@ -1679,7 +1851,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
   | `posted_date` | 列表相對日期（如 `13 hours ago`）；`--detail` 時 `YYYY-MM-DD` |
   | `scraped_at` | 抓取當下 `datetime.now()` |
 
-## 🗺️ 按地區篩選（foundit）
+### 🗺️ 按地區篩選（foundit）
 
 - foundit 的地區是 **46 個 SEO 瀏覽頁 slug**（來源 `jobs-by-locations-sitemap`），寫進網址路徑（`-in-<slug>`），與 Moovup 的 shortCode、勞工處數字 ID、JobsDB slug、Recruit 數字 ID、JobMarket 雙參數、LinkedIn / Indeed 自由文字**完全獨立**，不可跨站混用。
 - 本程式內建 `scrapers/foundit_locations.json`：**46 項**（name + 中文別名）。中英文皆可輸入：
@@ -1689,7 +1861,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - ⚠️ **粒度是站方瀏覽頁級**：香港只有 `hong-kong` / `kowloon` / `admiralty-kranji` / `gloucester-road` / `science-park` / `remote` 等少數項，**無元朗 / 屯門等細區**（該站未提供對應瀏覽頁）；另含台灣 / 新加坡 / 曼谷等亞洲地區（該站職源跨區）。
 - 未知地區 `logger.warning` 後忽略，不報錯。
 
-## 🧭 技術筆記（eFinancialCareers 逆向要點）
+### 🧭 技術筆記（eFinancialCareers 逆向要點）
 
 - **真實網域**：香港站 `https://www.efinancialcareers.hk`（`/jobs-hong-kong`、`/search-jobs/hong-kong` 等**常見路徑皆 404**——路徑規則與一般求職站不同）。職位詳情 `/jobs-<City>-<Region>-<標題>.id<數字>`。
 - **robots 線索**：`Disallow: /v1` 暗示版本化 API 一族 → 前端實際使用 **`https://job-search-ui.efinancialcareers.com/v3/efc/jobs/search`**。
@@ -1719,7 +1891,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
   | `posted_date` | API `postedDate`（ISO）取 `[:10]` |
   | `scraped_at` | 抓取當下 `datetime.now()` |
 
-## 🗺️ 按地區篩選（eFinancialCareers）
+### 🗺️ 按地區篩選（eFinancialCareers）
 
 - eFC 的地區走 API **`location` 自由文字參數**（40km 半徑模糊地理搜尋），但站方地區索引**僅支援大區級**，與 foundit 的 46 slug、JobMarket 的 80 項等**完全獨立**，不可跨站混用。
 - 本程式內建 `scrapers/efc_geo.json`：**3 大區**（中英文皆可輸入）：
@@ -1730,7 +1902,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 
 ---
 
-## 🧭 技術筆記（獵聘 liepin 逆向要點 — 2026-09-11 重做為香港據點；2026-09-14 停用）
+### 🧭 技術筆記（獵聘 liepin 逆向要點 — 2026-09-11 重做為香港據點；2026-09-14 停用）
 
 > **2026-09-11 重大更新**：原 Wave 5 版本判定「香港覆蓋未證實、多數回 0 筆」。本次重新偵察後證實
 > **獵聘有完整的香港職缺庫**（站方回報約 800 筆，含真實港區），並找出正確的過濾方式 → 升級為可用據點。
@@ -1826,7 +1998,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
   `location`/`salary`/`url`/`posted_date`）**零空值**；地區分布 湾仔区 11 /
   油尖旺区 7 / 观塘区 6 / 沙田区 4 / 香港 4 / 中西区 2 / 西贡区 2 / 其他 4。
 
-### 🗺️ 按地區篩選（獵聘）
+#### 🗺️ 按地區篩選（獵聘）
 
 - **層級**：站方只到**城市**層級（`320` 香港 / `330` 澳門 / `340` 台灣），
   **沒有分區碼**。分區名以字串形式出現在職缺的 `dq` 欄位（如 `香港-观塘区`），
@@ -1854,7 +2026,7 @@ python main.py --source liepin --district 观塘
 
 ---
 
-## 🧭 技術筆記（BOSS直聘 zhipin 逆向要點 — Wave 5 受限模組）
+### 🧭 技術筆記（BOSS直聘 zhipin 逆向要點 — Wave 5 受限模組）
 
 > **2026-09-11 複查**：站方防護已從「全站安全验证」改為**部分開放 + 登入牆**。
 > 首頁與海外專區可用純 `requests` 開啟（無安全驗證），但**香港職缺對訪客仍為零**
@@ -1889,7 +2061,7 @@ python main.py --source liepin --district 观塘
 
 ---
 
-## 🧭 技術筆記（OfferToday 逆向要點）
+### 🧭 技術筆記（OfferToday 逆向要點）
 
 > **前身 HKGoodJobs**（舊域 `hkgoodjobs.com` 全面 403，2026-09 止損）於 2026 年更名 **OfferToday** 重新上線，本據點為「Wave 3′ 復活賽」成果（R1–R10 低速偵察，2026-09）。
 
@@ -1942,7 +2114,7 @@ python main.py --source liepin --district 观塘
     `salaryDesc` / `workExperienceDesc` / `educationDesc` / `brandIntroduce` / `addressVO`。
 - **禮節**：`request_delay` 設為 3 秒（推薦池 API 較敏感），`pageSize` 上限 10 → 每頁 1 支請求。
 
-## 🗺️ 按地區篩選（OfferToday）
+### 🗺️ 按地區篩選（OfferToday）
 
 - OfferToday 的地區走 API 的 **`subDistrictCodes`** 參數，吃**純 code**：
   - 區級　→ `HK101304`（元朗全區）
@@ -1961,7 +2133,9 @@ python main.py --source liepin --district 观塘
 
 ---
 
-## 🗺️ 路線圖（依計劃書）
+<a id="roadmap"></a>
+
+### 🗺️ 路線圖（依計劃書）
 
 | 階段 | 網站 | 難度 | 狀態 |
 |------|------|------|------|

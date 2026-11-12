@@ -115,7 +115,7 @@ lone surrogate。若自訂工具需要讀 `input()`，請改用 `read_input()`�
 | 入口 | 用途 |
 |---|---|
 | `python -m hkjobs guide`／`python -m hkjobs`（無子命令） | 互動引導：用編號選站、職能、天數，固定 `--pages 1`；選完**先印完整命令**再問要不要執行，取消即零請求 |
-| 雙擊 `start.bat`（Windows） | 自動找 `venv`／`.venv`、檢查依賴（缺了提示 `pip install -r requirements.txt`）後進入同一個引導模式 |
+| 雙擊 `start.bat`（Windows） | **新手入口**：先確認 Python 3.10+ 存在（沒裝會請你到 python.org，不再誤報「缺套件」），才自動找 `venv`／`.venv`、檢查依賴（缺了提示 `pip install -r requirements.txt`），最後進入同一個引導模式 |
 | `python build_dashboard.py` | 把 `output/` 的 JSON／CSV 做成單檔 HTML 看板，**認得 CLI 的 schema v2 封套**；預設 16px、大字模式、鍵盤可達；`--out` 純檔名放 `output/`，含目錄或絕對路徑照給，寫入失敗回 `exit 2` 且不丟 traceback |
 
 `build_dashboard.py` 的日期解析統一呼叫 `hkjobs.aggregate.parse_date`（不再有第二套 regex），
