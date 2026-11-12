@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """互動引導模式：給不想背旗標、也不想查字典的求職者。
 
-純標準庫 `input()`，零新依賴。這是**新增入口**，不改既有旗標 API，
+輸入統一走 `contract.read_input()`（純標準庫 `input()` 加上 stdin 編碼修補），
+零新依賴。這是**新增入口**，不改既有旗標 API，
 也不影響 `--json` 契約：引導模式只會組出一般的人類模式 `search` 命令。
+Windows cp950 下管道送中文關鍵字也不會產生 lone surrogate（見 contract.py）。
 
 設計：
 - 站別與職能選項直接來自 `capabilities.SOURCES` 與 `options.load_dimension()`，
@@ -15,7 +17,7 @@ from __future__ import annotations
 from typing import Callable
 
 from hkjobs.capabilities import SOURCES
-from hkjobs.contract import configure_io, EXIT_OK
+from hkjobs.contract import configure_io, read_input, EXIT_OK
 from hkjobs.options import load_dimension
 
 MAX_DICT_CHOICES = 12
@@ -40,7 +42,9 @@ def _choose(prompt: str, choices: list[tuple[str, object]],
         print(f"  {idx}) {label}")
     for _ in range(_MAX_RETRY):
         try:
-            raw = input(f"請輸入編號 [1-{len(choices)}，Enter = {default + 1}，q = 離開]：").strip()
+            raw = read_input(
+                f"請輸入編號 [1-{len(choices)}，Enter = {default + 1}，q = 離開]："
+            ).strip()
         except (EOFError, KeyboardInterrupt):
             return None
         if not raw:
@@ -56,7 +60,7 @@ def _choose(prompt: str, choices: list[tuple[str, object]],
 
 def _free_text(prompt: str, default: str = ""):
     try:
-        answer = input(prompt).strip()
+        answer = read_input(prompt).strip()
     except (EOFError, KeyboardInterrupt):
         return None
     return answer or default

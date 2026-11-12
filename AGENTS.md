@@ -77,13 +77,28 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 
 ## 互動引導與 Windows 啟動器
 
-- `hkjobs guide` 或 **`hkjobs`（無子命令）** → `hkjobs/guide.py`，純標準庫 `input()`、零新依賴。
+- `hkjobs guide` 或 **`hkjobs`（無子命令）** → `hkjobs/guide.py`，零新依賴；所有輸入走 `contract.read_input()`。
 - 站別選項來自 `capabilities.SOURCES`，職能選項來自 `options.load_dimension()`；固定 `--pages 1`。
 - 選完先印**完整命令**（`display_command()`）再問 `Y/n`；取消或 EOF = 零請求、`exit 0`。
 - `run_guide(execute=...)` 可注入執行函式供零網路測試；引導模式只組出一般人類模式命令。
 - `start.bat`：ASCII-only、`chcp 65001`、自動找 `venv` / `.venv`、缺依賴提示
   `pip install -r requirements.txt`，最後進 `python -m hkjobs guide`。
 - **不變**：既有旗標 API、`--json` 單一 JSON 封套、`python main.py` 舊入口、exit code 全部不受影響。
+
+### stdin 編碼（2026-11-12 修）
+
+`configure_io()` 現在同時管輸出與輸入：
+
+| 情境 | stdin 處理 |
+|---|---|
+| 真實 console（`isatty()` 為 True） | **完全不動**。Windows 走 Unicode API／PEP 528，本來就是 UTF-8；互動式打字不受影響 |
+| 管道／檔案導向（`isatty()` 為 False） | `reconfigure(encoding="utf-8", errors="surrogateescape")`；避免 cp950 把 UTF-8 位元組解成 lone surrogate |
+| 已出現 lone surrogate | `repair_stdin_text()` 用 `surrogateescape` 取回原始位元組，依 `utf-8 → cp950 → big5hkscs → gb18030` 重解；UTF-8 管道與 `cmd.exe` 的 cp950 管道都能還原中文 |
+
+`read_input(prompt)` 是**所有** `input()` 的單一入口（引導模式各題、CLI 的
+`--fill-gaps` `y/N` 確認），`EOFError`／`KeyboardInterrupt` 原樣丟給呼叫端。
+回歸測試見 `tests/test_stdin_encoding.py`（含未設 `PYTHONIOENCODING` 的
+cp950 管道重現、反向 cp950 位元組、console 不被 reconfigure 的保證）。
 
 ## 兩套去重語義（勿混用）
 
@@ -185,9 +200,9 @@ CSV；日期解析**唯一來源是 `hkjobs.aggregate.parse_date`**，`age_days`
 - 新增／變更據點行為，必須同步更新：`hkjobs/capabilities.py`、README 的「各站功能支援矩陣」與該站技術筆記。
 - 變更多人類輸出／旗標，必須同步更新：`README.md` 的「給 AI agent／程式呼叫」章節、本文件命令段、`search --help` 的 epilog 與 `hkjobs/args.py` 的旗標說明；若動到離線重播，另同步 `tools/replay_aggregation.py` 與 `tools/README.md`。薪金欄顯示格式另同步 README「薪金換算基準」與本文件「人類模式」段（含範例輸出字串）。
 - 新增／調整旗標時，`hkjobs/capabilities.py` 是能力與薪金換算基準的單一資料源（`GAP_FILL_ACTIONS` / `SALARY_CONVERSION_BASIS`），不要在 CLI 裡另寫一份。
-- 變更篩選值驗證、引導模式或啟動器，須同步 `hkjobs/validation.py`／`hkjobs/guide.py`／`start.bat`、`tests/test_dimension_validation.py`／`tests/test_guide.py`、本文件專節與 README「60 秒上手」。
+- 變更篩選值驗證、引導模式、啟動器或 stdin 編碼，須同步 `hkjobs/validation.py`／`hkjobs/guide.py`／`hkjobs/contract.py`／`start.bat`、`tests/test_dimension_validation.py`／`tests/test_guide.py`／`tests/test_stdin_encoding.py`、本文件專節與 README「60 秒上手」。
 - 變更 HTML 看板，須同步 `build_dashboard.py`、`tests/test_dashboard.py`、README「聚合儀表板」章節；日期解析只能呼叫 `hkjobs/aggregate.py::parse_date`，不得再養第二套 regex。
-- Windows cp950：所有人類輸出、`build_dashboard.py` 與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。`start.bat` 必須維持全 ASCII。
+- Windows cp950 **同時管輸出與輸入**：所有人類輸出、`build_dashboard.py` 與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。輸入面不得讓管道／agent 送中文時產生 lone surrogate 再炸在 `print()`；新增 `input()` 一律改用 `contract.read_input()`，不得直接呼叫 builtin。`start.bat` 必須維持全 ASCII。
 - 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。**但「該站支援且字典打錯」屬另一情境，須 exit 2 擋下**（見本文件「篩選值前置驗證」）。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 220 個測試。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 232 個測試。
 - 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README；去重數字改動時一併更新 `tools/README.md` 的基準說明。

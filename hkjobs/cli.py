@@ -26,6 +26,7 @@ from hkjobs.contract import (
     emit_json,
     exit_code_for,
     now_iso,
+    read_input,
     search_payload,
 )
 from hkjobs.guide import run_guide
@@ -355,7 +356,7 @@ def _announce_gap_fill(args: argparse.Namespace, lines: list[str], total: int) -
     if args.yes:
         return None
     try:
-        answer = input("繼續？（y/N）")
+        answer = read_input("繼續？（y/N）")
     except EOFError:
         answer = ""
     if answer.strip().lower() not in ("y", "yes"):

@@ -61,6 +61,13 @@ Windows 使用者可以直接**雙擊 `start.bat`**：它會自動找 `venv`／`
 選職能、選天數，不必記 `--source` 的名字，也不會打錯字典值；選完會**先印出完整命令**
 再問要不要執行，看過一次就能把那行學起來。引導模式固定 `--pages 1`，遵守速率禮節。
 
+> 🐢 **中文關鍵字在 Windows 也不會踩雷**：`contract.configure_io()` 會把**被重定向**
+> 的 stdin（管道／檔案）改用 UTF-8 讀取，`read_input()` 再修補萬一殘留的
+> lone surrogate。因此「用手在終端機打字」與「腳本／agent 用 `printf` 餵中文」
+> 兩條路都正常，cp950 主控台下不會出現 `UnicodeEncodeError`。真實 console
+> 走 Windows Unicode API，程式刻意不去 reconfigure 它。所有 `input()`
+> （引導模式各題、`--fill-gaps` 的 `y/N` 確認）共用同一套處理。
+
 > **分工**：`hkjobs` 負責「抓」，`build_dashboard.py` 負責「讀」。抓完執行
 > `python build_dashboard.py`，會把 `output/` 的結果聚合成一份可直接雙擊、
 > 有大字模式與鍵盤瀏覽的 HTML 看板（見「聚合儀表板」一節）。
@@ -146,7 +153,7 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 220 個測試、約 6 秒、零網路請求。
+> 232 個測試、約 10 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -303,9 +310,9 @@ hk-job-scraper/
 │   ├── capabilities.py     # 12 站能力矩陣
 │   ├── options.py          # 字典查詢 adapter
 │   ├── validation.py       # 無效字典值前置驗證（exit 2、零請求）
-│   ├── guide.py           # 互動引導模式（純標準庫）
+│   ├── guide.py           # 互動引導模式（read_input／純標準庫）
 │   ├── aggregate.py        # 日期／薪金正規化、去重、排序、完整度
-│   └── contract.py         # JSON 封套與 exit code
+│   └── contract.py         # JSON 封套、exit code 與 stdin/stdout 編碼設定
 ├── LICENSE                 # MIT 授權
 ├── .gitattributes          # 換行符策略：全專案統一 LF（消除 Windows CRLF 警告）
 ├── tools/                  # 診斷／偵察腳本（非常規執行所需，見 tools/README.md）
@@ -342,6 +349,7 @@ hk-job-scraper/
 │   ├── test_aggregation.py # 聚合管線（含去重保留重貼）
 │   ├── test_dimension_validation.py # 無效篩選值前置驗證
 │   ├── test_guide.py       # 引導模式與 start.bat
+│   ├── test_stdin_encoding.py # cp950 管道輸入中文不崩潰
 │   ├── test_dashboard.py  # 儀表板 v2 輸入 / 無障礙 / --out
 │   └── test_dictionaries.py # 17 個字典的完整性與跨站隔離
 ├── docs/
@@ -1043,7 +1051,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 220 個測試，約 6 秒，零網路請求
+python -m unittest discover -s tests -v      # 232 個測試，約 10 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。

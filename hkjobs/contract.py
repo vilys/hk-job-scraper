@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -37,13 +38,78 @@ class SourceResult:
     error: str | None = None
 
 
+# Windows 下「被重定向」的 stdin 會用 locale 編碼（cp950）去解 UTF-8 位元組，
+# 產生 U+DC80–U+DCFF 的 lone surrogate；這種字串再印到 UTF-8 stdout 就會
+# UnicodeEncodeError: surrogates not allowed（引導模式 pipe 中文關鍵字的 crash）。
+# 真實 console 走 Unicode API（PEP 528），stdin 本來就是 UTF-8，不需也不該動。
+_SURROGATE = re.compile(r"[\udc80-\udcff]")
+# 復原原始位元組後的候選解碼順序：UTF-8 優先，再照顧港澳／簡體舊編碼。
+_INPUT_DECODE_ORDER = ("utf-8", "cp950", "big5hkscs", "gb18030")
+
+
 def configure_io() -> None:
-    """統一 stdout/stderr 為 UTF-8，避免 Windows cp950 輸出中文 JSON 失敗。"""
+    """統一 stdout/stderr 為 UTF-8，並對齊「非互動式」stdin 的輸入編碼。
+
+    輸出面：避免 Windows cp950 主控台印中文 JSON／提示失敗。
+    輸入面：管道／檔案導向的 stdin 改用 UTF-8 + surrogateescape；
+    **互動式 console（isatty=True）刻意跳過**，不干擾 Windows Unicode API。
+    """
     for stream in (sys.stdout, sys.stderr):
         try:
             stream.reconfigure(encoding="utf-8")
         except (AttributeError, ValueError, OSError):
             pass
+    _configure_stdin()
+
+
+def _configure_stdin() -> None:
+    """只處理被重定向的 stdin；已是 UTF-8 + surrogateescape 時不動。"""
+    stdin = sys.stdin
+    if stdin is None:
+        return
+    try:
+        if stdin.isatty():
+            return
+        enc = (getattr(stdin, "encoding", "") or "").lower().replace("_", "-")
+        err = (getattr(stdin, "errors", "") or "").lower()
+        if enc in ("utf-8", "utf8") and err == "surrogateescape":
+            return
+        stdin.reconfigure(encoding="utf-8", errors="surrogateescape")
+    except (AttributeError, ValueError, OSError, TypeError):
+        # StringIO / mock 物件沒有 reconfigure；不動它，read_input 仍會修補文字。
+        pass
+
+
+def repair_stdin_text(text: str) -> str:
+    """把 lone surrogate 還原成原始位元組，再用正確編碼重解一次。
+
+    surrogateescape 讓我們能無損取回原始位元組：
+    - stdin 仍用 cp950、管道送 UTF-8 → 取回 UTF-8 位元組 → 解成中文；
+    - stdin 已用 UTF-8、管道送 cp950（cmd.exe 常見）→ 取回 cp950 位元組 → 解成中文。
+    兩條路都收敛到可列印的字串，不再把 surrogate 送進 print()。
+    """
+    if not text or not _SURROGATE.search(text):
+        return text
+    enc = getattr(sys.stdin, "encoding", None) or "utf-8"
+    try:
+        raw = text.encode(enc, "surrogateescape")
+    except (UnicodeError, LookupError, TypeError):
+        return text
+    for candidate in _INPUT_DECODE_ORDER:
+        try:
+            return raw.decode(candidate)
+        except (UnicodeError, LookupError):
+            continue
+    # 最後手段：至少不留 surrogate，避免再次炸在輸出端。
+    return raw.decode("utf-8", "replace")
+
+
+def read_input(prompt: str = "") -> str:
+    """本專案所有 input() 的單一入口，確保引導模式與 --fill-gaps 確認同源。
+
+    EOFError / KeyboardInterrupt 原樣丟給呼叫端（既有取消語意不變）。
+    """
+    return repair_stdin_text(input(prompt))
 
 
 def now_iso() -> str:

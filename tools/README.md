@@ -104,6 +104,12 @@ python tools/replay_aggregation.py --baseline output/baseline_from_v2.json --out
 的 module docstring 都只用 cp950 可編碼字元；其餘探針腳本也在入口重設兩個串流。
 新增輸出文字時請避開 emoji／`≈` 等 cp950 無法編碼的字元（`→` `×` `÷` `—` 則可用）。
 
+cp950 規則**也適用於輸入**：`configure_io()` 會另外把被重定向的 stdin 設為
+UTF-8 + `surrogateescape`（真實 console 不動），`contract.read_input()` 再修補殘留的
+lone surrogate。若自訂工具需要讀 `input()`，請改用 `read_input()`，別直接呼叫 builtin；
+否則管道送中文關鍵字時會在輸出端炸 `surrogates not allowed`（見 `AGENTS.md` 的
+「stdin 編碼」專節）。
+
 ### 相關入口（不在 tools/ 裡，但常被一起問到）
 
 | 入口 | 用途 |
