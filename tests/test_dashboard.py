@@ -243,5 +243,82 @@ class TestAccessibility(unittest.TestCase):
         self.assertNotIn("<!--", escaped)
 
 
+class TestEmptyState(unittest.TestCase):
+    """兩種「空」：沒資料要教人先抓；有資料被篩選濾光才維持舊提示。
+
+    2026-11-13 修：舊版一律顯示「試著放寬篩選」，空 output/ 的新手會去
+    放寬根本不存在的篩選。此處全部離線，不發任何請求。
+    """
+    @classmethod
+    def setUpClass(cls):
+        with tempfile.TemporaryDirectory() as td:
+            p = _write_json(Path(td) / "x.json", _cli_v2_payload())
+            cls.jobs, cls.meta = bd.collect([p])
+            cls.empty_jobs, cls.empty_meta = bd.collect(
+                [str(Path(td) / "_no_such_*.json")])
+        cls.empty_html = bd.build_html(cls.empty_jobs, cls.empty_meta)
+        cls.filled_html = bd.build_html(cls.jobs, cls.meta)
+
+    def test_no_data_page_tells_user_to_fetch_first(self):
+        self.assertIn("請先執行", self.empty_html)
+        self.assertIn(bd.EMPTY_DATA_COMMAND, self.empty_html)
+        self.assertIn("再重新產生看板", self.empty_html)
+        self.assertNotIn("放寬篩選", self.empty_html)
+        self.assertIn("window.JOBS = [];", self.empty_html)
+
+    def test_filtered_out_page_keeps_original_hint(self):
+        self.assertIn("沒有符合條件的職位，試著放寬篩選", self.filled_html)
+        self.assertNotIn("請先執行", self.filled_html)
+        for html in (self.empty_html, self.filled_html):
+            self.assertNotIn("__EMPTY_", html)
+
+    def test_render_branches_on_total_jobs(self):
+        self.assertIn("JOBS.length === 0 ? EMPTY_DATA_HTML : EMPTY_FILTER_HTML",
+                      self.empty_html)
+        self.assertIn('const EMPTY_FILTER_HTML = "";', self.empty_html)
+        self.assertIn("const EMPTY_DATA_HTML = ", self.empty_html)
+
+    def test_injected_hint_is_a_valid_html_fragment(self):
+        import re
+
+        m = re.search(r"const EMPTY_DATA_HTML = (.*);", self.empty_html)
+        frag = json.loads(m.group(1))
+        self.assertIn("<code>", frag)
+        self.assertIn("</code>", frag)
+        self.assertIn('class="empty"', frag)
+
+    def test_empty_page_keeps_accessibility_markers(self):
+        for marker in ("--fs:16px", 'data-font="large"]{--fs:20px',
+                       'class="btn" id="fontBtn"', ":focus-visible{outline:3px solid",
+                       "跳至主要內容", 'role="list"', 'aria-live="polite"',
+                       'aria-pressed="false"', "overflow-wrap:anywhere"):
+            self.assertIn(marker, self.empty_html, marker)
+
+    def test_console_warns_but_still_writes_empty_dashboard(self):
+        with tempfile.TemporaryDirectory() as td:
+            dest = Path(td) / "empty.html"
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                code = bd.main(["--glob", str(Path(td) / "_no_such_*.json"),
+                                "--out", str(dest)])
+            self.assertEqual(code, contract.EXIT_OK)
+            self.assertIn("空看板", out.getvalue())
+            self.assertIn(bd.EMPTY_DATA_COMMAND, out.getvalue())
+            self.assertIn("請先執行", dest.read_text(encoding="utf-8"))
+
+    def test_empty_console_is_cp950_clean(self):
+        with tempfile.TemporaryDirectory() as td:
+            dest = Path(td) / "empty.html"
+            proc = subprocess.run(
+                [sys.executable, "build_dashboard.py",
+                 "--glob", "output/_no_such_*.json", "--out", str(dest)],
+                cwd=ROOT, capture_output=True,
+                env=dict(os.environ, PYTHONIOENCODING="cp950"))
+            self.assertEqual(proc.returncode, 0,
+                             proc.stderr.decode("cp950", "replace"))
+            self.assertNotIn(b"UnicodeEncodeError", proc.stderr)
+            self.assertNotIn(b"Traceback", proc.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()

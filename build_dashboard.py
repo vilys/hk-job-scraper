@@ -370,6 +370,9 @@ HTML = r"""<!DOCTYPE html>
   .more{margin-top:5px;font-size:var(--fs-sm);font-family:inherit;color:var(--accent);
         cursor:pointer;background:none;border:none;padding:0}
   .empty{text-align:center;color:var(--muted);padding:40px 0;font-size:var(--fs)}
+  .empty code{display:inline-block;margin:8px 0;padding:4px 8px;border-radius:6px;
+              background:var(--panel2);color:var(--ink);font-size:.95em;
+              overflow-wrap:anywhere;text-align:left}
   #loadMore{width:100%;margin-top:12px}
   footer{color:var(--muted);font-size:var(--fs-sm);text-align:center;margin-top:22px;line-height:1.9}
   :root[data-font="large"] .barname{max-width:45%}
@@ -446,6 +449,9 @@ window.JOBS = __DATA__;
 window.META = __META__;
 
 const JOBS = window.JOBS, META = window.META, LABEL = META.source_label || {};
+// 兩種「空」不同：完全沒資料要教人先抓；有資料但被篩選濾光才維持舊提示。
+const EMPTY_DATA_HTML = __EMPTY_DATA__;
+const EMPTY_FILTER_HTML = __EMPTY_FILTER__;
 const PAGE = 40;
 let shown = PAGE, activeSrc = new Set();
 
@@ -573,7 +579,7 @@ function render(){
   $("count").textContent = `符合條件 ${out.length} 筆（顯示 ${Math.min(shown, out.length)} 筆）`;
   const slice = out.slice(0, shown);
   $("list").innerHTML = out.length ? slice.map(cardHtml).join("") :
-    '<div class="empty">🫧 沒有符合條件的職位，試著放寬篩選</div>';
+    (JOBS.length === 0 ? EMPTY_DATA_HTML : EMPTY_FILTER_HTML);
   $("list").querySelectorAll(".more").forEach(b => b.onclick = () => {
     const d = b.previousElementSibling;
     const open = d.classList.toggle("open");
@@ -610,8 +616,24 @@ render();
 """
 
 
+EMPTY_DATA_COMMAND = ("python -m hkjobs search --source gov_hk --pages 1 "
+                      "--keyword 文員 --out output/文員.json")
+EMPTY_DATA_HINT = (
+    "output/ 目前沒有職位資料。請先執行 <code>" + EMPTY_DATA_COMMAND
+    + "</code>，再重新產生看板。"
+)
+EMPTY_FILTER_HINT = "🫧 沒有符合條件的職位，試著放寬篩選"
+
+
 def build_html(jobs: list[dict], meta: dict) -> str:
+    """只注入用得到的空狀態訊息：0 檔 HTML 不會出現「放寬篩選」。"""
+    empty_data = (f'<div class="empty">{EMPTY_DATA_HINT}</div>'
+                  if not jobs else "")
+    empty_filter = (f'<div class="empty">{EMPTY_FILTER_HINT}</div>'
+                    if jobs else "")
     return (HTML
+            .replace("__EMPTY_DATA__", _json_safely(empty_data))
+            .replace("__EMPTY_FILTER__", _json_safely(empty_filter))
             .replace("__DATA__", _json_safely(jobs))
             .replace("__META__", _json_safely(meta)))
 
@@ -644,6 +666,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"據點分佈：{meta['per_source']}")
     if meta["files_skipped"]:
         print(f"已略過（非職位檔或無法讀取）：{', '.join(meta['files_skipped'])}")
+    if meta["total"] == 0:
+        print("提醒：目前沒有讀到任何職位資料，產生的會是空看板。")
+        print(f"  請先執行 {EMPTY_DATA_COMMAND}，再重新產生看板。")
 
     out_path = _resolve_out(args.out)
     try:

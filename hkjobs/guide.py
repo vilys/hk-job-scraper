@@ -10,10 +10,13 @@ Windows cp950 下管道送中文關鍵字也不會產生 lone surrogate（見 co
 - 站別與職能選項直接來自 `capabilities.SOURCES` 與 `options.load_dimension()`，
   用編號挑選，不必自由打字打錯字典值。
 - 選完先印出「完整命令」再執行，使用者可以學起來或直接複製。
+- 執行後先給「加 `--out` 存檔」的具體指令，再提 HTML 看板：引導模式本身
+  **不寫檔**，直接叫人跑 `build_dashboard.py` 只會得到 0 筆空看板。
 - 固定 `--pages 1`（探測量），符合專案速率禮節。
 """
 from __future__ import annotations
 
+import re
 from typing import Callable
 
 from hkjobs.capabilities import SOURCES
@@ -31,6 +34,12 @@ def _quote(arg: str) -> str:
 
 def display_command(argv: list[str]) -> str:
     return " ".join(_quote(a) for a in ["python", "-m", "hkjobs", *argv])
+
+
+def _out_name(keyword: str) -> str:
+    """把關鍵字轉成可照抄的 output/ 檔名（與 main.py 的關鍵字清理一致）。"""
+    safe = re.sub(r'[\\/:*?"<>|]+', "", keyword or "").strip().replace(" ", "_")
+    return f"output/{safe or 'jobs'}.json"
 
 
 def _choose(prompt: str, choices: list[tuple[str, object]],
@@ -168,7 +177,11 @@ def run_guide(execute: Callable[[list[str]], int] | None = None) -> int:
         return EXIT_OK
 
     code = int(execute(argv))
+    # 引導模式刻意不含 --out：先給存檔指令，再提看板，否則新手會得到 0 筆空看板。
     print()
-    print("看完終端機結果後，也可以執行 python build_dashboard.py 產生 HTML 看板，")
+    print("這次結果只印在終端機，沒有寫入檔案（引導模式刻意不加 --out）。")
+    print("想留一份檔案，請把上面那行指令加上 --out，例如：")
+    print("  " + display_command([*argv, "--out", _out_name(keyword)]))
+    print("存好檔之後，再執行 python build_dashboard.py 產生 HTML 看板，")
     print("在瀏覽器裡用大字與鍵盤慢慢看（CLI 負責抓，HTML 負責讀）。")
     return code

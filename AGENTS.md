@@ -91,6 +91,10 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
   `python --version` → 雙擊 `start.bat` → 引導模式編號選」；`main.py` 只出現在
   legacy 小節。引導模式**不寫檔**（組出的命令不含 `--out`），要產檔請另下
   `--out` 指令再做 HTML 看板；文件不得寫成「引導抓完就能做看板」。
+- **運行時同理**（2026-11-13 修）：`guide.py` 執行後的結尾提示必須先講「沒有寫入檔案」，
+  再給可照抄的 `--out` 指令（`display_command()` 複用已印過的 `argv`，檔名由
+  `_out_name()` 清理 Windows 非法字元），**最後才**提 `build_dashboard.py`；
+  取消路徑不印這段提示。文字須 cp950 可編碼、無 emoji；`tests/test_guide.py::TestPostRunHint` 守住順序。
 - **不變**：既有旗標 API、`--json` 單一 JSON 封套、`python main.py` 舊入口、exit code 全部不受影響。
 
 ### stdin 編碼（2026-11-12 修）
@@ -208,10 +212,10 @@ CSV；日期解析**唯一來源是 `hkjobs.aggregate.parse_date`**，`age_days`
 - 新增／變更據點行為，必須同步更新：`hkjobs/capabilities.py`、README 的「各站功能支援矩陣」與該站技術筆記。
 - 變更多人類輸出／旗標，必須同步更新：`README.md` 的「給 AI agent／程式呼叫」章節、本文件命令段、`search --help` 的 epilog 與 `hkjobs/args.py` 的旗標說明；若動到離線重播，另同步 `tools/replay_aggregation.py` 與 `tools/README.md`。薪金欄顯示格式另同步 README「薪金換算基準」與本文件「人類模式」段（含範例輸出字串）。
 - 新增／調整旗標時，`hkjobs/capabilities.py` 是能力與薪金換算基準的單一資料源（`GAP_FILL_ACTIONS` / `SALARY_CONVERSION_BASIS`），不要在 CLI 裡另寫一份。
-- 變更篩選值驗證、引導模式、啟動器或 stdin 編碼，須同步 `hkjobs/validation.py`／`hkjobs/guide.py`／`hkjobs/contract.py`／`start.bat`、`tests/test_dimension_validation.py`／`tests/test_guide.py`／`tests/test_stdin_encoding.py`、本文件專節與 README「60 秒上手」第 3／4 步。文件裡的編號選項以 `guide.py` 實際順序為準（例如「最近幾天」的 `2` 是 3 天內，不是「3 天」）。
+- 變更篩選值驗證、引導模式、啟動器或 stdin 編碼，須同步 `hkjobs/validation.py`／`hkjobs/guide.py`／`hkjobs/contract.py`／`start.bat`、`tests/test_dimension_validation.py`／`tests/test_guide.py`／`tests/test_stdin_encoding.py`、本文件專節、README「60 秒上手」第 3／4 步與**運行時結尾提示**。文件裡的編號選項以 `guide.py` 實際順序為準（例如「最近幾天」的 `2` 是 3 天內，不是「3 天」）。
 - 變更 README 章節標題或增減主章節，須同步開頭「我該讀哪裡？（受眾路由）」表與「目錄」的 `<a id>` 錨點；求職者路由固定四節（60 秒上手／食譜／儀表板／速率禮節）。技術筆記**只可搬位置或加路由，不得刪內容**；附錄標題層級為 `##` → 各站 `###` → 小節 `####`。
-- 變更 HTML 看板，須同步 `build_dashboard.py`、`tests/test_dashboard.py`、README「聚合儀表板」章節；日期解析只能呼叫 `hkjobs/aggregate.py::parse_date`，不得再養第二套 regex。
+- 變更 HTML 看板，須同步 `build_dashboard.py`、`tests/test_dashboard.py`、README「聚合儀表板」章節；日期解析只能呼叫 `hkjobs/aggregate.py::parse_date`，不得再養第二套 regex。空狀態須區分「總資料 0 筆」（給可照抄的 `--out` 指令，0 檔 HTML 不得摻入「放寬篩選」字樣，連註解也一樣）與「有資料但被篩選濾光」（維持原句）；console 端 0 檔提醒與大字模式／鍵盤可達性一併守住。
 - Windows cp950 **同時管輸出與輸入**：所有人類輸出、`build_dashboard.py` 與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。輸入面不得讓管道／agent 送中文時產生 lone surrogate 再炸在 `print()`；新增 `input()` 一律改用 `contract.read_input()`，不得直接呼叫 builtin。`start.bat` 必須維持全 ASCII（含 Python 前提、版本與安裝失敗等所有訊息）。
 - 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。**但「該站支援且字典打錯」屬另一情境，須 exit 2 擋下**（見本文件「篩選值前置驗證」）。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 233 個測試。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 245 個測試。
 - 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README；去重數字改動時一併更新 `tools/README.md` 的基準說明。

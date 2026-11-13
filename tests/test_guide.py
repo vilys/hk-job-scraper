@@ -100,6 +100,55 @@ class TestGuidedMode(unittest.TestCase):
                                     for s in a.option_strings})
 
 
+class TestPostRunHint(unittest.TestCase):
+    """引導模式不寫檔：結尾必須先給 --out 存檔指令，再提 HTML 看板。
+
+    2026-11-13 修：舊提示直接叫人跑 build_dashboard.py，新手在空 output/
+    會得到 0 筆空看板。這裡全部用注入的 execute，零真實請求。
+    """
+    def test_hint_gives_save_command_before_dashboard(self):
+        code, out, spy = _run_guide(["2", "文員", "", "", "", ""])
+        self.assertEqual(code, EXIT_OK)
+        self.assertEqual(spy.call_count, 1)
+        self.assertIn("沒有寫入檔案", out)
+        self.assertIn("--out output/文員.json", out)
+        self.assertLess(out.index("--out output/"),
+                        out.index("build_dashboard.py"))
+
+    def test_hint_command_is_a_valid_search_command(self):
+        import shlex
+
+        _, out, _ = _run_guide(["2", "文員", "", "", "", ""])
+        line = next(l.strip() for l in out.splitlines()
+                    if l.strip().startswith("python -m hkjobs") and "--out" in l)
+        argv = shlex.split(line)[3:]      # 去掉 python -m hkjobs
+        args = cli.build_parser().parse_args(argv)
+        self.assertEqual(args.out, "output/文員.json")
+        self.assertEqual(args.pages, 1)
+        self.assertEqual(args.keyword, "文員")
+        self.assertEqual(args.source, "gov_hk")
+
+    def test_out_name_sanitizes_windows_illegal_chars(self):
+        self.assertEqual(guide._out_name("文員"), "output/文員.json")
+        self.assertEqual(guide._out_name("data engineer"),
+                         "output/data_engineer.json")
+        self.assertEqual(guide._out_name('a/b:c*?"<>|'), "output/abc.json")
+        self.assertEqual(guide._out_name(""), "output/jobs.json")
+
+    def test_cancel_prints_no_post_run_hint(self):
+        _, out, spy = _run_guide(["2", "文員", "", "", "", "n"])
+        self.assertEqual(spy.call_count, 0)
+        self.assertNotIn("想留一份檔案", out)
+        self.assertNotIn("build_dashboard.py", out)
+
+    def test_hint_text_is_cp950_encodable(self):
+        _, out, _ = _run_guide(["2", "文員", "", "", "", ""])
+        try:
+            out.encode("cp950")
+        except UnicodeEncodeError as e:
+            self.fail(f"引導模式人類輸出必須 cp950 可編碼：{e}")
+
+
 class TestStartBat(unittest.TestCase):
     def test_launcher_exists_and_is_ascii_only(self):
         path = ROOT / "start.bat"
