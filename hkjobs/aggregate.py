@@ -419,7 +419,7 @@ COVERAGE_ADVICE = {
     "linkedin": ("salary", "站方列表不提供薪金，屬已知限制"),
     "jobmarket": ("salary", "站方列表不提供薪金，屬已知限制"),
     "foundit": ("salary", "站方列表不提供薪金，屬已知限制"),
-    "jobsdb": ("salary", "站方列表薪金常缺，屬已知限制"),
+    "jobsdb": ("salary", "本次走 Playwright SSR（地區／職能／排序篩選或 GraphQL 熔斷），列表薪金常缺"),
 }
 
 

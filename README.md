@@ -149,7 +149,7 @@ python build_dashboard.py
 | 需求 | 據點 |
 |---|---|
 | 只要 `requests`（最小安裝即可） | 勞工處 `gov_hk`、JobMarket、eFinancialCareers、LinkedIn、OfferToday |
-| 需要 Playwright + `playwright install chromium` | Moovup、JobsDB、Recruit、Indeed（停用中） |
+| 需要 Playwright + `playwright install chromium` | Moovup、Recruit、Indeed（停用中）；**JobsDB 僅在退回 SSR 或用 `--detail` 時需要**（見下） |
 | **另需本機安裝 Google Chrome**（指紋辨識） | foundit、獵聘 `liepin`、BOSS直聘 |
 
 <a id="guide"></a>
@@ -262,7 +262,7 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 269 個測試、約 11 秒、零網路請求。
+> 302 個測試、約 11 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -350,12 +350,12 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
   - **支援時間排列與近期篩選**：`--sort` 依刊登日期/薪資/經驗/學歷排序；`--days N` 只留最近 N 天內刊登（見下方「按刊登日期排序 / 近期篩選（勞工處）」）。
   - **支援按工作種類 / 行業篩選**（勞工處 `criteria.jobType` / `criteria.industry` 兩套獨立維度，見下方「按工作種類 / 行業篩選（勞工處）」）。
 - **JobsDB 據點已實戰驗證**：
-  - React SSR + Cloudflare。用 Playwright 真瀏覽器訪首頁取得 `cf_clearance` Cookie，**共用同一 session**，不硬撞 GraphQL。
-  - 職位列表是**伺服器渲染**進 `/jobs?keywords=K&page=N` 的 HTML（卡片用 `data-automation='normalJob'`），**非 GraphQL 列表呼叫**——故每頁只需 1 次 GET，比硬刷 API 安全得多。
-  - **支援關鍵字搜尋 + `?page=N` 翻頁**（每頁約 20–30 筆）。
+  - **2026-11-15 起有兩條通道**：一般關鍵字搜尋走 `POST /graphql` 的 `jobSearchV7`（免 Playwright、補齊 SSR 常缺的薪金）；指定 `--district` / `--category` / `--sort`、設 `JOBSDB_GRAPHQL=0` 或通道熔斷時，退回既有 Playwright SSR。詳見下方「🧭 技術筆記（JobsDB）」。
+  - SSR 通道：React SSR + Cloudflare，先訪首頁取得 `cf_clearance` Cookie 並**共用同一 session**；職位列表是伺服器渲染進 `/jobs?keywords=K&page=N` 的 HTML（卡片用 `data-automation='normalJob'`），每頁只需 1 次 GET。（這是 2026-09 的主要路線，現為 fallback。）
+  - **支援關鍵字搜尋 + `?page=N` 翻頁**（每頁約 20–30 筆；GraphQL 通道固定 `pageSize=30` 維持相同語意）。
   - **支援職能（工作種類）+ 地區篩選**：`--category`（職能，中文/英文/slug，如 `資訊及通訊科技`）與 `--district`（地區，中文/slug，如 `荃灣`）已接上，透過 `/jobs-in-<職能>/in-<地區>` 瀏覽網址實現（見下方「🗺️ 按地區篩選（JobsDB）」）。
   - **支援近期篩選 `--days N`**：列表頁已含相對刊登日（如 `7d ago`），直接由列表過濾，不必抓 30 筆詳情/頁（與 gov.hk 不同）。
-  - **支援排序 `--sort`**：JobsDB 網站 UI 僅提供「相關性（預設）」與「刊登日期（Date）」兩種排序。對應實作：`--sort post_dt_desc` → 網址加 `?sortmode=ListedDate`（新→舊，已實測 1h→2h→3h 遞增）；其餘選項（`post_dt_asc` / `salary_*` / `yr_exp_*` / `edu_lvl_*`）為 gov_hk 專有，JobsDB 無對應 UI，傳入會警告並回退預設。`--days` 未指定 `--sort` 時自動套 `post_dt_desc`，讓新職位堆在前、提早停翻（見下方「🧭 技術筆記（JobsDB）」）。
+  - **支援排序 `--sort`**：JobsDB 網站 UI 僅提供「相關性（預設）」與「刊登日期（Date）」兩種排序。對應實作：`--sort post_dt_desc` → 網址加 `?sortmode=ListedDate`（新→舊，已實測 1h→2h→3h 遞增）；其餘選項（`post_dt_asc` / `salary_*` / `yr_exp_*` / `edu_lvl_*`）為 gov_hk 專有，JobsDB 無對應 UI，傳入會警告並回退預設。⚠️ **2026-11-11 起 `--days` 不再自動套 `post_dt_desc`**（舊行為會讓 `analyst` 搜尋被剛刊登的 Dealer／會計淹沒）；想按日期排請明確指定（見下方「🧭 技術筆記（JobsDB）」）。
   - **不支援項**：`--industry`（JobsDB 無獨立行業維度，職能已涵蓋，傳入會忽略並提示）。
 - **LinkedIn 據點已實戰驗證（訪客模式）**：
   - **無須登入、無須 Playwright**：職位搜尋結果為**伺服器渲染 HTML**（plain `requests` + `BeautifulSoup` 即可），詳情另有**免登入 guest API** `jobs-guest/jobs/api/jobPosting/<id>`。比前幾站更輕量。
@@ -481,7 +481,8 @@ hk-job-scraper/
 ## ⚙️ 環境要求與安裝
 
 - Python 3.10+（**第一次用請先照 [60 秒上手第 2 步](#quickstart) 跑 `python --version`**；Windows 的 Microsoft Store 別名坑也在那裡說明）
-- 需要 Playwright 的據點：**Moovup**（Cloudflare Turnstile）、**JobsDB**（Cloudflare）、**Indeed**（Cloudflare，⚠️ **須本機 `channel="chrome"`**）、**Recruit**（WebForms 翻頁需真瀏覽器）、**foundit**（⚠️ **須本機 `channel="chrome"`**，內建 Chromium 被 WAF 403）。**JobMarket / eFinancialCareers / OfferToday** 不需要（全程普通 requests）。
+- 需要 Playwright 的據點：**Moovup**（Cloudflare Turnstile）、**Indeed**（Cloudflare，⚠️ **須本機 `channel="chrome"`**）、**Recruit**（WebForms 翻頁需真瀏覽器）、**foundit**（⚠️ **須本機 `channel="chrome"`**，內建 Chromium 被 WAF 403）。**JobMarket / eFinancialCareers / OfferToday** 不需要（全程普通 requests）。
+  - **JobsDB 自 2026-11-15 起預設走 GraphQL 通道，一般關鍵字搜尋不需要 Playwright**；但指定 `--district` / `--category` / `--sort`、設 `JOBSDB_GRAPHQL=0`、通道熔斷或使用 `--detail` 時仍會退回需要瀏覽器的 SSR 流程，故 `hkjobs sources` 的「需瀏覽器」欄仍顯示「需」。詳見[技術筆記](#appendix)。
 - ⚠️ **foundit / 獵聘 / BOSS直聘 需要本機安裝 Google Chrome**：foundit 的 WAF 與獵聘、BOSS直聘的反爬均以指紋區分瀏覽器，模組以 `channel="chrome"`（系統 Chrome）headless 開啟；未安裝 Chrome 時會啟動失敗並提示。
 - 只需 `requests` + `beautifulsoup4`、不需瀏覽器的據點：**勞工處 gov.hk**、**LinkedIn**（訪客模式）。
 
@@ -641,7 +642,7 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 | 欄位 | 勞工處 `gov_hk` | JobsDB | 影響 |
 |---|---|---|---|
 | `company` | ❌ 列表頁無僱主欄位，需 `--detail`（每筆多 1 支請求） | ✅ 列表即有 | `hkjobs` 人類模式在公司欄全空時會自動提示，不是爬蟲壞掉 |
-| `salary` | ✅ 列表即有 | ⚠️ 列表常缺（實測 30 筆中 24 筆無薪金） | 人類摘要改顯示 `N/M 筆有薪金`，不再只給一個數字 |
+| `salary` | ✅ 列表即有 | ✅ GraphQL 通道補齊；⚠️ 退回 Playwright SSR 時仍常缺（實測 30 筆中 24 筆無薪金） | 人類摘要改顯示 `N/M 筆有薪金`，不再只給一個數字 |
 | `posted_date` | ❌ 列表無日期（`--days` 下推站方，需 `--detail` 才有值） | ✅ 相對日期 | 人類清單的刊登日欄在勞工處顯示 `—` |
 
 **各站欄位完整度（`--source all --keyword 文員 --pages 1`，2026-11-11 實測 196 筆）**
@@ -659,6 +660,8 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 | efc | 0 | — | — | — | — | 金融站，對「文員」0 筆屬正常 |
 
 `hkjobs --source all` 的人類摘要會自動印出這張表並給建議；`--json` 的 `summary.sources[].coverage` 可程式讀取。
+
+> 註：上表是 **2026-11-11 的 Playwright SSR 歷史實測**，數字保留供對照。2026-11-15 起 JobsDB 預設走 GraphQL 通道，薪金改由 `salary {min,max,period}` 補齊（離線快照 202/202 有薪金）；但該通道**尚未對站方發過真實請求**，且指定 `--district` / `--category` / `--sort` 或通道熔斷時仍會退回 SSR，那時上表數字依然適用。
 
 > 🤖 機器可讀版本：`hkjobs sources --json`（能力表由 `hkjobs/capabilities.py` 提供，與本表同步維護；各站 `notes` 亦收錄上述限制）。
 
@@ -1111,10 +1114,9 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
   - gov.hk：取自職位卡 `#locDesc` 欄位（官方中文區名）。
 - **Cloudflare 保護**：Moovup 受 Cloudflare Turnstile 保護，本程式靠 Playwright 真瀏覽器通過；
   若長時間高頻請求仍有被限流（429）風險，請適度降低 `--pages` 或拉長間隔（`config.REQUEST_DELAY`）。
-- **JobsDB 的 Cloudflare**：hk.jobsdb.com 同樣在 Cloudflare 後。本程式**先訪首頁取得 `cf_clearance` Cookie、
-  後續所有列表請求共用同一瀏覽器 session**（不重建 context），因此實測中不會反覆觸發挑戰。
+- **JobsDB 的 Cloudflare**：hk.jobsdb.com 同樣在 Cloudflare 後。**退回 SSR 通道時**，本程式先訪首頁取得 `cf_clearance` Cookie、後續所有列表請求共用同一瀏覽器 session（不重建 context），因此實測中不會反覆觸發挑戰。
   但 JobsDB 反爬更嚴，請嚴守禮貌間隔（預設 2 秒 + 抖動），並避免 `--pages` 開太大；
-  若出現 403 / 轉圈，先停 10 分鐘再試，切勿重試狂刷。
+  若出現 403 / 轉圈，先停 10 分鐘再試，切勿重試狂刷。GraphQL 通道單頁只發 1 次 POST、失敗即熔斷退回此路線，不重撞。
 - **JobsDB 功能邊界**：`--district` / `--category` / `--sort` **已生效**（透過瀏覽網址與 `?sortmode=ListedDate`）；`--industry` 不適用（JobsDB 無此維度，忽略並提示）；`--detail` 詳情頁解析為 best-effort。
   詳見上方「🗺️ 按地區篩選（JobsDB）」與下方「🧭 技術筆記（JobsDB）」。
 - **gov.hk 無反爬但請禮貌**：勞工處網站無 Cloudflare，但仍建議保持預設 2 秒間隔，避免對政府伺服器造成壓力。
@@ -1216,7 +1218,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 269 個測試，約 11 秒，零網路請求
+python -m unittest discover -s tests -v      # 302 個測試，約 11 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。
@@ -1346,8 +1348,9 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - **反爬保護：Cloudflare**。實測**用真瀏覽器（Playwright Chromium）即可通過，不會跳出 Turnstile 挑戰**。
   關鍵做法：**先 `goto` 首頁一次，讓瀏覽器拿到 `cf_clearance` Cookie，之後所有列表請求共用同一個
   `BrowserContext` / `Page`**，不重建、不重挑戰。UA 帶 `zh-HK,zh;q=0.9` 且 `locale="zh-HK"`。
-  - ⚠️ **絕不硬撞 GraphQL**：JobsDB 的 GraphQL 端點（如 `JobCountsV6`、`GetBanner`）只會對 facet / banner 發請求，
+  - ⚠️ **絕不硬撞 GraphQL**（2026-09-10 觀察；**2026-11-15 已局部更正，見本節末新小節**）：JobsDB 的 GraphQL 端點（如 `JobCountsV6`、`GetBanner`）只會對 facet / banner 發請求，
     **職位列表本身不在 GraphQL 回傳裡**。若想靠爬 API 拿列表，反而更容易被標記。故採 SSR HTML 路線最穩。
+    → 這句對當初試過的兩個 operation 仍然成立，原觀察保留供追溯；但 `jobSearchV7` 是**另一個** operation，離線快照實證會回傳完整職位列表與結構化薪資。勿再據此認定「JobsDB 沒有列表 GraphQL」。
 - **搜尋機制：React SSR + 伺服器渲染 HTML**。鍵入關鍵字後網址變成 `/jobs?keywords=K`（首頁有時 301 轉為 `/K-jobs`，
   但帶 `?page=N` 時仍走 `/jobs?keywords=K&page=N`，`page` 參數會保留）。職位卡片以
   `data-automation='normalJob'` 渲染在 HTML 中，直接 `query_selector_all` 即可，每頁只需 1 次 GET。
@@ -1380,7 +1383,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
   - `jobTitle` → 職位名（其 `href` 形如 `/job/<id>?...`，取 `<id>` 作 `job_id` 前綴 `jobsdb_`）
   - `jobCompany` → 公司
   - `jobCardLocation` → 地區（缺則回退 `jobLocation`）
-  - `jobSalary` → 薪資（列表常省略，故薪資欄位填充率約 3 成）
+  - `jobSalary` → 薪資（**SSR 列表**常省略，故薪資欄位填充率約 3 成；GraphQL 通道改由 `salary {min,max,period}` 補齊，見本節末新小節）
   - `jobShortDescription` → 簡述
   - `jobClassification` / `jobSubClassification` → 職位大類 / 子類（作為 `industry` 欄位來源，**自有 slug 體系**）
   - `jobListingDate` → **相對刊登日**（如 `2d ago`、`6h ago`、`Just now`、`30d+ ago`）
@@ -1392,7 +1395,7 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
   實測 `sortmode=ListedDate` 會讓列表由最新排到最舊（1h→2h→3h… 遞增）。
   - 實作對應：`--sort post_dt_desc` → 網址加 `sortmode=ListedDate`；其餘選項（`post_dt_asc` / `salary_*` / `yr_exp_*` / `edu_lvl_*`）為 **gov_hk 專有**，JobsDB 無對應 UI，傳入會 `logger.warning` 並回退預設（Relevance）。
   - `sortmode` 參數可與 `keywords` / `page` / 地區瀏覽網址共存：站方會將 `/jobs?keywords=K&page=N&sortmode=ListedDate` 301 正規化為 `/K-jobs?page=N&sortmode=ListedDate`（Playwright 自動跟隨）。
-  - **與 `--days` 的協同優化**：`base_scraper` 在設 `--days` 且未指定 `--sort` 時自動套 `post_dt_desc`；新職位因此堆在最前，一旦某頁全超出天數即停止翻頁（如「ICT + 荃灣 + 3 天內」第 2 頁全為舊職位即停），大幅減少請求數與被封風險。
+  - **與 `--days` 的協同優化（2026-11-11 起已取消自動排序，此段保留歷史記述）**：早期 `base_scraper` 在設 `--days` 且未指定 `--sort` 時會自動套 `post_dt_desc`；但這會讓 `analyst` 之類的搜尋被剛刊登的 Dealer／會計淹沒，故 **2026-11-11 起 `--days` 只做日期過濾、不改排序**，想按日期排請明確給 `--sort post_dt_desc`。也因此，站方不保證日期排序時不會提早停翻（避免靜默漏抓）。
 - **詳情頁**：`/job/<id>`，同樣靠 `data-automation` 屬性（`job-detail-title` / `jobDescription` / `jobRequirements` 等）解析，
   為 **best-effort**（v1 選擇器與列表略有差異，實測微調中）。`--detail` 模式抓取後會補 `description` / `requirements`。
 - **各欄位資料來源總表（JobsDB → JobRecord）**：
@@ -1416,6 +1419,38 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - **地區 / 分類體系（重要）**：JobsDB 的地區與分類是**自有 slug 體系**（如 `kowloon-east`、`accounting`），
   **與 Moovup 的 shortCode、勞工處的數字 ID 三者完全獨立**，不可跨站混用。v1 未接 `--district` / `--category` / `--industry`，
   詳見上方「🗺️ 按地區篩選（JobsDB）」。
+
+#### 2026-11-15 新增：GraphQL `jobSearchV7` 搜尋通道
+
+**依據**：2026-11-14 的離線快照（SSR 頁的 `window.SEEK_APOLLO_DATA` + `/graphql` 回應）。SSR 的 `ROOT_QUERY` key 本身就是完整 params，所以 query 形狀不是猜的：`responseConfig.pageSize: 30`、`searchIntent.text: "AI Agent"`（**原始字串，不是 `ai%20agent`**）、`sort: "score"`、`filter.listedAt: "7d"`。同一份快照三頁共 202 筆，與瀏覽器畫面的 202 份一致。
+
+| 條件 | 走哪條 | 請求 |
+|---|---|---|
+| 只給 `--keyword` / `--days` / `--pages` | `POST /graphql` 的 `jobSearchV7` | 每頁 1 次 POST，`pageSize=30` |
+| 給 `--district` / `--category` / `--sort` | 既有 Playwright SSR 瀏覽網址 | 每頁 1 次 GET |
+| 設 `JOBSDB_GRAPHQL=0` | 既有 Playwright SSR | 同上 |
+| GraphQL 失敗（非 200／Cloudflare HTML／`errors`／形狀不符／網路例外） | **熔斷本輪**並退回 SSR | 後續頁不再打 GraphQL |
+
+**只下推已驗證維度**：地區在 `filter` 沒有對應欄位（SSR 用 `/in-<slug>` 瀏覽網址）；職能雖有 `categoryId` 但需要內部數值 ID，字典只有 slug；`sort:"date"` 沒有離線實證（`--sort post_dt_desc` 的 `sortmode=ListedDate` 已實測，交回 SSR）。這三種情況硬下推會得到「看起來成功但篩選沒生效」的結果，寧可退回。
+
+**參數對照**：
+
+| CLI / URL | GraphQL |
+|---|---|
+| `--keyword` / `?keywords=` | `searchIntent.text`（原樣、不做 percent-encode） |
+| `--days 7` / `?daterange=7` | `filter.listedAt: "7d"`（`1/3/7/14/31` → `1d/3d/7d/14d/30d`） |
+| `--pages` 的第 N 頁 | `responseConfig.page: N`（`pageSize: 30`） |
+| 未指定排序 | `sort: "score"`（站方相關性） |
+
+**資料增益**：`salary {min,max,period,currency}` 補上 SSR 常缺的薪金（離線快照 202/202 有值）；`listedAt.dateTimeUtc` 精確 UTC 存進 `raw["graphql"]["listed_at_utc"]`；另外補到 `description`（abstract）、`job_type`（`cjs.workTypes`）。`posted_date` 仍輸出 `2d ago` 相對字串，因為 `days_since_posted()` 只認這種格式，直接改 ISO 會讓 `--days` 把職位全濾掉。
+
+⚠️ **`cjs.salary.hideSalary`**：雇主交給搜尋索引、但明確選擇不在招聘頁顯示的薪資（快照中 157/202 筆）。技術上拿得到，但本專案**只放 `raw`，不進 13 欄主表**，公開輸出不張揚雇主未顯示的值。這也與詳情頁那句「Sign in and add your expected salary to see matches」無關——那是請求職者填自己的期望薪資看匹配度，不是解鎖雇主薪資。
+
+**登入**：完全不需要。請求只帶 UA、`Accept`、`Content-Type`、`Origin`、`Referer`，**無 Cookie、無 Authorization、無任何憑證**；`solVisitorId` / `sessionId` 是每次以 `uuid4()` 產生的隨機匿名 UUID。202 份是 filter 算出來的集合，與帳號無關。
+
+**節流**：單頁 1 次 POST、零併發、不重試；翻頁間隔沿用 `BaseScraper._sleep()`（JobsDB 2 秒 + 抖動）。通道級失敗即熔斷本輪，避免 `_with_retry` 把同一頁重撞成「3 次 GraphQL + 3 次瀏覽器」。`JOBSDB_GRAPHQL=0` 是可一鍵回到舊行為的安全閥。
+
+⚠️ **未實測聲明**：本通道以離線快照開發與測試（`tests/test_jobsdb_graphql.py` / `test_jobsdb_graphql_channel.py`），**開發過程沒有對 JobsDB 發過任何真實請求**。`31 → "30d"` 是由「URL 的 31 = Last 30 days」與 SSR 的 `listedAt:"30d"` 推導；`text` 送中文原字串也未經站方驗證。GraphQL 是未公開介面，schema 隨時可能改，故保留 Playwright fallback。
 
 ---
 

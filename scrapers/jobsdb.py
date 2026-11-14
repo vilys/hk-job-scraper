@@ -19,8 +19,14 @@
   會將 /jobs?keywords=K&page=N&sortmode=ListedDate 301 正規化為 /K-jobs?...，Playwright 自動跟隨）。
 - 刊登日為「相對時間」字串（7d ago / 13h ago / Just now），用 days_since_posted() 解析。
 - 標題會併入「New」徽章（如 `...EngineerNew`），以 strip_new_badge() 剝除。
+- GraphQL 搜尋通道（2026-11-15，見下方「GraphQL 搜尋通道」區塊）：
+  POST /graphql 的 jobSearchV7 可取得 SSR 卡片沒有的結構化薪資與精確刊登日。
+  search() 在「只用了已驗證維度」時優先走此通道，失敗或指定未驗證維度時
+  自動熔斷並退回既有 Playwright SSR 流程；JOBSDB_GRAPHQL=0 可一鍵停用。
+  零憑證（無 Cookie / Authorization），13 欄契約與 schemaVersion=2 皆不變。
+  ⚠️ 本通道以離線快照開發，尚未對站方發過真實請求；見 README 技術筆記。
 - GraphQL 轉接（2026-11-15 離線 spike）：record_from_graphql() 把 jobSearchV7
-  單筆轉成 13 欄 JobRecord，純函式、零請求，不動既有 search()/get_detail() 流程。
+  單筆轉成 13 欄 JobRecord，純函式、零請求。
   來歷資訊（hideSalary 等）只放 raw，不進主表；詳見該函式區塊註解。
 """
 from __future__ import annotations
@@ -29,16 +35,19 @@ import json
 import logging
 import os
 import re
+import uuid
 from datetime import datetime, timezone
 from typing import Optional
 from urllib.parse import quote, urljoin
+
+import requests
 
 try:
     from playwright.sync_api import sync_playwright
 except ImportError:  # pragma: no cover — 允許「只裝 requests」的極簡安裝
     sync_playwright = None
 
-from config import DEFAULT_HEADERS
+from config import DEFAULT_HEADERS, REQUEST_TIMEOUT
 from job_model import JobRecord
 from base_scraper import BaseScraper
 
@@ -205,6 +214,119 @@ def record_from_graphql(job: dict, *, now: datetime | None = None) -> JobRecord:
     )
 
 
+# ---- GraphQL 搜尋通道（2026-11-15；只在已驗證維度上啟用） ----
+# 依據：2026-11-14 離線快照（SSR 的 window.SEEK_APOLLO_DATA + /graphql 回應）。
+# SSR 自己的 ROOT_QUERY key 就是完整 params，故 query 形狀不是猜的：
+#   responseConfig.pageSize = 30；searchIntent.text 是**原始字串**（"AI Agent"，
+#   不是 "ai%20agent"）；sort 只見 "score"；filter 只見 listedAt / salaryMin。
+#
+# 三個刻意不下的推（沒有離線實證，避免「結果看起來成功其實語意錯」）：
+#   1. 地區（--district）：filter 無對應欄位；SSR 用瀏覽網址 /in-<slug>。
+#   2. 職能（--category）：filter 有 categoryId，但需要內部數值 ID，字典只有 slug。
+#   3. 排序（--sort）：只見 sort:"score"，沒有 sort:"date" 的實證。
+# 上述任一維度被指定時，search() 直接走既有 Playwright 瀏覽網址。
+#
+# --days 的對應：set_days() 存的是 URL 的 daterange（1/3/7/14/31），
+# GraphQL 用 "Nd"。31 是 URL 上「Last 30 days」的值，SSR 自拼 URL 的
+# daterange=30 對應 filter.listedAt:"30d"，故 31 → "30d"（此格為推導，未實測）。
+#
+# 節流：單頁只發 1 次 POST，不重試、不併發；翻頁間隔由 BaseScraper._sleep()
+# 統一負責（JobsDB 2 秒 + 抖動）。任何通道級失敗即熔斷本輪，直接退回 SSR，
+# 不讓 _with_retry 把同一頁重撞成「3 次 GraphQL + 3 次瀏覽器」。
+_GRAPHQL_URL = BASE + "/graphql"
+_GRAPHQL_PAGE_SIZE = 30          # 與 SSR 每頁 30 張卡一致，維持 --pages 語意
+_GRAPHQL_LISTED_AT = {
+    "1": "1d", "3": "3d", "7": "7d", "14": "14d", "31": "30d",
+}
+
+_GRAPHQL_QUERY_TEMPLATE = """query {
+  jobSearchV7(params: {
+    responseConfig: {
+      enrichment: {relatedSearchesCount: 12, suggestions: ["locationV1","queryParamLabelsV1","sabFilterV1","organisationV1","relatedSearchesV1"]}
+      page: __PAGE__, pageSize: __PAGE_SIZE__, representations: ["uiV1"], results: ["jobs"]
+    },
+    searchContext: {brand: "jobsdb", channel: "web", intent: "SEARCH", solVisitorId: __VISITOR_ID__, source: "FE_SERP"},
+    searchIntent: {country: "HK", distanceKms: 2, __FILTER__locale: "en-HK", sort: __SORT__, text: __TEXT__},
+    sessionId: __SESSION_ID__
+  }) {
+    results {
+      jobs {
+        id title abstract
+        advertiser { id name }
+        organisation { id name }
+        location { id displayName { text } }
+        workArrangements { id label { text } }
+        cjs { workTypes { sourceId name(locale: "en-HK") } salary { minimum maximum currency period hideSalary } roleTitles { shortId } }
+        listedAt { dateTimeUtc }
+        salary { min max period currency }
+        categories { id label(locale: "en-HK") }
+      }
+    }
+    metadata { sol }
+  }
+}"""
+
+
+class JobsDBGraphQLError(RuntimeError):
+    """GraphQL 通道不可用（網路／Cloudflare／schema 改版／回應形狀不符）。
+
+    由 search() 捕捉後熔斷並退回既有 Playwright SSR 流程，不向上拋。
+    """
+
+
+def _gql_literal(value) -> str:
+    """用 JSON 字串語法產生安全的 GraphQL string literal（含中文、引號跳脫）。"""
+    return json.dumps(str(value or ""), ensure_ascii=False)
+
+
+def build_graphql_query(*, keyword: str, page: int = 1, listed_at: str = "",
+                        sort: str = "score", visitor_id: str = "", session_id: str = "",
+                        page_size: int = _GRAPHQL_PAGE_SIZE) -> str:
+    """純函式：組出 jobSearchV7 查詢字串（不發請求、不讀環境、不帶憑證）。
+
+    visitor_id / session_id 是前端產生的隨機匿名 UUID，不綁定帳號；呼叫端
+    每次以 uuid4() 動態產生，避免把任何固定識別值寫進公開 repo。
+    """
+    try:
+        p = max(1, int(page))
+        size = max(1, min(100, int(page_size)))
+    except (TypeError, ValueError) as e:
+        raise JobsDBGraphQLError(f"分頁參數無效：{e}") from e
+    flt = f"filter: {{listedAt: {_gql_literal(listed_at)}}}, " if listed_at else ""
+    repl = {
+        "__PAGE__": str(p),
+        "__PAGE_SIZE__": str(size),
+        "__VISITOR_ID__": _gql_literal(visitor_id),
+        "__SESSION_ID__": _gql_literal(session_id),
+        "__SORT__": _gql_literal(sort or "score"),
+        "__TEXT__": _gql_literal(keyword),
+        "__FILTER__": flt,
+    }
+    # 單次掃描：替換進去的關鍵字不會再被當成 placeholder 處理
+    return re.sub(r"__[A-Z_]+__", lambda m: repl.get(m.group(), m.group()),
+                  _GRAPHQL_QUERY_TEMPLATE)
+
+
+def parse_graphql_response(data: dict, *, now: datetime | None = None) -> list[JobRecord]:
+    """純函式：驗證 /graphql 回應並轉成 13 欄 JobRecord 清單（零請求）。
+
+    形狀不對（含 GraphQL errors、schema 改版）一律丟 JobsDBGraphQLError，
+    讓 search() 熔斷並退回 SSR；空清單是合法結果，不觸發 fallback。
+    """
+    if not isinstance(data, dict):
+        raise JobsDBGraphQLError("回應不是 JSON 物件")
+    if data.get("errors"):
+        detail = json.dumps(data["errors"], ensure_ascii=False)[:200]
+        raise JobsDBGraphQLError(f"GraphQL errors（可能 schema 改版）：{detail}")
+    payload = data.get("data")
+    search = payload.get("jobSearchV7") if isinstance(payload, dict) else None
+    results = search.get("results") if isinstance(search, dict) else None
+    jobs = results.get("jobs") if isinstance(results, dict) else None
+    if not isinstance(jobs, list):
+        raise JobsDBGraphQLError("回應缺少 data.jobSearchV7.results.jobs 陣列")
+    return [record_from_graphql(j, now=now) for j in jobs]
+
+
 # ---- JobsDB 自有 slug 字典（與 Moovup / 勞工處 完全獨立，見 README 鐵律） ----
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -258,6 +380,8 @@ class JobsDBScraper(BaseScraper):
         self._context = None
         self._page = None
         self._daterange: str = ""      # 站方端日期過濾（daterange=N），由 set_days() 注入
+        # GraphQL 通道熔斷：本輪一旦判定不可用就直接走 SSR，不重撞（見通道區塊註解）
+        self._gql_broken: bool = False
 
     # ---------- 站方端日期過濾掛載點（base_scraper.scrape_all 呼叫） ----------
     def set_days(self, days: int) -> None:
@@ -422,7 +546,7 @@ class JobsDBScraper(BaseScraper):
             path += "?" + "&".join(params)
         return BASE + path
 
-    # ---------- 搜尋 ----------
+    # ---------- 搜尋（GraphQL 優先，既有 Playwright SSR 為 fallback） ----------
     def search(
         self,
         keyword: str,
@@ -432,11 +556,89 @@ class JobsDBScraper(BaseScraper):
         industry: Optional[str] = None,
         sort: Optional[str] = None,
     ) -> list[JobRecord]:
-        self._ensure_browser()
+        """單頁搜尋。只在「已驗證維度」上走 GraphQL，其餘一律用既有流程。
+
+        路由規則見上方「GraphQL 搜尋通道」區塊：指定 --district / --category /
+        --sort、設 JOBSDB_GRAPHQL=0、或本輪通道已熔斷時，直接走 _search_browser()。
+        GraphQL 任何失敗都只熔斷本輪並退回 SSR，不向上拋、不重撞。
+        """
         # JobsDB 無獨立「行業」維度（職能分類已涵蓋行業語意），忽略並提示
         if industry:
             logger.warning(
                 "[jobsdb] --industry 不適用 JobsDB（職能分類已涵蓋行業語意），已忽略")
+
+        if self._use_graphql(district=district, category=category, sort=sort):
+            try:
+                jobs = self._search_graphql(keyword, page)
+                logger.info("[jobsdb] 第 %d 頁 GraphQL 取得 %d 筆", page, len(jobs))
+                return jobs
+            except Exception as e:  # noqa: BLE001 — 通道層任何意外都退回既有流程
+                self._gql_broken = True
+                logger.warning(
+                    "[jobsdb] GraphQL 通道不可用（%s: %s），本輪改走 Playwright SSR",
+                    type(e).__name__, str(e)[:200])
+        return self._search_browser(keyword, page, district, category, sort=sort)
+
+    def _use_graphql(self, *, district, category, sort) -> bool:
+        """判斷本頁能否安全走 GraphQL（純判斷，不發請求）。"""
+        if os.environ.get("JOBSDB_GRAPHQL", "1") == "0":
+            return False
+        if self._gql_broken:
+            return False
+        untested = [name for name, val in
+                    (("--district", district), ("--category", category), ("--sort", sort))
+                    if val]
+        if untested:
+            logger.info(
+                "[jobsdb] 指定 %s（GraphQL 篩選維度未經離線實證），改走既有瀏覽網址",
+                "、".join(untested))
+            return False
+        return True
+
+    def _search_graphql(self, keyword: str, page: int) -> list[JobRecord]:
+        """單頁 GraphQL 搜尋：1 次 POST → 驗證 → 13 欄轉接。"""
+        listed_at = _GRAPHQL_LISTED_AT.get(self._daterange, "")
+        query = build_graphql_query(
+            keyword=keyword or "", page=page, listed_at=listed_at,
+            sort="score",
+            visitor_id=str(uuid.uuid4()), session_id=str(uuid.uuid4()),
+        )
+        logger.info("[jobsdb] POST /graphql（page=%d, listedAt=%s, pageSize=%d）",
+                    page, listed_at or "-", _GRAPHQL_PAGE_SIZE)
+        return parse_graphql_response(self._post_graphql(query))
+
+    def _post_graphql(self, query: str) -> dict:
+        """送出 jobSearchV7 並回傳 JSON。零憑證：不帶 Cookie / Authorization。
+
+        不建立共用 Session、不保留任何狀態；Cloudflare 挑戰頁與非 200
+        一律轉成 JobsDBGraphQLError，由 search() 熔斷。
+        """
+        headers = dict(self.headers)
+        headers.update({
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Origin": BASE,
+            "Referer": BASE + "/",
+        })
+        response = requests.post(
+            _GRAPHQL_URL, json={"query": query}, headers=headers,
+            timeout=REQUEST_TIMEOUT,
+        )
+        text = response.text or ""
+        if response.status_code != 200:
+            raise JobsDBGraphQLError(f"HTTP {response.status_code}")
+        probe = text[:2000].upper()
+        if "<!DOCTYPE HTML" in probe or "JUST A MOMENT" in probe:
+            raise JobsDBGraphQLError("回應為 Cloudflare 挑戰頁（HTML）")
+        try:
+            return response.json()
+        except ValueError as e:
+            raise JobsDBGraphQLError(f"回應不是有效 JSON：{text[:120]}") from e
+
+    def _search_browser(self, keyword: str, page: int, district, category,
+                        sort: Optional[str] = None) -> list[JobRecord]:
+        """既有 Playwright SSR 流程（內容與接入 GraphQL 前完全相同）。"""
+        self._ensure_browser()
         url = self._build_url(keyword, district, category, page, sort=sort)
         logger.info("[jobsdb] GET %s", url)
         self._page.goto(url, wait_until="domcontentloaded", timeout=30000)

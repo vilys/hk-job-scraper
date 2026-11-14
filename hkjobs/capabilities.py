@@ -83,9 +83,12 @@ SOURCES: dict[str, SourceInfo] = {
         supports={"district": True, "category": True, "industry": False,
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("jobsdb"),
-        notes="列表含相對日期但薪金常缺（實測 30 筆中 24 筆無薪金）；"
-              "--days 走站方 daterange（只吃 1/3/7/14/31，本模組向上取整）"
-              "且只做日期過濾、保留站方相關性排序。",
+        notes="2026-11-15 起預設走 GraphQL jobSearchV7（免瀏覽器、補結構化薪金與精確刊登日）；"
+              "指定 --district/--category/--sort、設 JOBSDB_GRAPHQL=0 或通道熔斷時退回 Playwright SSR，"
+              "此時薪金常缺（實測 30 筆中 24 筆無薪金）。--days 站方端仍只吃 1/3/7/14/31，"
+              "GraphQL 轉為 listedAt:\"Nd\"（31→30d）；只做日期過濾、保留相關性排序。"
+              "--detail 與上述 SSR 情境仍需 Playwright，故 needsBrowser 維持 True。"
+              "⚠️ GraphQL 通道以離線快照開發，尚未對站方發過真實請求。",
     ),
     "linkedin": SourceInfo(
         name="linkedin", label="LinkedIn", enabled=True,

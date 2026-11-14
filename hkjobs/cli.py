@@ -208,8 +208,9 @@ def _print_sources_table(rows: list[dict]) -> None:
             + f"  {'/'.join(dims) or '—'} / {r['daysMode']}"
         )
     print("\n提示：加 --json 取得完整矩陣與各站備註；有效值用 hkjobs options --source <站> --json")
-    print("備註：JobsDB 列表薪金常缺；勞工處列表無公司名（需 --detail）；"
-          "eFC 未指定 --district 時預設 Hong Kong。")
+    print("備註：JobsDB 走 GraphQL 通道時補齊薪金；指定 --district/--category/--sort、"
+          "設 JOBSDB_GRAPHQL=0 或通道熔斷時退回 SSR，薪金仍常缺；"
+          "勞工處列表無公司名（需 --detail）；eFC 未指定 --district 時預設 Hong Kong。")
 
 
 def _print_options(payload: dict) -> None:
