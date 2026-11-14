@@ -19,6 +19,9 @@
   會將 /jobs?keywords=K&page=N&sortmode=ListedDate 301 正規化為 /K-jobs?...，Playwright 自動跟隨）。
 - 刊登日為「相對時間」字串（7d ago / 13h ago / Just now），用 days_since_posted() 解析。
 - 標題會併入「New」徽章（如 `...EngineerNew`），以 strip_new_badge() 剝除。
+- GraphQL 轉接（2026-11-15 離線 spike）：record_from_graphql() 把 jobSearchV7
+  單筆轉成 13 欄 JobRecord，純函式、零請求，不動既有 search()/get_detail() 流程。
+  來歷資訊（hideSalary 等）只放 raw，不進主表；詳見該函式區塊註解。
 """
 from __future__ import annotations
 
@@ -26,7 +29,7 @@ import json
 import logging
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from urllib.parse import quote, urljoin
 
@@ -51,6 +54,156 @@ logger = logging.getLogger(__name__)
 
 BASE = "https://hk.jobsdb.com"
 LIST_URL = BASE + "/jobs"
+
+# ---- GraphQL 搜尋回應轉接（2026-11-15 離線 spike，零請求） ----
+# 站方 SSR 頁把 Apollo cache 放在 window.SEEK_APOLLO_DATA，其中 jobSearchV7
+# 的回應與 /graphql 端點同形。以下純函式只做「單筆 job → JobRecord 13 欄」
+# 的離線轉接：不發請求、不啟動瀏覽器、不改既有 search()/get_detail() 流程。
+#
+# 離線快照實證（2026-11-14）：
+#   salary {min,max,period,currency} 是顯示用值（已除以 100）；
+#   cjs.salary.hideSalary=true 代表招聘頁不顯示，但搜尋索引仍保留薪資區間；
+#   listedAt.dateTimeUtc 是 UTC ISO；categories 為 [子類, 大類]。
+# 取捨：posted_date 仍輸出相對時間字串，與 days_since_posted() 及
+#   aggregate.parse_date() 相容；精確 UTC 存 raw["graphql"]["listed_at_utc"]。
+#   若日後改輸出精確 ISO，須先擴充 days_since_posted()，否則 --days 會濾光。
+
+_GRAPHQL_PERIOD_LABEL = {
+    "monthly": "per month",
+    "hourly": "per hour",
+    "annual": "per year",
+}
+
+
+def _gql_text(value) -> str:
+    """安全取 GraphQL 本地化文字（displayName.text / label.text / name）。"""
+    if isinstance(value, dict):
+        for key in ("text", "name", "label", "displayName"):
+            v = value.get(key)
+            if isinstance(v, str) and v.strip():
+                return v.strip()
+            if isinstance(v, dict):
+                got = _gql_text(v)
+                if got:
+                    return got
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _gql_salary_text(salary) -> tuple[str, dict]:
+    """salary {min,max,period,currency} 轉成站方卡片同形字串 + 中繼資訊。
+
+    未知週期回空字串（不假造單位）；min == max 只給單點數字。
+    中繼資訊只進 raw，不改 13 欄主表。
+    """
+    if not isinstance(salary, dict):
+        return "", {}
+    period = str(salary.get("period") or "").strip().lower()
+    info = {
+        "salary_period": period,
+        "salary_currency": str(salary.get("currency") or ""),
+    }
+    label = _GRAPHQL_PERIOD_LABEL.get(period)
+    if not label:
+        return "", info
+    try:
+        low = int(float(salary.get("min") or 0))
+        high = int(float(salary.get("max") or 0))
+    except (TypeError, ValueError):
+        return "", info
+    if low <= 0:
+        return "", info
+    if high <= 0 or high == low:
+        return f"${low:,} {label}", info
+    if high < low:
+        low, high = high, low
+    return f"${low:,} – ${high:,} {label}", info
+
+
+def _gql_relative_date(utc_text, now: datetime) -> str:
+    """UTC ISO 轉成站方卡片同形相對時間（Just now / Nm ago / Nh ago / Nd ago）。"""
+    if not isinstance(utc_text, str) or not utc_text.strip():
+        return ""
+    try:
+        dt = datetime.fromisoformat(utc_text.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return ""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    ref = now if now.tzinfo else now.replace(tzinfo=timezone.utc)
+    delta = (ref.astimezone(timezone.utc) - dt).total_seconds()
+    if delta < 60:
+        return "Just now"
+    if delta < 3600:
+        return f"{int(delta // 60)}m ago"
+    if delta < 86400:
+        return f"{int(delta // 3600)}h ago"
+    return f"{int(delta // 86400)}d ago"
+
+
+def record_from_graphql(job: dict, *, now: datetime | None = None) -> JobRecord:
+    """jobSearchV7 單筆轉成 JobRecord（純函式、零請求）。
+
+    缺欄位／型別異常一律安全退化，單筆壞資料不拖垮整批。
+    hideSalary 等來歷資訊存 raw["graphql"]，不進入 13 欄主表。
+    """
+    if not isinstance(job, dict):
+        job = {}
+    reference = now or datetime.now(timezone.utc)
+    jid = str(job.get("id") or "").strip()
+
+    advertiser = job.get("advertiser") if isinstance(job.get("advertiser"), dict) else {}
+    organisation = job.get("organisation") if isinstance(job.get("organisation"), dict) else {}
+    company = _gql_text(advertiser) or _gql_text(organisation)
+
+    cjs = job.get("cjs") if isinstance(job.get("cjs"), dict) else {}
+    cjs_salary = cjs.get("salary") if isinstance(cjs.get("salary"), dict) else {}
+    work_types = cjs.get("workTypes")
+    job_type = ""
+    if isinstance(work_types, list):
+        job_type = ", ".join(t for t in (_gql_text(w) for w in work_types) if t)
+    role_titles = cjs.get("roleTitles")
+    roles = [str(r.get("shortId") or "") for r in role_titles
+             if isinstance(r, dict) and r.get("shortId")] if isinstance(role_titles, list) else []
+
+    cats = job.get("categories") if isinstance(job.get("categories"), list) else []
+    labels = [t for t in (_gql_text(c) for c in cats) if t]
+    industry = labels[-1] if labels else ""   # [子類, 大類]，取大類
+
+    arrangements = job.get("workArrangements")
+    work_arrangements = [t for t in (_gql_text(a) for a in arrangements) if t] \
+        if isinstance(arrangements, list) else []
+
+    salary_text, salary_meta = _gql_salary_text(job.get("salary"))
+    listed = job.get("listedAt") if isinstance(job.get("listedAt"), dict) else {}
+    utc = str(listed.get("dateTimeUtc") or "")
+    posted = _gql_relative_date(utc, reference)
+
+    meta = {
+        "hide_salary": bool(cjs_salary.get("hideSalary")),
+        "listed_at_utc": utc,
+        "categories": labels,
+        "role_titles": roles,
+        "work_arrangements": work_arrangements,
+        "advertiser_id": str(advertiser.get("id") or ""),
+        **salary_meta,
+    }
+    return JobRecord(
+        job_id=f"jobsdb_{jid}" if jid else "jobsdb_",
+        source="jobsdb",
+        title=strip_new_badge(str(job.get("title") or "")),
+        company=company,
+        location=_gql_text(job.get("location")),
+        salary=salary_text,
+        job_type=job_type,
+        industry=industry,
+        description=str(job.get("abstract") or ""),
+        requirements="",
+        url=f"{BASE}/job/{jid}" if jid else "",
+        posted_date=posted,
+        scraped_at=reference.isoformat(),
+        raw={"graphql": meta},
+    )
+
 
 # ---- JobsDB 自有 slug 字典（與 Moovup / 勞工處 完全獨立，見 README 鐵律） ----
 _HERE = os.path.dirname(os.path.abspath(__file__))

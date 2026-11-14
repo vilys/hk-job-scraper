@@ -217,5 +217,5 @@ CSV；日期解析**唯一來源是 `hkjobs.aggregate.parse_date`**，`age_days`
 - 變更 HTML 看板，須同步 `build_dashboard.py`、`tests/test_dashboard.py`、README「聚合儀表板」章節；日期解析只能呼叫 `hkjobs/aggregate.py::parse_date`，不得再養第二套 regex。空狀態須區分「總資料 0 筆」（給可照抄的 `--out` 指令，0 檔 HTML 不得摻入「放寬篩選」字樣，連註解也一樣）與「有資料但被篩選濾光」（維持原句）；console 端 0 檔提醒與大字模式／鍵盤可達性一併守住。
 - Windows cp950 **同時管輸出與輸入**：所有人類輸出、`build_dashboard.py` 與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。輸入面不得讓管道／agent 送中文時產生 lone surrogate 再炸在 `print()`；新增 `input()` 一律改用 `contract.read_input()`，不得直接呼叫 builtin。`start.bat` 必須維持全 ASCII（含 Python 前提、版本與安裝失敗等所有訊息）。
 - 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。**但「該站支援且字典打錯」屬另一情境，須 exit 2 擋下**（見本文件「篩選值前置驗證」）。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 245 個測試。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 269 個測試。
 - 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README；去重數字改動時一併更新 `tools/README.md` 的基準說明。
