@@ -156,11 +156,23 @@ class TestParseResponse(unittest.TestCase):
         scraper = JobsDBScraper.__new__(JobsDBScraper)
         self.assertEqual(scraper.days_since_posted(r), 2)
 
-    def test_hide_salary_stays_in_raw_only(self):
+    def test_hide_salary_flag_stays_in_raw_only(self):
         r = parse_graphql_response(gql_response(gql_job()), now=NOW)[0]
         self.assertTrue(r.raw["graphql"]["hide_salary"])
         self.assertNotIn("hide_salary", r.to_dict())
         self.assertEqual(len(r.to_dict()), 13)
+
+    def test_hidden_salary_value_still_fills_main_salary_field(self):
+        """合規事實固化：旗標只在 raw，薪資數值仍進 13 欄主表並會被輸出。
+
+        這條防止文件再次寫成「只放 raw／不張揚雇主未顯示的值」——
+        那句話對旗標成立，對薪資數值不成立。
+        """
+        r = parse_graphql_response(gql_response(gql_job()), now=NOW)[0]
+        self.assertTrue(r.raw["graphql"]["hide_salary"])
+        self.assertNotIn("hide_salary", r.to_dict())
+        self.assertTrue(r.salary, "hideSalary=true 不應清空主表 salary")
+        self.assertEqual(parse_salary(r.salary)[:3], (40000, 50000, "month"))
 
     def test_errors_are_rejected(self):
         with self.assertRaises(JobsDBGraphQLError) as cm:

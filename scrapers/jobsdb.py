@@ -27,7 +27,8 @@
   ⚠️ 本通道以離線快照開發，尚未對站方發過真實請求；見 README 技術筆記。
 - GraphQL 轉接（2026-11-15 離線 spike）：record_from_graphql() 把 jobSearchV7
   單筆轉成 13 欄 JobRecord，純函式、零請求。
-  來歷資訊（hideSalary 等）只放 raw，不進主表；詳見該函式區塊註解。
+  來歷旗標（hideSalary）存 raw["graphql"] 供追溯；對應薪資數值仍填主表 salary，
+  使用範圍與合規提醒見 README「使用範圍」。
 """
 from __future__ import annotations
 
@@ -153,7 +154,8 @@ def record_from_graphql(job: dict, *, now: datetime | None = None) -> JobRecord:
     """jobSearchV7 單筆轉成 JobRecord（純函式、零請求）。
 
     缺欄位／型別異常一律安全退化，單筆壞資料不拖垮整批。
-    hideSalary 等來歷資訊存 raw["graphql"]，不進入 13 欄主表。
+    hideSalary 旗標存 raw["graphql"] 供追溯、不進 13 欄主表；但薪資數值
+    仍填入主表 salary（含招聘頁刻意不顯示的值），使用範圍見 README。
     """
     if not isinstance(job, dict):
         job = {}

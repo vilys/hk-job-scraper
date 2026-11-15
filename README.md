@@ -262,7 +262,7 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 302 個測試、約 11 秒、零網路請求。
+> 303 個測試、約 11 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -1218,7 +1218,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 302 個測試，約 11 秒，零網路請求
+python -m unittest discover -s tests -v      # 303 個測試，約 11 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。
@@ -1444,7 +1444,9 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 
 **資料增益**：`salary {min,max,period,currency}` 補上 SSR 常缺的薪金（離線快照 202/202 有值）；`listedAt.dateTimeUtc` 精確 UTC 存進 `raw["graphql"]["listed_at_utc"]`；另外補到 `description`（abstract）、`job_type`（`cjs.workTypes`）。`posted_date` 仍輸出 `2d ago` 相對字串，因為 `days_since_posted()` 只認這種格式，直接改 ISO 會讓 `--days` 把職位全濾掉。
 
-⚠️ **`cjs.salary.hideSalary`**：雇主交給搜尋索引、但明確選擇不在招聘頁顯示的薪資（快照中 157/202 筆）。技術上拿得到，但本專案**只放 `raw`，不進 13 欄主表**，公開輸出不張揚雇主未顯示的值。這也與詳情頁那句「Sign in and add your expected salary to see matches」無關——那是請求職者填自己的期望薪資看匹配度，不是解鎖雇主薪資。
+⚠️ **`cjs.salary.hideSalary`**：雇主交給搜尋索引、但明確選擇不在招聘頁顯示的薪資**旗標**（離線快照 157/202 筆，佔有薪金職位的 77.7%）。本專案把**旗標本身**存在 `raw["graphql"]["hide_salary"]` 供追溯、不進 13 欄主表；但**對應的薪資數值 `salary.min/max` 會照常填入主表 `salary`，並出現在 CSV／JSON 輸出**。換句話說，使用者看到的薪金有很高比例是招聘頁刻意不顯示的值——這點必須明講，不能只說「旗標沒進主表」。這也與詳情頁那句「Sign in and add your expected salary to see matches」無關——那是請求職者填自己的期望薪資看匹配度，不是解鎖雇主薪資。
+
+**使用範圍（2026-11-15 補充）**：本專案輸出供**個人求職參考與一次性市場研究**。上述隱藏薪酬技術上存在於公開搜尋索引、且全程未帶任何憑證，但雇主既然選擇不顯示，使用上仍應有分際：若要將這些數字用於**對外發布、薪酬談判指南、資料產品或商業用途**，請先確認 Jobsdb／SEEK 的服務條款，必要時取得對方同意；本專案不提供法律意見。維持的邊界：只抓公開廣告內容、不取求職者個資、不投遞履歷、不繞付費牆、不抓登入後專屬內容。抓取禮節見上方「節流」；若要擴大抓取（整站／歷史／每日排程），請先提高間隔，不要拉高併發。
 
 **登入**：完全不需要。請求只帶 UA、`Accept`、`Content-Type`、`Origin`、`Referer`，**無 Cookie、無 Authorization、無任何憑證**；`solVisitorId` / `sessionId` 是每次以 `uuid4()` 產生的隨機匿名 UUID。202 份是 filter 算出來的集合，與帳號無關。
 
