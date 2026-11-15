@@ -87,12 +87,14 @@ SOURCES: dict[str, SourceInfo] = {
               "指定 --district/--category/--sort、設 JOBSDB_GRAPHQL=0 或通道熔斷時退回 Playwright SSR，"
               "此時薪金常缺（實測 30 筆中 24 筆無薪金）。--days 站方端仍只吃 1/3/7/14/31，"
               "GraphQL 轉為 listedAt:\"Nd\"（31→30d）；只做日期過濾、保留相關性排序。"
-              "--salary-min 下推為 GraphQL filter.salaryMin:\"Nm\"（m=monthly；"
-              "退回 SSR 時改用 salaryrange=N-&salarytype=monthly），"
+              "--salary-min 下推為 GraphQL filter.salaryMin:\"Nm\"（m=monthly）；"
+              "SSR fallback 的 salaryrange 網址參數實測無效（2026-11-15），該路徑僅客戶端篩，"
+              "且 SSR 列表薪金覆蓋低，fallback 下會丟掉大量「無法判斷」的職位。"
               "其餘來源沒有站方端參數，由客戶端依正規化月薪兜底篩選。"
               "--detail 自 2026-11-15 起也走 GraphQL jobDetails 免瀏覽器（完整 JD HTML 轉純文字）；"
               "上述 SSR 情境與通道熔斷時才需 Playwright，故 needsBrowser 維持 True。"
-              "⚠️ GraphQL 通道以離線快照開發，尚未對站方發過真實請求。",
+              "✅ GraphQL 通道已於 2026-11-15 做過即時驗證（搜尋／翻頁／詳情）；"
+              "仍未驗證：中文關鍵字送 text、SSR 瀏覽網址維度。",
     ),
     "linkedin": SourceInfo(
         name="linkedin", label="LinkedIn", enabled=True,

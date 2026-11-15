@@ -57,7 +57,7 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 - 勞工處 `gov_hk` 列表頁沒有公司名也沒有刊登日，兩者都需 `--detail`；公司欄全空時人類輸出會提示。
 - **`--days` 只做日期過濾，不改排序**（2026-11-11 起）；`query.sort` 為 `null` 表示保留站方相關性排序。要日期排序請明確指定 `--sort post_dt_desc`。
 - JobsDB 站方 `daterange` 只吃 1/3/7/14/31；`--days 10` 會送 `daterange=14`，**客戶端再篩回 10 天**，人類輸出會明確提示，不會靜默放寬。GraphQL 通道改用 `filter.listedAt:"Nd"` 下推（同一組離散值；`31→"30d"`）。
-- **`--salary-min N`（2026-11-15）**：只保留月薪有機會達到 N 的職位（以區間上限判斷，缺上限時用單點值；與站方 `salaryMin` 的區間交集語意一致）。JobsDB 下推站方端（GraphQL `filter.salaryMin:"<N>m"`；SSR fallback `salaryrange=<N>-&salarytype=monthly`），其他來源由 `BaseScraper.scrape_all()` 以 `aggregate.parse_salary()` 的正規化月薪兜底；薪金解析不出者一律排除（與 `--days` 無法判定日期者的處理一致）。`query.salaryMin` 回顯；`schemaVersion` 仍 2、`jobs[]` 13 欄不變。
+- **`--salary-min N`（2026-11-15）**：只保留月薪有機會達到 N 的職位（以區間上限判斷，缺上限時用單點值；與站方 `salaryMin` 的區間交集語意一致）。**只有 GraphQL 通道是真的站方端下推**（`filter.salaryMin:"<N>m"`）；SSR fallback 的 `salaryrange`／`salarytype` **實測無效**（2026-11-15：`salaryrange=100000-` 仍回同一組 30 張卡，等 12 秒亦無變化），該路徑僅客戶端篩，且 SSR 列表薪金覆蓋低（同頁 7/30）→ fallback ＋ `--salary-min` 會把 23/30 當「無法判斷」丟掉。其他來源由 `BaseScraper.scrape_all()` 以 `aggregate.parse_salary()` 的正規化月薪兜底；薪金解析不出者一律排除。`query.salaryMin` 回顯；`schemaVersion` 仍 2、`jobs[]` 13 欄不變。
 - `--source all` 的人類摘要另印「各站欄位完整度」小表（公司／薪金／地區／日期命中數）與已知缺口建議；`--json` 對應 `summary.sources[].coverage`。
 - `efc` 未指定 `--district` 時預設 `Hong Kong`（原本會回 London／New York），stderr 與人類輸出皆提示可改。
 
@@ -74,7 +74,7 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 
 - **零憑證**：請求只帶 UA、`Accept`、`Content-Type`、`Origin`、`Referer`；無 Cookie、無 `Authorization`、無 `li_at`。`solVisitorId`／`sessionId` 每次以 `uuid4()` 動態產生（匿名追蹤 ID，不綁帳號）。設計上**不需要登入**。
 - 已驗證維度只有 `text`（原始字串，不做 percent-encode）、`filter.listedAt`、`filter.salaryMin`、`responseConfig.page/pageSize`、`sort:"score"`。地區／職能／`sort:"date"` 沒有離線實證，故不下推。
-- **`--salary-min` 下推 `filter.salaryMin`**（2026-11-15）：值為 `"<N>m"`，`m`=monthly（唯一有離線 payload 實證的週期），與 `listedAt` 共用同一個 `filter` 物件。SSR fallback 改用 `salaryrange=<N>-&salarytype=monthly`，兩條通道語意一致；其他來源由 `BaseScraper` 客戶端兜底。
+- **`--salary-min` 下推 `filter.salaryMin`**（2026-11-15）：值為 `"<N>m"`，`m`=monthly（唯一有實證的週期），與 `listedAt` 共用同一個 `filter` 物件。SSR fallback 仍會帶 `salaryrange=<N>-&salarytype=monthly`，但**實測無效**（僅與站方 UI 參數形狀一致、無害），該路徑靠客戶端兜底；其他來源同樣由 `BaseScraper` 客戶端兜底。
 - 資料增益：`salary {min,max,period,currency}` 補上 SSR 常缺的薪金；`listedAt.dateTimeUtc` 精確 UTC 存 `raw["graphql"]["listed_at_utc"]`。`posted_date` 仍輸出相對字串（`2d ago`），因為 `days_since_posted()` 只認相對格式——若改 ISO 會讓 `--days` 濾光。
 - `cjs.salary.hideSalary` 是雇主交給索引但選擇不對求職者顯示的**旗標**：旗標只存 `raw["graphql"]["hide_salary"]`、不進 13 欄主表；**但對應的薪資數值照常填入主表 `salary`，會出現在 CSV／JSON 輸出**（離線快照 157/202 筆）。描述此行為時須區分「旗標」與「薪資數值」，兩者去向不同，不可混為一談。
 - 使用範圍：輸出供個人求職參考與一次性市場研究；對外發布／薪酬談判指南／資料產品前須先確認 Jobsdb／SEEK 服務條款。邊界：只抓公開廣告、零憑證、不取求職者個資、不投遞履歷、不繞付費牆。
@@ -83,8 +83,8 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 - 詳情 query 刻意**不選** `products.questionnaire`（申請問卷題目定義），維持「只抓公開廣告」邊界；單一回應過大（413 / Payload Too Large）改用不含 `content` 的精簡 query，只影響該筆、不熔斷整輪。`jobDetails: null` 視為單筆無資料。
 - `BaseScraper.detail_replace_fields` 是 opt-in 白名單（預設空）；只有 `JobsDBScraper` 宣告 `{"description"}`，讓完整 JD 覆蓋列表 abstract，其餘 11 站「list 優先、detail 只補空」政策完全不變。
 - `needsBrowser` 在能力矩陣**維持 `True`**：`--district`／`--category`／`--sort` 的 SSR 路徑與兩個通道的 fallback 仍需要瀏覽器。
-- ✅ **2026-11-15 即時單頁驗證（真請求）**：`jobSearchV7` 單頁 30 筆、`listedAt:"7d"` 生效、30/30 有薪金；`--salary-min 60000` 回傳與基準僅 9 筆重疊的另一組 30 筆，證明站方 `salaryMin` 真的生效（`17000` 那組與基準相同，因該頁全部已達標，不能作為證據）；`jobDetails` 兩筆 4,391／4,766 字純文字 JD、零 HTML 標籤，合併後 `salary` 保留、`description` 由截斷預告換成完整 JD、13 欄齊全。全程 6 支 POST、零瀏覽器。
-- ⚠️ **仍未即時驗證**：SSR fallback（`salaryrange`／Playwright 路徑）、多頁翻頁、中文關鍵字送 `text`；`31→"30d"` 仍為推導。`JOBSDB_GRAPHQL=0` 是可一鍵回退的安全閥。
+- ✅ **2026-11-15 即時驗證**：`jobSearchV7` 單頁 30 筆、`listedAt:"7d"` 生效、30/30 有薪金；`--salary-min 60000` 回傳與基準僅 9 筆重疊的另一組 30 筆，證明站方 `salaryMin` 真的生效（`17000` 那組與基準相同，因該頁全部已達標，不能作為證據）；`--pages 2` → 60 筆零重複、`page=2` 全新 30 筆；`jobDetails` 兩筆 4,391／4,766 字純文字 JD、零 HTML 標籤；`JOBSDB_GRAPHQL=0` 的 SSR fallback 可正常載入（取得 `cf clearance`、無 Cloudflare 阻擋）但 `salaryrange` 不生效。
+- ⚠️ **仍未即時驗證**：中文關鍵字送 `text`、`--district`／`--category`／`--sort` 的 SSR 瀏覽網址、熔斷後的真實退回流程；`31→"30d"` 仍為推導。`JOBSDB_GRAPHQL=0` 是可一鍵回退的安全閥，但會讓 `--salary-min` 嚴重失真（見上）。
 
 ## 篩選值前置驗證（`hkjobs/validation.py`）
 

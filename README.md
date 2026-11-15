@@ -614,7 +614,7 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 | `--industry` | 否 | 無 | 行業篩選（支援：勞工處、JobMarket、OfferToday）。JobsDB 無獨立行業維度，傳入會被忽略並提示。 |
 | `--sort` | 否 | 無（站方相關性） | 排序：**gov_hk 全選項支援**（`post_dt_desc`(新→舊) / `post_dt_asc`(舊→新) / `salary_desc`·`salary_asc`(月薪) / `yr_exp_asc`·`yr_exp_desc`(經驗) / `edu_lvl_asc`·`edu_lvl_desc`(學歷)）；**JobsDB 與 LinkedIn 僅支援 `post_dt_desc`**（新→舊），其餘選項為 gov_hk 專有、傳入會警告並回退預設。⚠️ **2026-11-11 起 `--days` 不再自動套 `post_dt_desc`**（舊行為會讓 `analyst` 搜尋被剛刊登的 Dealer／會計淹沒）；想按日期排請明確指定。 |
 | `--days` | 否 | 無 | 只保留最近 N 天內刊登的職位，**只做日期過濾、不改排序**。各站實作不同：勞工處 / JobsDB / LinkedIn / OfferToday 有**站方端**日期參數；Moovup 不支援（警告後忽略）；獵聘以 `refreshTime`（刷新日）近似。勞工處結果不含 `posted_date`、亦不含公司名，兩者都需 `--detail`。詳見矩陣「近期」列。 |
-| `--salary-min` | 否 | 無 | 只保留**月薪有機會達到 N 港元**的職位（`N` 為正整數；以區間上限判斷，缺上限時用單點值）。JobsDB 下推站方端：GraphQL `filter.salaryMin:"<N>m"`，退回 SSR 時用 `salaryrange=<N>-&salarytype=monthly`；其他來源沒有站方端參數，由客戶端以正規化月薪兜底篩選。**薪金解析不出者一律排除**；時薪／日薪／年薪先換算成月薪再比。⚠️ 只有 monthly 週期有離線實證，`N` 一律視為月薪。 |
+| `--salary-min` | 否 | 無 | 只保留**月薪有機會達到 N 港元**的職位（`N` 為正整數；以區間上限判斷，缺上限時用單點值）。JobsDB GraphQL 下推站方端 `filter.salaryMin:"<N>m"`；**SSR fallback 的網址參數 `salaryrange` 實測無效**，該路徑只在客戶端篩（且 SSR 列表薪金覆蓋低，會排除大量「無法判斷」者）。其他來源沒有站方端參數，同樣由客戶端以正規化月薪兜底。**薪金解析不出者一律排除**；時薪／日薪／年薪先換算成月薪再比。⚠️ 只有 monthly 週期有實證，`N` 一律視為月薪。 |
 
 <a id="matrix"></a>
 
@@ -632,7 +632,7 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
 | 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設大致新→舊，頂部推廣區塊除外） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
 | 近期 `--days` | ❌ 不適用 | ✅ **站方端 `criteria.postedDtFr/To`**（2026-09-09 新增，格式 DD/MM/YYYY：列表無日期，舊流程須逐筆抓詳情取 `#postedDt`，改為站方端後 20 筆僅 2 支請求） | ✅ 列表含日期 + **站方端 `daterange=N`**（2026-09-10 新增，實測站方總數 2,241 → 467 筆；⚠️ 只吃 `1/3/7/14/31` 五個離散值，其餘數字站方不理會，本爬蟲自動向上取整） | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ⛔ **2026-09-11 據點停用，本列僅供復活時參考**：內嵌職位陣列瞬時（~9s，不點擊）+ **站方端 `fromage=N`**（2026-09-09 加入，⚠️ **從未實測驗證**——該站次日即遭封鎖、最終證實為強制登入牆，見 Indeed 章節）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時（⚠️ 2026-09-09 實測 `postedDate` / `datePosted` / `daysSincePosted` 三種參數名皆無效，站方端無日期過濾；因列表已含 ISO 日期、客戶端零成本篩選，影響極小） | ⚠️ 客戶端（`refreshTime` **刷新日**近似，非刊登日：實測 40 筆中 1天→6 / 3天→22 / 7天→33 / 14天→38） | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
-| 薪金下限 `--salary-min` | ⚠️ 僅客戶端（列表無薪金，需 `--detail`；解析不出者排除） | ⚠️ 僅客戶端（列表已有薪金） | ✅ **站方端 `salaryMin:"<N>m"`**（GraphQL；m=monthly 唯一有實證）；退回 SSR 時 `salaryrange=<N>-&salarytype=monthly` | ⚠️ 僅客戶端（列表無薪金 → 幾乎全排除） | ⛔ 停用 | ⚠️ 僅客戶端 | ⚠️ 僅客戶端（列表無薪金 → 幾乎全排除） | ⚠️ 僅客戶端（列表無薪金 → 幾乎全排除） | ⚠️ 僅客戶端（多為 Competitive → 幾乎全排除） | ⛔ 停用 | ⛔ 停用 | ⚠️ 僅客戶端 |
+| 薪金下限 `--salary-min` | ⚠️ 僅客戶端（列表無薪金，需 `--detail`；解析不出者排除） | ⚠️ 僅客戶端（列表已有薪金） | ✅ **站方端 `salaryMin:"<N>m"`**（GraphQL）；⚠️ SSR fallback 的 `salaryrange` 實測無效 → 只剩客戶端篩 | ⚠️ 僅客戶端（列表無薪金 → 幾乎全排除） | ⛔ 停用 | ⚠️ 僅客戶端 | ⚠️ 僅客戶端（列表無薪金 → 幾乎全排除） | ⚠️ 僅客戶端（列表無薪金 → 幾乎全排除） | ⚠️ 僅客戶端（多為 Competitive → 幾乎全排除） | ⛔ 停用 | ⛔ 停用 | ⚠️ 僅客戶端 |
 | 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ **2026-11-15 起優先走 GraphQL `jobDetails`**：完整 JD（HTML→純文字）、`salary.label`、精確刊登／截止日，常見路徑免瀏覽器；失敗熔斷退回 Playwright 詳情頁（2026-09-08 實測修正的 selector：`advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 已實測修正（2026-09-08）：描述原只抓到 17 字（`(.*?)</div>` 撞上巢狀 div）→ 改 DOM `inner_text` + 巢狀配對，實測 934–2476 字；另加點擊重試與 🐢 熔斷（連續 2 筆失敗即停止），16 筆由 **9 分鐘 / 剩 1 筆** → **~1 分鐘 / 完整** | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
 | 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | 首頁 ~58／續頁 10（guest 端點） | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 40（pageSize=40；實測 42 張卡、剔除 2 筆外地後 40 張全在香港） | 0（港澳台專區無職缺） | 10（站方上限） |
 | 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告。⚠️⚠️ **2026-09-09：另須「UA 不覆寫」**，否則 Client Hints 版本不一致仍會被擋；⛔ **2026-09-11：據點停用（0 筆）**——真人手動開也只見登入牆，非單純封鎖（詳見 Indeed 章節）） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；**必須讓頁面自己的 JS 發請求**——直接 requests 或瀏覽器內 fetch 打 API 皆回 `flag=0/-1400`；連 6–7 支請求觸發 IP 驗證碼） | ✅ 需（`channel="chrome"`；⛔ 2026-09-11 複查：首頁改為可開，但港澳台專區 0 張 + 登入牆） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
@@ -1120,7 +1120,7 @@ config.py         請求間隔 / UA / 輸出目錄 / 各站選擇器集中管理
 - **JobsDB 的 Cloudflare**：hk.jobsdb.com 同樣在 Cloudflare 後。**退回 SSR 通道時**，本程式先訪首頁取得 `cf_clearance` Cookie、後續所有列表請求共用同一瀏覽器 session（不重建 context），因此實測中不會反覆觸發挑戰。
   但 JobsDB 反爬更嚴，請嚴守禮貌間隔（預設 2 秒 + 抖動），並避免 `--pages` 開太大；
   若出現 403 / 轉圈，先停 10 分鐘再試，切勿重試狂刷。GraphQL 通道單頁只發 1 次 POST、失敗即熔斷退回此路線，不重撞。
-- **JobsDB 功能邊界**：`--district` / `--category` / `--sort` **已生效**（透過瀏覽網址與 `?sortmode=ListedDate`，此路徑仍走 Playwright）；`--industry` 不適用（JobsDB 無此維度，忽略並提示）；`--detail` 自 2026-11-15 起走 GraphQL `jobDetails` 取完整 JD，失敗才熔斷退回 Playwright 詳情頁；`--salary-min` 自 2026-11-15 起下推站方端（GraphQL `salaryMin`；SSR 用 `salaryrange`＋`salarytype=monthly`），其他站由客戶端兜底。
+- **JobsDB 功能邊界**：`--district` / `--category` / `--sort` **已生效**（透過瀏覽網址與 `?sortmode=ListedDate`，此路徑仍走 Playwright）；`--industry` 不適用（JobsDB 無此維度，忽略並提示）；`--detail` 自 2026-11-15 起走 GraphQL `jobDetails` 取完整 JD，失敗才熔斷退回 Playwright 詳情頁；`--salary-min` 只有 GraphQL 通道是真的站方端下推（`salaryMin`），**SSR fallback 的 `salaryrange` 網址參數實測無效**（2026-11-15），該路徑僅客戶端篩選。
   詳見上方「🗺️ 按地區篩選（JobsDB）」與下方「🧭 技術筆記（JobsDB）」。
 - **gov.hk 無反爬但請禮貌**：勞工處網站無 Cloudflare，但仍建議保持預設 2 秒間隔，避免對政府伺服器造成壓力。
 - **⚠️ User-Agent 必須與本機 Chrome 同版本（2026-09-10 血淚教訓）**：
@@ -1484,21 +1484,23 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 
 | 通道 | 做法 | 依據 |
 |---|---|---|
-| JobsDB GraphQL | `filter: {listedAt: "...", salaryMin: "<N>m"}` | 2026-11-14 離線 payload 實證：`filter: {listedAt:"7d", salaryMin:"17000m"}` |
-| JobsDB SSR fallback | 網址加 `salaryrange=<N>-&salarytype=monthly` | 使用者提供並實測可用的網址形狀；與 `daterange`／`keywords`／`sortmode` 共存 |
+| JobsDB GraphQL | `filter: {listedAt: "...", salaryMin: "<N>m"}` | 離線 payload 實證 ＋ 2026-11-15 即時實測（`60000m` 回另一組 30 筆） |
+| JobsDB SSR fallback | 網址加 `salaryrange=<N>-&salarytype=monthly` | ⚠️ **參數照送但實測無效**：`salaryrange=100000-` 仍回同一組 30 張卡（等 12 秒 hydration 無變化）→ 此路徑只有客戶端篩 |
 | 其他來源 | 沒有站方端參數，由 `BaseScraper.scrape_all()` 以 `aggregate.parse_salary()` 的正規化月薪兜底 | 全站一致，避免「只有 JobsDB 篩了、其他站照收」的假成功 |
 
-- **`m` 是 monthly**：目前只有 monthly 有離線實證，故不提供 `--salary-type` 去猜 hourly／annual；`N` 一律視為月薪。
+- **`m` 是 monthly**：目前只有 monthly 有實證，故不提供 `--salary-type` 去猜 hourly／annual；`N` 一律視為月薪。
 - **「區間交集」語意**：以區間上限判斷，`$15K–$20K` **算**符合 `--salary-min 17000`，與站方 `salaryMin` 一致；離線 202 筆（站方已套 `salaryMin:"17000m"`）用同一判定全數保留。若你要「保證下限 ≥ N」，請用 CSV 的 `salary_min` 再篩（本參數刻意不從嚴，避免把站方已篩出的職缺二次誤殺）。
 - **無法解析薪金者一律排除**（如 `Negotiable`／`Competitive`），與 `--days` 對「無法判定日期」的處理一致；人類輸出會明確標明，不會靜默混入。
+- **SSR fallback 的實際代價**：該路徑的列表薪金覆蓋很低（2026-11-15 實測同一頁 30 筆只有 7 筆帶薪金，而 GraphQL 是 30/30），加上 `salaryrange` 無效，所以 fallback ＋ `--salary-min 17000` 會由 30 筆篩到 7 筆，被丟的 23 筆是「無法判斷」而非「薪金不足」。需要準確的薪金篩選時，請確認 GraphQL 通道可用（別設 `JOBSDB_GRAPHQL=0`）。
 - 與 `--days` 獨立：兩者可同時下推；某頁被薪金濾空**不會**提早停翻（相關性排序下後面頁仍可能有符合的職位）。
 - `query.salaryMin` 回顯參數；`schemaVersion` 仍為 2、`jobs[]` 13 欄與 CSV 19 欄不變。
-- **即時實測（2026-11-15，GraphQL 通道）**：`--keyword "ai agent" --days 7 --pages 1` 共 6 支 POST（3×`jobSearchV7`、3×`jobDetails`），全程未啟動瀏覽器。
-  - 基準不設下限 → 30 筆、30/30 有薪金；加 `--salary-min 17000` → 同樣 30 筆且**與基準完全相同**（該頁 30 筆的區間上限本來就全部 ≥ 17,000，故這一組不能證明篩選生效）。
-  - 加 `--salary-min 60000` → 站方回的是**另一組 30 筆**（與基準僅 9 筆重疊、新出現 21 筆），且全部上限 ≥ 60,000 → **站方端 `salaryMin` 確實生效**，非靜默忽略。
-  - 客戶端兜底在該 30 筆上保留 30/30，與站方判定一致。
-  - 兩個邊界樣本值得留意：`$1 – $100,000 per month`（區間極寬）與 `$900,000 – $1,100,000 per year`（年薪，換算月薪 75,000–91,667）在 `salaryMin:"60000m"` 下都會入選——這是「區間交集」語意的自然結果，非 bug。
-- ⚠️ 仍未即時實測的部分：**SSR fallback 的 `salaryrange`**（需走 Playwright 瀏覽器路徑）與**多頁翻頁**；兩者只有離線測試覆蓋。`JOBSDB_GRAPHQL=0` 可一鍵退回 SSR。
+- **即時實測（2026-11-15）**：
+  - GraphQL 通道：`--keyword "ai agent" --days 7` 共 6 支 POST（3×`jobSearchV7`、3×`jobDetails`），全程未啟動瀏覽器。基準 30 筆、30/30 有薪金；`--salary-min 17000` 與基準完全相同（該頁全部已達標，**不能**當作篩選生效的證據）；`--salary-min 60000` 回另一組 30 筆（與基準僅 9 筆重疊、新出現 21 筆）→ 站方端確實生效。
+  - 翻頁：`--pages 2` 共 60 筆、零重複；第 1 頁與前一次單頁跑完全同序（決定性）；第 2 頁 30 筆全新；全部刊登日 2–6 天內。
+  - 詳情：`jobDetails` 兩筆 4,391／4,766 字純文字、零 HTML 標籤；合併後 `salary` 保留列表值、`description` 由 103 字預告換成完整 JD、13 欄齊全。
+  - SSR fallback：`JOBSDB_GRAPHQL=0` 可正常載入（`cf clearance` 取得、無 Cloudflare 阻擋），30 張卡與 GraphQL 同序；但 `salaryrange` 無效（見上）。
+  - 邊界樣本：`$1 – $100,000 per month` 與 `$900,000 – $1,100,000 per year`（換算月薪 75,000–91,667）在 `salaryMin:"60000m"` 下都會入選——「區間交集」語意的自然結果，非 bug。
+- ⚠️ 仍未即時實測：中文關鍵字送 `text`、`--district`／`--category`／`--sort` 的 SSR 瀏覽網址、熔斷後的真實退回流程。`JOBSDB_GRAPHQL=0` 可一鍵退回 SSR（但薪金篩選會大幅失真，見上）。
 
 ---
 

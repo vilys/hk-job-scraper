@@ -31,9 +31,11 @@
   失敗熔斷本輪並退回既有 Playwright 詳情流程；JOBSDB_GRAPHQL=0 同步停用。
   刻意不選 products.questionnaire（申請問卷題目），維持「只抓公開廣告」邊界。
 - GraphQL 薪金下限（2026-11-15）：--salary-min 下推成 filter.salaryMin:"<N>m"
-  （m=monthly，離線 payload 有實證）；退回 SSR 時 URL 改用
-  salaryrange=<N>-&salarytype=monthly。兩個通道語意一致，都是「月薪下限」。
-  其他來源沒有站方端參數，由 base_scraper 的客戶端兜底統一篩選。
+  （m=monthly，有離線 payload 與即時實測雙重佐證）。SSR fallback 仍會帶
+  salaryrange=<N>-&salarytype=monthly，但 2026-11-15 實測**無效**
+  （salaryrange=100000- 仍回同一組 30 張卡，hydration 12 秒無變化），
+  故 fallback 實際上只有客戶端篩選。其他來源沒有站方端參數，
+  由 base_scraper 的客戶端兜底統一篩選。
 - GraphQL 轉接（2026-11-15 離線 spike）：record_from_graphql() 把 jobSearchV7
   單筆轉成 13 欄 JobRecord，純函式、零請求。
   來歷旗標（hideSalary）存 raw["graphql"] 供追溯；對應薪資數值仍填主表 salary，
@@ -579,12 +581,13 @@ class JobsDBScraper(BaseScraper):
 
     # ---------- 站方端薪金下限掛載點（base_scraper.scrape_all 呼叫） ----------
     def set_salary_min(self, value: int) -> None:
-        """把 --salary-min 下推成 JobsDB 的站方端月薪下限。
+        """把 --salary-min 記錄下來，供兩條通道使用。
 
-        兩條通道語意一致，都是「月薪 ≥ N」：
-        - GraphQL：filter.salaryMin: "<N>m"（m=monthly，2026-11-14 離線 payload 實證）；
-        - SSR fallback：網址加 salaryrange=<N>-&salarytype=monthly
-          （使用者提供並實測可用的網址形狀，可與 daterange 共存）。
+        - GraphQL：filter.salaryMin: "<N>m"（m=monthly）——**這條才真的在站方端生效**
+          （2026-11-15 即時實測：60000m 回傳與基準僅 9 筆重疊的另一組 30 筆）。
+        - SSR fallback：網址仍會帶 salaryrange=<N>-&salarytype=monthly，但實測**無效**
+          （salaryrange=100000- 仍回同一組 30 張卡，等 12 秒 hydration 亦無變化），
+          該路徑實際只靠 base_scraper 的客戶端兜底；保留參數只是與站方 UI 形狀一致。
         目前只做 monthly；hourly／annual 沒有實證，故不提供 --salary-type。
         """
         try:
@@ -726,8 +729,10 @@ class JobsDBScraper(BaseScraper):
             # 站方端日期過濾（僅 1/3/7/14/31 五個合法值，見 set_days）
             params.append(f"daterange={self._daterange}")
         if self._salary_min:
-            # 站方端薪金下限（月薪）：salaryrange=<N>- 搭配 salarytype=monthly；
-            # 與瀏覽網址的 daterange／keywords／sortmode 可共存（URL 實證）。
+            # ⚠️ 2026-11-15 實測：salaryrange 對 SSR 列表**不生效**
+            # （salaryrange=100000- 仍回同一組 30 張卡；等 12 秒 hydration 亦無變化；
+            #   /jobs?keywords= 會 301 到 /<kw>-jobs?，參數有保留但仍不篩）。
+            # 仍照送：與站方 UI 參數形狀一致、無副作用；真正的篩選靠客戶端兜底。
             params.append(f"salaryrange={self._salary_min}-")
             params.append("salarytype=monthly")
         if params:

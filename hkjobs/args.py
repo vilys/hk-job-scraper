@@ -102,13 +102,13 @@ def add_search_arguments(
     p.add_argument("--salary-min", type=_positive_int, default=None, metavar="N",
                    help="只保留月薪有機會達到 N 港元的職位（預設不過濾；N 為正整數）。"
                         "判定用薪金區間上限（缺上限時用單點值），與 JobsDB 站方 "
-                        "salaryMin 的「區間有交集」語意一致；JobsDB 下推到站方端："
-                        "GraphQL filter.salaryMin 用「<N>m」，退回 SSR 時用 "
-                        "salaryrange=<N>-&salarytype=monthly；"
+                        "salaryMin 的「區間有交集」語意一致；JobsDB 走 GraphQL 時下推到"
+                        "站方端 filter.salaryMin（「<N>m」）；SSR fallback 的 salaryrange "
+                        "網址參數實測無效，該路徑只在客戶端篩。"
                         "其餘來源沒有站方端參數，由客戶端以同一套正規化月薪篩選，"
                         "讓同一個條件在每一站都真的生效。"
                         "薪金解析不出者一律排除；時薪／日薪／年薪先換算成月薪再比。"
-                        "注意：目前只有 monthly 週期有離線實證，N 一律視為月薪。")
+                        "注意：目前只有 monthly 週期有實證，N 一律視為月薪。")
 
 
 def build_search_argparser(
