@@ -18,6 +18,7 @@ from typing import Iterable
 
 from config import DEFAULT_HEADERS, MAX_RETRIES, delay_for
 from exporter import export
+from hkjobs import aggregate
 from job_model import JobRecord
 
 logger = logging.getLogger(__name__)
@@ -137,6 +138,7 @@ class BaseScraper(ABC):
         industry: str | None = None,
         sort: str | None = None,
         days: int | None = None,
+        salary_min: int | None = None,
         with_detail: bool = False,
         fill_location: bool = False,
         output: str | None = None,
@@ -152,6 +154,8 @@ class BaseScraper(ABC):
             industry:     行業過濾（依來源而定）
             sort:         排序方式（依來源而定，如 gov_hk 的 post_dt_desc）
             days:         只保留最近 N 天內刊登的職位（需抓詳情以取得日期）
+            salary_min:   只保留月薪 ≥ N 的職位（站方端可下推的來源先下推，
+                          其餘來源由客戶端以正規化月薪兜底；解析不出薪金者排除）
             with_detail:  True 時對每筆結果再抓詳情頁
             fill_location: True 時對列表結果補地區（僅實作了 `fill_locations()` 的
                            來源支援，如 recruit；其餘來源警告後忽略，不中斷）
@@ -171,6 +175,15 @@ class BaseScraper(ABC):
                 self.set_days(days)
             except Exception as e:  # noqa: BLE001
                 logger.warning("[%s] 站方端日期過濾設定失敗：%s", self.source, e)
+
+        # 站方端薪金下限掛載點：有實作 set_salary_min() 的來源才下推（目前只有
+        # JobsDB：GraphQL filter.salaryMin / SSR salaryrange）。其餘來源沒有此方法，
+        # 整段跳過，改由下方的客戶端兜底統一篩選 → 跨站隔離鐵律不變。
+        if salary_min is not None and hasattr(self, "set_salary_min"):
+            try:
+                self.set_salary_min(salary_min)
+            except Exception as e:  # noqa: BLE001
+                logger.warning("[%s] 站方端薪金下限設定失敗：%s", self.source, e)
 
         # 按日期篩選：若列表頁已含日期（list_has_date），直接以列表資料過濾；
         # 否則必須抓詳情以取得 posted_date。
@@ -262,6 +275,20 @@ class BaseScraper(ABC):
                         self.source, days,
                     )
 
+            # 薪金下限：站方端下推只有 JobsDB 有，其餘來源靠這裡的客戶端兜底，
+            # 讓「只留月薪 ≥ N」在每一站都真實生效，而不是只有一站篩、其他站照收。
+            # 無法解析薪金者視為不符合（與 --days 對「無法判定日期」一致）；
+            # 本頁被濾空不代表後面頁沒有，故不提早停翻。
+            if salary_min is not None:
+                kept = [j for j in jobs if self._meets_salary_min(j, salary_min)]
+                dropped = len(jobs) - len(kept)
+                if dropped:
+                    logger.info(
+                        "[%s] 已過濾 %d 筆薪金未達／無法判斷 %d 元的職位。",
+                        self.source, dropped, salary_min,
+                    )
+                jobs = kept
+
             all_jobs.extend(jobs)
             self._stats["success"] += len(jobs)   # 只計入通過篩選、實際保留的筆數
             self._sleep()
@@ -287,6 +314,19 @@ class BaseScraper(ABC):
         """判斷職位是否為最近 days 天內刊登。無法判定日期者視為不符合。"""
         age = self.days_since_posted(job)
         return age is not None and age <= days
+
+    @staticmethod
+    def _meets_salary_min(job: JobRecord, minimum: int) -> bool:
+        """客戶端薪金下限：以區間上限判斷「與 [N, ∞) 有交集」。
+
+        與 JobsDB 站方 `salaryMin:"Nm"` 的語意對齊：離線 202 筆實測顯示，
+        站方會保留 `$13,333–$20,000`、`$90–$100/hour` 這類「下限低於 N、
+        但上限達到 N」的職缺。若這裡改用下限判斷，會把站方已篩出的 6/202 筆
+        二次誤殺；故取上限（缺上限時用單點值）。解析不出薪金者仍不符合。
+        """
+        low, high, _ = aggregate.parse_salary(str(job.salary or ""))
+        top = high if high is not None else low
+        return top is not None and top >= minimum
 
     def days_since_posted(self, job: JobRecord) -> int | None:
         """回傳職位距今天數；子類可覆寫以解析各自日期格式，無法判定回傳 None。"""

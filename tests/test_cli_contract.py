@@ -18,12 +18,14 @@ class TestLegacyParser(unittest.TestCase):
     def test_legacy_options_unchanged(self):
         parser = main.build_argparser()
         strings = {s for a in parser._actions for s in a.option_strings}
+        # 2026-11-15 新增可選的 --salary-min（預設 None）；不帶它的舊命令
+        # 參數與行為逐鍵不變，故既有「舊入口」契約仍然成立。
         self.assertEqual(
             strings,
             {
                 "-h", "--help", "--source", "--keyword", "--pages", "--output", "--detail",
                 "--fill-location", "--outfile", "--district", "--category",
-                "--industry", "--sort", "--days",
+                "--industry", "--sort", "--days", "--salary-min",
             },
         )
 
@@ -35,7 +37,7 @@ class TestLegacyParser(unittest.TestCase):
                 "source": "moovup", "keyword": "", "pages": 3, "output": "json",
                 "detail": False, "fill_location": False, "outfile": None,
                 "district": None, "category": None, "industry": None,
-                "sort": None, "days": None,
+                "sort": None, "days": None, "salary_min": None,
             },
         )
 

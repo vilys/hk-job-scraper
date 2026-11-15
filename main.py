@@ -86,6 +86,7 @@ def main() -> None:
                 industry=args.industry,
                 sort=args.sort,
                 days=args.days,
+                salary_min=args.salary_min,
                 with_detail=args.detail,
                 fill_location=args.fill_location,
                 output=str(out_path),

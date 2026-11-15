@@ -30,6 +30,10 @@
   常見路徑（--keyword/--days/--pages + --detail）因此不必啟動 Playwright。
   失敗熔斷本輪並退回既有 Playwright 詳情流程；JOBSDB_GRAPHQL=0 同步停用。
   刻意不選 products.questionnaire（申請問卷題目），維持「只抓公開廣告」邊界。
+- GraphQL 薪金下限（2026-11-15）：--salary-min 下推成 filter.salaryMin:"<N>m"
+  （m=monthly，離線 payload 有實證）；退回 SSR 時 URL 改用
+  salaryrange=<N>-&salarytype=monthly。兩個通道語意一致，都是「月薪下限」。
+  其他來源沒有站方端參數，由 base_scraper 的客戶端兜底統一篩選。
 - GraphQL 轉接（2026-11-15 離線 spike）：record_from_graphql() 把 jobSearchV7
   單筆轉成 13 欄 JobRecord，純函式、零請求。
   來歷旗標（hideSalary）存 raw["graphql"] 供追溯；對應薪資數值仍填主表 salary，
@@ -282,6 +286,27 @@ class JobsDBGraphQLError(RuntimeError):
     """
 
 
+# salaryMin 的週期後綴：m = monthly。目前只有 "17000m" 這一個形狀有離線
+# payload 實證（2026-11-14 的 202 筆查詢），故 --salary-min 一律視為月薪，
+# 不提供 --salary-type 去猜 hourly / annual 的後綴，避免「看起來成功但單位錯」。
+_GRAPHQL_SALARY_MIN_SUFFIX = "m"
+
+
+def graphql_salary_min(value) -> str:
+    """把 `--salary-min` 正整數轉成站方 `salaryMin` 字串（`<n>m`）。
+
+    純函式：0／None／負數／非整數一律回空字串（呼叫端視為「不下推」），
+    不拋錯、不猜單位。`m` 是 monthly，為目前唯一有離線實證的週期。
+    """
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return ""
+    if number <= 0:
+        return ""
+    return f"{number}{_GRAPHQL_SALARY_MIN_SUFFIX}"
+
+
 def _gql_literal(value) -> str:
     """用 JSON 字串語法產生安全的 GraphQL string literal（含中文、引號跳脫）。"""
     return json.dumps(str(value or ""), ensure_ascii=False)
@@ -289,18 +314,26 @@ def _gql_literal(value) -> str:
 
 def build_graphql_query(*, keyword: str, page: int = 1, listed_at: str = "",
                         sort: str = "score", visitor_id: str = "", session_id: str = "",
+                        salary_min: int | str | None = 0,
                         page_size: int = _GRAPHQL_PAGE_SIZE) -> str:
     """純函式：組出 jobSearchV7 查詢字串（不發請求、不讀環境、不帶憑證）。
 
     visitor_id / session_id 是前端產生的隨機匿名 UUID，不綁定帳號；呼叫端
     每次以 uuid4() 動態產生，避免把任何固定識別值寫進公開 repo。
+    salary_min 為月薪下限；非正整數自動忽略，不讓壞值污染 query。
     """
     try:
         p = max(1, int(page))
         size = max(1, min(100, int(page_size)))
     except (TypeError, ValueError) as e:
         raise JobsDBGraphQLError(f"分頁參數無效：{e}") from e
-    flt = f"filter: {{listedAt: {_gql_literal(listed_at)}}}, " if listed_at else ""
+    filters = []
+    if listed_at:
+        filters.append(f"listedAt: {_gql_literal(listed_at)}")
+    salary = graphql_salary_min(salary_min)
+    if salary:
+        filters.append(f"salaryMin: {_gql_literal(salary)}")
+    flt = f"filter: {{{', '.join(filters)}}}, " if filters else ""
     repl = {
         "__PAGE__": str(p),
         "__PAGE_SIZE__": str(size),
@@ -504,6 +537,7 @@ class JobsDBScraper(BaseScraper):
         self._context = None
         self._page = None
         self._daterange: str = ""      # 站方端日期過濾（daterange=N），由 set_days() 注入
+        self._salary_min: int = 0      # 站方端薪金下限（月薪），由 set_salary_min() 注入
         # GraphQL 通道熔斷：本輪一旦判定不可用就直接走 SSR，不重撞（見通道區塊註解）
         self._gql_broken: bool = False
         # jobDetails 詳情通道獨立熔斷（兩個 operation 各自判斷，不互相牽連）
@@ -542,6 +576,29 @@ class JobsDBScraper(BaseScraper):
             logger.info("[jobsdb] --days %d 無對應值，向上取整為 daterange=%d", n, picked)
         self._daterange = str(picked)
         logger.info("[jobsdb] 已啟用站方端日期過濾 daterange=%s", self._daterange)
+
+    # ---------- 站方端薪金下限掛載點（base_scraper.scrape_all 呼叫） ----------
+    def set_salary_min(self, value: int) -> None:
+        """把 --salary-min 下推成 JobsDB 的站方端月薪下限。
+
+        兩條通道語意一致，都是「月薪 ≥ N」：
+        - GraphQL：filter.salaryMin: "<N>m"（m=monthly，2026-11-14 離線 payload 實證）；
+        - SSR fallback：網址加 salaryrange=<N>-&salarytype=monthly
+          （使用者提供並實測可用的網址形狀，可與 daterange 共存）。
+        目前只做 monthly；hourly／annual 沒有實證，故不提供 --salary-type。
+        """
+        try:
+            number = int(value)
+        except (TypeError, ValueError):
+            logger.warning(
+                "[jobsdb] --salary-min %r 無法轉為整數，已忽略站方端下推", value)
+            return
+        if number <= 0:
+            self._salary_min = 0
+            return
+        self._salary_min = number
+        logger.info("[jobsdb] 已啟用站方端薪金下限 salaryMin=%s（monthly）",
+                    graphql_salary_min(number))
 
     # ---------- 瀏覽器（共用一個 session，拿 cf clearance） ----------
     def _ensure_browser(self) -> None:
@@ -668,6 +725,11 @@ class JobsDBScraper(BaseScraper):
         if self._daterange:
             # 站方端日期過濾（僅 1/3/7/14/31 五個合法值，見 set_days）
             params.append(f"daterange={self._daterange}")
+        if self._salary_min:
+            # 站方端薪金下限（月薪）：salaryrange=<N>- 搭配 salarytype=monthly；
+            # 與瀏覽網址的 daterange／keywords／sortmode 可共存（URL 實證）。
+            params.append(f"salaryrange={self._salary_min}-")
+            params.append("salarytype=monthly")
         if params:
             path += "?" + "&".join(params)
         return BASE + path
@@ -726,11 +788,13 @@ class JobsDBScraper(BaseScraper):
         listed_at = _GRAPHQL_LISTED_AT.get(self._daterange, "")
         query = build_graphql_query(
             keyword=keyword or "", page=page, listed_at=listed_at,
+            salary_min=self._salary_min,
             sort="score",
             visitor_id=str(uuid.uuid4()), session_id=str(uuid.uuid4()),
         )
-        logger.info("[jobsdb] POST /graphql（page=%d, listedAt=%s, pageSize=%d）",
-                    page, listed_at or "-", _GRAPHQL_PAGE_SIZE)
+        logger.info("[jobsdb] POST /graphql（page=%d, listedAt=%s, salaryMin=%s, pageSize=%d）",
+                    page, listed_at or "-", graphql_salary_min(self._salary_min) or "-",
+                    _GRAPHQL_PAGE_SIZE)
         return parse_graphql_response(self._post_graphql(query))
 
     def _post_graphql(self, query: str, variables: Optional[dict] = None) -> dict:

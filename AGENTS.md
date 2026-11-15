@@ -33,7 +33,7 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 
 ## 命令
 
-- `hkjobs search`：參數同 `python main.py`（`--source/--keyword/--pages/--days/--district/--category/--industry/--sort/--detail/--fill-location`），另有：
+- `hkjobs search`：參數同 `python main.py`（`--source/--keyword/--pages/--days/--salary-min/--district/--category/--industry/--sort/--detail/--fill-location`），另有：
   - `--json`：stdout 只輸出單一 JSON 封套；**不主動寫檔**（除非同時給 `--out`）；日誌走 stderr（預設 WARNING）。
   - `--out PATH`：顯式寫檔；`.csv` 寫職位 CSV（UTF-8 BOM、**schema v2 共 19 欄**），其他副檔名寫 JSON（`--json` 時為完整封套）。
   - `--sort-by date|salary`：**跨站排序**。`--source all` 預設 `date`（刊登日新→舊）；單站預設不排序，保留站方相關性。解析不出日期／薪金者排最後，不丟棄。
@@ -57,6 +57,7 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 - 勞工處 `gov_hk` 列表頁沒有公司名也沒有刊登日，兩者都需 `--detail`；公司欄全空時人類輸出會提示。
 - **`--days` 只做日期過濾，不改排序**（2026-11-11 起）；`query.sort` 為 `null` 表示保留站方相關性排序。要日期排序請明確指定 `--sort post_dt_desc`。
 - JobsDB 站方 `daterange` 只吃 1/3/7/14/31；`--days 10` 會送 `daterange=14`，**客戶端再篩回 10 天**，人類輸出會明確提示，不會靜默放寬。GraphQL 通道改用 `filter.listedAt:"Nd"` 下推（同一組離散值；`31→"30d"`）。
+- **`--salary-min N`（2026-11-15）**：只保留月薪有機會達到 N 的職位（以區間上限判斷，缺上限時用單點值；與站方 `salaryMin` 的區間交集語意一致）。JobsDB 下推站方端（GraphQL `filter.salaryMin:"<N>m"`；SSR fallback `salaryrange=<N>-&salarytype=monthly`），其他來源由 `BaseScraper.scrape_all()` 以 `aggregate.parse_salary()` 的正規化月薪兜底；薪金解析不出者一律排除（與 `--days` 無法判定日期者的處理一致）。`query.salaryMin` 回顯；`schemaVersion` 仍 2、`jobs[]` 13 欄不變。
 - `--source all` 的人類摘要另印「各站欄位完整度」小表（公司／薪金／地區／日期命中數）與已知缺口建議；`--json` 對應 `summary.sources[].coverage`。
 - `efc` 未指定 `--district` 時預設 `Hong Kong`（原本會回 London／New York），stderr 與人類輸出皆提示可改。
 
@@ -66,13 +67,14 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 
 | 條件 | 通道 | 請求 |
 |---|---|---|
-| 只給 `--keyword`／`--days`／`--pages`（或都不給） | `POST https://hk.jobsdb.com/graphql` 的 `jobSearchV7` | 每頁 1 次 POST，`pageSize=30` |
+| 只給 `--keyword`／`--days`／`--salary-min`／`--pages`（或都不給） | `POST https://hk.jobsdb.com/graphql` 的 `jobSearchV7` | 每頁 1 次 POST，`pageSize=30` |
 | 給 `--district`／`--category`／`--sort` | 既有 Playwright SSR 瀏覽網址 | 每頁 1 次 GET（共用 `cf_clearance`） |
 | `JOBSDB_GRAPHQL=0` | 既有 Playwright SSR | 同上 |
 | GraphQL 失敗（非 200／Cloudflare HTML／`errors`／形狀不符／網路例外） | **熔斷本輪**並退回 SSR | 後續頁不再打 GraphQL |
 
 - **零憑證**：請求只帶 UA、`Accept`、`Content-Type`、`Origin`、`Referer`；無 Cookie、無 `Authorization`、無 `li_at`。`solVisitorId`／`sessionId` 每次以 `uuid4()` 動態產生（匿名追蹤 ID，不綁帳號）。設計上**不需要登入**。
-- 已驗證維度只有 `text`（原始字串，不做 percent-encode）、`filter.listedAt`、`responseConfig.page/pageSize`、`sort:"score"`。地區／職能／`sort:"date"` 沒有離線實證，故不下推。
+- 已驗證維度只有 `text`（原始字串，不做 percent-encode）、`filter.listedAt`、`filter.salaryMin`、`responseConfig.page/pageSize`、`sort:"score"`。地區／職能／`sort:"date"` 沒有離線實證，故不下推。
+- **`--salary-min` 下推 `filter.salaryMin`**（2026-11-15）：值為 `"<N>m"`，`m`=monthly（唯一有離線 payload 實證的週期），與 `listedAt` 共用同一個 `filter` 物件。SSR fallback 改用 `salaryrange=<N>-&salarytype=monthly`，兩條通道語意一致；其他來源由 `BaseScraper` 客戶端兜底。
 - 資料增益：`salary {min,max,period,currency}` 補上 SSR 常缺的薪金；`listedAt.dateTimeUtc` 精確 UTC 存 `raw["graphql"]["listed_at_utc"]`。`posted_date` 仍輸出相對字串（`2d ago`），因為 `days_since_posted()` 只認相對格式——若改 ISO 會讓 `--days` 濾光。
 - `cjs.salary.hideSalary` 是雇主交給索引但選擇不對求職者顯示的**旗標**：旗標只存 `raw["graphql"]["hide_salary"]`、不進 13 欄主表；**但對應的薪資數值照常填入主表 `salary`，會出現在 CSV／JSON 輸出**（離線快照 157/202 筆）。描述此行為時須區分「旗標」與「薪資數值」，兩者去向不同，不可混為一談。
 - 使用範圍：輸出供個人求職參考與一次性市場研究；對外發布／薪酬談判指南／資料產品前須先確認 Jobsdb／SEEK 服務條款。邊界：只抓公開廣告、零憑證、不取求職者個資、不投遞履歷、不繞付費牆。
@@ -240,5 +242,5 @@ CSV；日期解析**唯一來源是 `hkjobs.aggregate.parse_date`**，`age_days`
 - 變更 HTML 看板，須同步 `build_dashboard.py`、`tests/test_dashboard.py`、README「聚合儀表板」章節；日期解析只能呼叫 `hkjobs/aggregate.py::parse_date`，不得再養第二套 regex。空狀態須區分「總資料 0 筆」（給可照抄的 `--out` 指令，0 檔 HTML 不得摻入「放寬篩選」字樣，連註解也一樣）與「有資料但被篩選濾光」（維持原句）；console 端 0 檔提醒與大字模式／鍵盤可達性一併守住。
 - Windows cp950 **同時管輸出與輸入**：所有人類輸出、`build_dashboard.py` 與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。輸入面不得讓管道／agent 送中文時產生 lone surrogate 再炸在 `print()`；新增 `input()` 一律改用 `contract.read_input()`，不得直接呼叫 builtin。`start.bat` 必須維持全 ASCII（含 Python 前提、版本與安裝失敗等所有訊息）。
 - 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。**但「該站支援且字典打錯」屬另一情境，須 exit 2 擋下**（見本文件「篩選值前置驗證」）。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 337 個測試。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 371 個測試。
 - 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README；去重數字改動時一併更新 `tools/README.md` 的基準說明。

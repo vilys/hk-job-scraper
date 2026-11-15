@@ -6,6 +6,25 @@ import argparse
 from hkjobs import aggregate
 
 
+def _positive_int(value: str) -> int:
+    """argparse type：`--salary-min` 只接受正整數（港幣月薪）。
+
+    放在共用的 `add_search_arguments()`，讓 `python main.py` 與 `python -m hkjobs`
+    在 parse 階段就有一致的錯字／負數防線，不必各自補檢查。
+    """
+    try:
+        number = int(value)
+    except (TypeError, ValueError) as exc:
+        raise argparse.ArgumentTypeError(
+            "--salary-min 必須是正整數（港幣月薪），例如 17000"
+        ) from exc
+    if number < 1:
+        raise argparse.ArgumentTypeError(
+            "--salary-min 必須大於或等於 1；不篩薪金請直接省略此參數"
+        )
+    return number
+
+
 def add_search_arguments(
     p: argparse.ArgumentParser, *, include_output_flags: bool = True
 ) -> None:
@@ -80,6 +99,16 @@ def add_search_arguments(
                         "（只有「on MM-DD」格式能算天數，其餘視為過舊淘汰）。"
                         "注意：只做日期過濾，不改排序；保留站方預設（相關性）順序。"
                         "公司名需 --detail，日期欄在 gov_hk 亦需 --detail。")
+    p.add_argument("--salary-min", type=_positive_int, default=None, metavar="N",
+                   help="只保留月薪有機會達到 N 港元的職位（預設不過濾；N 為正整數）。"
+                        "判定用薪金區間上限（缺上限時用單點值），與 JobsDB 站方 "
+                        "salaryMin 的「區間有交集」語意一致；JobsDB 下推到站方端："
+                        "GraphQL filter.salaryMin 用「<N>m」，退回 SSR 時用 "
+                        "salaryrange=<N>-&salarytype=monthly；"
+                        "其餘來源沒有站方端參數，由客戶端以同一套正規化月薪篩選，"
+                        "讓同一個條件在每一站都真的生效。"
+                        "薪金解析不出者一律排除；時薪／日薪／年薪先換算成月薪再比。"
+                        "注意：目前只有 monthly 週期有離線實證，N 一律視為月薪。")
 
 
 def build_search_argparser(

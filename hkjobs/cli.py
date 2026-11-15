@@ -284,6 +284,7 @@ def _run_one(source: str, args: argparse.Namespace) -> SourceResult:
             industry=args.industry,
             sort=args.sort,
             days=args.days,
+            salary_min=getattr(args, "salary_min", None),
             with_detail=args.detail,
             fill_location=args.fill_location,
             output=None,
@@ -414,6 +415,7 @@ def _print_human(
     deduped: int = 0,
     raw_total: int = 0,
     show_coverage: bool = False,
+    salary_min: int | None = None,
 ) -> None:
     """人類模式輸出：來源摘要 + 職位清單 + 完整度 + 下一步提示。
 
@@ -433,6 +435,9 @@ def _print_human(
     with_salary = sum(1 for j in jobs if aggregate.has_numeric_salary(j))
     salary_note = f"{with_salary}/{total} 筆有薪金" if total else "0 筆"
     print(f"\n總計：{total} 筆（{salary_note}）")
+    if salary_min:
+        print(f"薪金下限：只保留薪金區間上限至少 {salary_min:,} 元的職位；"
+              "薪金解析不出者已排除（時薪／日薪／年薪先換算成月薪）。")
     if deduped:
         print(f"去重：合併 {deduped} 筆重複職缺（原始 {raw_total} 筆；"
               "--no-dedup 可保留原始筆數）")
@@ -482,6 +487,8 @@ def _write_out(path: Path, payload: dict, *, json_mode: bool) -> None:
 
 def cmd_search(args: argparse.Namespace) -> int:
     _setup_logging(quiet=args.quiet, json_mode=args.json)
+    # 兼容以手工 Namespace 呼叫的舊測試／內嵌呼叫：缺 salary_min 視為未指定。
+    salary_min = getattr(args, "salary_min", None)
     if args.source != "all" and args.source not in SOURCES:
         return _usage_error(
             f"未知來源：{args.source}（可選：{', '.join(SOURCES)}, all）"
@@ -489,6 +496,9 @@ def cmd_search(args: argparse.Namespace) -> int:
     # --pages 0 原本會跑出「0 筆結果 / exit 5」，那是把用法錯誤偽裝成查無結果。
     if args.pages < 1:
         return _usage_error("--pages 必須 ≥ 1（探測請用 1；0 不是「不翻頁」）")
+    # args.py 的 type 已在 parse 階段擋下錯字與負數；這裡再守住手動傳入的 Namespace。
+    if salary_min is not None and salary_min < 1:
+        return _usage_error("--salary-min 必須大於或等於 1（不篩薪金請省略此參數）")
     # 覆蓋保護必須在發出任何請求之前：爬完才發現不能寫，等於白打一站的請求。
     # --json 是既有 agent 契約，維持原行為（不加 --force 也能覆寫）。
     if args.out and not args.json and not args.force and Path(args.out).exists():
@@ -545,6 +555,7 @@ def cmd_search(args: argparse.Namespace) -> int:
         "keyword": args.keyword,
         "pages": args.pages,
         "days": args.days,
+        "salaryMin": salary_min,
         "district": args.district,
         "category": args.category,
         "industry": args.industry,
@@ -577,6 +588,7 @@ def cmd_search(args: argparse.Namespace) -> int:
             deduped=summary["deduped"],
             raw_total=summary["rawTotal"],
             show_coverage=(args.source == "all"),
+            salary_min=salary_min,
         )
         if args.source == "efc" and not args.district:
             print("提示：eFC 未指定 --district，已預設 Hong Kong；"
