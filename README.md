@@ -262,7 +262,7 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 371 個測試、約 11 秒、零網路請求。
+> 393 個測試、約 11 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -350,10 +350,10 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
   - **支援時間排列與近期篩選**：`--sort` 依刊登日期/薪資/經驗/學歷排序；`--days N` 只留最近 N 天內刊登（見下方「按刊登日期排序 / 近期篩選（勞工處）」）。
   - **支援按工作種類 / 行業篩選**（勞工處 `criteria.jobType` / `criteria.industry` 兩套獨立維度，見下方「按工作種類 / 行業篩選（勞工處）」）。
 - **JobsDB 據點已實戰驗證**：
-  - **2026-11-15 起有兩條通道**：一般關鍵字搜尋走 `POST /graphql` 的 `jobSearchV7`（免 Playwright、補齊 SSR 常缺的薪金）；指定 `--district` / `--category` / `--sort`、設 `JOBSDB_GRAPHQL=0` 或通道熔斷時，退回既有 Playwright SSR。詳見下方「🧭 技術筆記（JobsDB）」。
+  - **2026-11-15 起有兩條通道**：一般關鍵字搜尋走 `POST /graphql` 的 `jobSearchV7`（免 Playwright、補齊 SSR 常缺的薪金）；`--district` 自 2026-11-15 起也走同一條通道（`searchIntent.where`）。指定 `--category` / `--sort`、地區不在字典內、設 `JOBSDB_GRAPHQL=0` 或通道熔斷時，退回既有 Playwright SSR。詳見下方「🧭 技術筆記（JobsDB）」。
   - SSR 通道：React SSR + Cloudflare，先訪首頁取得 `cf_clearance` Cookie 並**共用同一 session**；職位列表是伺服器渲染進 `/jobs?keywords=K&page=N` 的 HTML（卡片用 `data-automation='normalJob'`），每頁只需 1 次 GET。（這是 2026-09 的主要路線，現為 fallback。）
   - **支援關鍵字搜尋 + `?page=N` 翻頁**（每頁約 20–30 筆；GraphQL 通道固定 `pageSize=30` 維持相同語意）。
-  - **支援職能（工作種類）+ 地區篩選**：`--category`（職能，中文/英文/slug，如 `資訊及通訊科技`）與 `--district`（地區，中文/slug，如 `荃灣`）已接上，透過 `/jobs-in-<職能>/in-<地區>` 瀏覽網址實現（見下方「🗺️ 按地區篩選（JobsDB）」）。
+  - **支援職能（工作種類）+ 地區篩選**：`--category`（職能，中文/英文/slug，如 `資訊及通訊科技`）與 `--district`（地區，中文/slug，如 `荃灣`）已接上。地區自 2026-11-15 起在字典內（40 個）走 GraphQL `searchIntent.where`，不必開瀏覽器；字典外與職能篩選仍透過 `/jobs-in-<職能>/in-<地區>` 瀏覽網址（見下方「🗺️ 按地區篩選（JobsDB）」）。
   - **支援近期篩選 `--days N`**：列表頁已含相對刊登日（如 `7d ago`），直接由列表過濾，不必抓 30 筆詳情/頁（與 gov.hk 不同）。
   - **支援排序 `--sort`**：JobsDB 網站 UI 僅提供「相關性（預設）」與「刊登日期（Date）」兩種排序。對應實作：`--sort post_dt_desc` → 網址加 `?sortmode=ListedDate`（新→舊，已實測 1h→2h→3h 遞增）；其餘選項（`post_dt_asc` / `salary_*` / `yr_exp_*` / `edu_lvl_*`）為 gov_hk 專有，JobsDB 無對應 UI，傳入會警告並回退預設。⚠️ **2026-11-11 起 `--days` 不再自動套 `post_dt_desc`**（舊行為會讓 `analyst` 搜尋被剛刊登的 Dealer／會計淹沒）；想按日期排請明確指定（見下方「🧭 技術筆記（JobsDB）」）。
   - **不支援項**：`--industry`（JobsDB 無獨立行業維度，職能已涵蓋，傳入會忽略並提示）。
@@ -482,7 +482,7 @@ hk-job-scraper/
 
 - Python 3.10+（**第一次用請先照 [60 秒上手第 2 步](#quickstart) 跑 `python --version`**；Windows 的 Microsoft Store 別名坑也在那裡說明）
 - 需要 Playwright 的據點：**Moovup**（Cloudflare Turnstile）、**Indeed**（Cloudflare，⚠️ **須本機 `channel="chrome"`**）、**Recruit**（WebForms 翻頁需真瀏覽器）、**foundit**（⚠️ **須本機 `channel="chrome"`**，內建 Chromium 被 WAF 403）。**JobMarket / eFinancialCareers / OfferToday** 不需要（全程普通 requests）。
-  - **JobsDB 自 2026-11-15 起，搜尋與 `--detail` 都走 GraphQL，一般關鍵字搜尋（含 `--days` / `--pages`）完全不需要 Playwright**；但指定 `--district` / `--category` / `--sort`、設 `JOBSDB_GRAPHQL=0` 或通道熔斷時仍會退回需要瀏覽器的 SSR 流程，故 `hkjobs sources` 的「需瀏覽器」欄仍顯示「需」。詳見[技術筆記](#appendix)。
+  - **JobsDB 自 2026-11-15 起，搜尋（含 `--district`）、翻頁與 `--detail` 都走 GraphQL，常見路徑完全不需要 Playwright**；但指定 `--category` / `--sort`、地區不在 40 個字典內、設 `JOBSDB_GRAPHQL=0` 或通道熔斷時仍會退回需要瀏覽器的 SSR 流程，故 `hkjobs sources` 的「需瀏覽器」欄仍顯示「需」。詳見[技術筆記](#appendix)。
 - ⚠️ **foundit / 獵聘 / BOSS直聘 需要本機安裝 Google Chrome**：foundit 的 WAF 與獵聘、BOSS直聘的反爬均以指紋區分瀏覽器，模組以 `channel="chrome"`（系統 Chrome）headless 開啟；未安裝 Chrome 時會啟動失敗並提示。
 - 只需 `requests` + `beautifulsoup4`、不需瀏覽器的據點：**勞工處 gov.hk**、**LinkedIn**（訪客模式）。
 
@@ -609,7 +609,7 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 | `--output` | 否 | `json` | 輸出格式：`json` \| `csv` \| `both` |
 | `--detail` | 否 | 關 | 同時抓取每筆職位的詳情（職責 / 要求 / 發佈時間 / **刊登日期**）；**JobsDB 自 2026-11-15 起走 GraphQL `jobDetails`，可取得完整 JD（HTML 轉純文字），常見路徑免瀏覽器**；失敗熔斷退回 Playwright 詳情頁 |
 | `--outfile` | 否 | 自動命名 | 自訂輸出檔名（不含副檔名），預設 `output/<source>_<keyword>` |
-| `--district` | 否 | 無 | 地區篩選，**多數據點已接上**（支援的站與格式見矩陣「地區」列）。例：JobsDB 用中文名或 slug（`荃灣` \| `tsuen-wan`，見 `scrapers/jobsdb_districts.json`）；勞工處用數字 ID 或中文；Moovup 用 shortCode。**各站字典獨立，不可混用**；逗號分隔時 JobsDB 僅取第一個。 |
+| `--district` | 否 | 無 | 地區篩選，**多數據點已接上**（支援的站與格式見矩陣「地區」列）。例：JobsDB 用中文名或 slug（`荃灣` \| `tsuen-wan`，見 `scrapers/jobsdb_districts.json`），字典內 40 個地區走 GraphQL `searchIntent.where`（免瀏覽器）、字典外才退回瀏覽網址；勞工處用數字 ID 或中文；Moovup 用 shortCode。**各站字典獨立，不可混用**；逗號分隔時 JobsDB 僅取第一個。 |
 | `--category` | 否 | 無 | 工作種類 / 職能篩選（支援：勞工處、JobsDB、Recruit、JobMarket、OfferToday，見矩陣）。例：JobsDB 用中文名 / 英文 / slug（見 `scrapers/jobsdb_classifications.json`）。**各站字典獨立**。 |
 | `--industry` | 否 | 無 | 行業篩選（支援：勞工處、JobMarket、OfferToday）。JobsDB 無獨立行業維度，傳入會被忽略並提示。 |
 | `--sort` | 否 | 無（站方相關性） | 排序：**gov_hk 全選項支援**（`post_dt_desc`(新→舊) / `post_dt_asc`(舊→新) / `salary_desc`·`salary_asc`(月薪) / `yr_exp_asc`·`yr_exp_desc`(經驗) / `edu_lvl_asc`·`edu_lvl_desc`(學歷)）；**JobsDB 與 LinkedIn 僅支援 `post_dt_desc`**（新→舊），其餘選項為 gov_hk 專有、傳入會警告並回退預設。⚠️ **2026-11-11 起 `--days` 不再自動套 `post_dt_desc`**（舊行為會讓 `analyst` 搜尋被剛刊登的 Dealer／會計淹沒）；想按日期排請明確指定。 |
@@ -627,7 +627,7 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 | 功能 / 參數 | Moovup | 勞工處 gov.hk | JobsDB | LinkedIn | Indeed | Recruit | JobMarket | foundit | eFinancialCareers | 獵聘 ⚠️ | BOSS直聘 ⚠️ | OfferToday |
 |------|------|------|------|------|------|------|------|------|------|------|------| ------ |
 | 關鍵字 `--keyword` | ✅ 支援 | ✅ 支援 | ✅ 可留空 | ✅ 支援 | ✅ 支援（⚠️ **必給關鍵字**——空 `q=` 站方回 `did not match any jobs` / 0 筆） | ✅ 可留空（純分類瀏覽） | ✅ 支援（可留空） | ✅ 支援（可留空→地區瀏覽頁） | ✅ 支援（可留空） | ⚠️ 機制已驗證（40 筆/頁）但連 6–7 支請求會觸發 IP 驗證碼 | ⚠️ 香港職缺為空（港澳台專區 0 張 + 登入牆） | ✅ 支援（可留空） |
-| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選）⚠️ **列表本身無地區欄**：單區篩選時**零請求回填**該區；多區／未篩選 → 用 `--fill-location`（AJAX 逐筆，25 筆/頁 = 25 支請求）或 `--detail` | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼 + 客戶端分區比對（`320` 香港；18 區見 `liepin_areas.json`，簡繁英皆可） | ❌ 不適用（香港不在站方城市體系） | ✅ 純 code 18 區 + 129 子區（中英文皆可，逗號多選） |
+| 地區 `--district` | ✅ shortCode（32 區） | ✅ 數字 ID（27 項） | ✅ slug（40 區；字典內走 GraphQL `where`，免瀏覽器；字典外退回瀏覽網址） | ✅ 18 區字典（zh→英文 `location=`；geoUrn 訪客模式無效） | ✅ 自由文字 `l=`（預設 Hong Kong） | ✅ 數字 ID（94 區，中英文皆可，逗號多選）⚠️ **列表本身無地區欄**：單區篩選時**零請求回填**該區；多區／未篩選 → 用 `--fill-location`（AJAX 逐筆，25 筆/頁 = 25 支請求）或 `--detail` | ✅ AreaID 5 大區 + AreaLocationID 75 子區（中英文皆可，逗號多選） | ✅ 46 個瀏覽頁 slug（中英文皆可） | ⚠️ 僅 3 大區（HK / HK Island / Kowloon；細分區站方回 0 筆） | ⚠️ 僅城市碼 + 客戶端分區比對（`320` 香港；18 區見 `liepin_areas.json`，簡繁英皆可） | ❌ 不適用（香港不在站方城市體系） | ✅ 純 code 18 區 + 129 子區（中英文皆可，逗號多選） |
 | 職能 / 工作種類 `--category` | ❌ 不適用 | ✅ 數字 ID（29 類） | ✅ slug（30 職能） | ❌ 不適用 | ❌ 不適用 | ✅ 數字 ID（34 大類 + 290 細類，中英雙語） | ✅ 數字 ID（28 大類 + 195 細類；細類可單送） | ❌ 不適用（SEO 瀏覽頁無此參數） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用 | ✅ POSITION level-2 code（31 大類 + 431 細類） |
 | 行業 `--industry` | ❌ 不適用 | ✅ 數字 ID（27 業） | ❌ 職能已涵蓋 | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（站方無此維度） | ✅ 數字 ID（30 業，中英雙語） | ❌ 不適用 | ❌ 不適用（sectors 無對應過濾參數） | ❌ 不適用 | ❌ 不適用 | ✅ INDUSTRY level-2 code（15 大類 / 53 細類；大類自動展開細類） |
 | 排序 `--sort` | ❌ 不適用 | ✅ 8 選項全支援 | ⚠️ 僅 `post_dt_desc` | ⚠️ 僅 `post_dt_desc` | ❌ 不適用（訪客） | ⚠️ 5 選項（`post_dt_desc`/`salary_desc`/`exp`/`edu`/`relevance`） | ❌ 不適用（站方 Order 實測無效；預設大致新→舊，頂部推廣區塊除外） | ❌ 不適用（SEO 頁固定排序） | ❌ 不適用（僅 relevance，其他值被忽略） | ❌ 不適用 | ❌ 不適用 | ❌ 不適用（API 無排序參數） |
@@ -1221,7 +1221,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 371 個測試，約 11 秒，零網路請求
+python -m unittest discover -s tests -v      # 393 個測試，約 11 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。
@@ -1477,6 +1477,21 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 **離線驗證**：拿 202 份已存檔的 `jobDetails` 回應跑完整 `scrape_all(with_detail=True)` → 202/202 筆、13 欄全對、`description` 中位 **2,793 字**（原列表 abstract 僅 118 字）、191/202 筆超過 1,000 字、全部無 HTML 標籤；共 3 + 202 = 205 次 POST。把瀏覽器入口設成「一碰就失敗」也全程未啟動，兩條通道皆未熔斷。
 
 `needsBrowser` 在 `hkjobs sources` 仍顯示「需」：指定 `--district` / `--category` / `--sort` 的 SSR 路徑，以及兩條通道的 fallback，都還需要 Playwright。也就是**常見路徑免瀏覽器，不是全站免瀏覽器**。
+
+#### 2026-11-15 新增：`--district` 地區下推（GraphQL `where`）
+
+`--district` 過去一律走 Playwright 瀏覽網址（GraphQL 地區維度沒有實證）。補上實證後改為下推 `searchIntent.where`：
+
+| 維度 | 做法 | 依據 |
+|---|---|---|
+| GraphQL | `searchIntent.where: ["Tuen Mun"]` | 朋友專案真實 payload 用 `where:["Tuen Mun District"]`（55 筆全在屯門）；本次實測 `"Tuen Mun District"` 與 `"Tuen Mun"` 回傳完全相同（各 60 筆） |
+| 地名來源 | slug 首字母大寫（`tuen-mun` → `Tuen Mun`） | `jobsdb_districts.json` 的 40 個 slug 全部可推導、無例外，故不需要額外英文對照表 |
+| 退回 | 地區不在 40 個字典內 → 瀏覽網址 `/jobs/in-<slug>` | 不拿猜出來的地名去試站方 |
+
+- 抽驗（`--keyword "customer services" --days 14 --pages 1`，各 1 支 POST、全程零瀏覽器）：屯門 **30/30**、沙田 **30/30** 落在該區；中環 **26/30**（另 4 筆在灣仔／尖沙咀）。
+- **`distanceKms: 2` 的語意**：查詢固定帶 2 公里半徑，站方會把「附近」一併納入，所以「小區」如中環會夾雜鄰區職位。這是站方行為，不是過濾失效；要嚴格只收某一區，請在 CSV／JSON 用 `location` 再篩。
+- 與 `--category` / `--sort` 仍互斥於快通道：這兩維沒有實證，指定時照舊退回瀏覽器。
+- 字典外 39 個地區的 `where` 命中率**未逐個實測**（只抽驗上述 3 個）。
 
 #### 2026-11-15 新增：`--salary-min` 薪金下限下推
 

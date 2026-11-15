@@ -24,7 +24,12 @@
   search() 在「只用了已驗證維度」時優先走此通道，失敗或指定未驗證維度時
   自動熔斷並退回既有 Playwright SSR 流程；JOBSDB_GRAPHQL=0 可一鍵停用。
   零憑證（無 Cookie / Authorization），13 欄契約與 schemaVersion=2 皆不變。
-  ⚠️ 本通道以離線快照開發，尚未對站方發過真實請求；見 README 技術筆記。
+  2026-11-15 已做過即時驗證（單頁搜尋、翻頁、詳情）；仍未驗證：中文關鍵字、
+  --category / --sort 的 SSR 瀏覽網址。見 README 技術筆記。
+- GraphQL 地區下推（2026-11-15）：--district 若在 jobsdb_districts.json 的 40 個之內，
+  以 searchIntent.where:["<英文名>"] 下推（地名由 slug 推導，如 tuen-mun → Tuen Mun），
+  整條路徑不必啟動 Playwright；字典外地區仍走瀏覽網址。查詢固定帶 distanceKms:2，
+  站方會納入「附近」，故中環會夾雜灣仔／尖沙咀職位（實測 26/30），非過濾失效。
 - GraphQL 詳情通道（2026-11-15，見下方「jobDetails 詳情通道」區塊）：
   get_detail() 優先打 jobDetails(id) 取完整 JD（content 為 HTML，轉純文字），
   常見路徑（--keyword/--days/--pages + --detail）因此不必啟動 Playwright。
@@ -260,7 +265,7 @@ _GRAPHQL_QUERY_TEMPLATE = """query {
       page: __PAGE__, pageSize: __PAGE_SIZE__, representations: ["uiV1"], results: ["jobs"]
     },
     searchContext: {brand: "jobsdb", channel: "web", intent: "SEARCH", solVisitorId: __VISITOR_ID__, source: "FE_SERP"},
-    searchIntent: {country: "HK", distanceKms: 2, __FILTER__locale: "en-HK", sort: __SORT__, text: __TEXT__},
+    searchIntent: {country: "HK", distanceKms: 2, __FILTER__locale: "en-HK", sort: __SORT__, text: __TEXT____WHERE__},
     sessionId: __SESSION_ID__
   }) {
     results {
@@ -314,15 +319,26 @@ def _gql_literal(value) -> str:
     return json.dumps(str(value or ""), ensure_ascii=False)
 
 
+def district_display_name(slug: str) -> str:
+    """slug → 站方 `where` 用的地名（`tuen-mun` → `Tuen Mun`）。
+
+    2026-11-15 實測：`where: ["Tuen Mun District"]` 與 `where: ["Tuen Mun"]`
+    回傳完全相同（60 筆、全部屯門），故不需要「District」後綴或額外英文對照表。
+    """
+    return " ".join(p.capitalize() for p in str(slug or "").split("-") if p)
+
+
 def build_graphql_query(*, keyword: str, page: int = 1, listed_at: str = "",
                         sort: str = "score", visitor_id: str = "", session_id: str = "",
                         salary_min: int | str | None = 0,
+                        where: str | list[str] | None = None,
                         page_size: int = _GRAPHQL_PAGE_SIZE) -> str:
     """純函式：組出 jobSearchV7 查詢字串（不發請求、不讀環境、不帶憑證）。
 
     visitor_id / session_id 是前端產生的隨機匿名 UUID，不綁定帳號；呼叫端
     每次以 uuid4() 動態產生，避免把任何固定識別值寫進公開 repo。
     salary_min 為月薪下限；非正整數自動忽略，不讓壞值污染 query。
+    where 為地區（單一字串或字串清單，例：`"Tuen Mun"`）；空值不加子句。
     """
     try:
         p = max(1, int(page))
@@ -336,6 +352,9 @@ def build_graphql_query(*, keyword: str, page: int = 1, listed_at: str = "",
     if salary:
         filters.append(f"salaryMin: {_gql_literal(salary)}")
     flt = f"filter: {{{', '.join(filters)}}}, " if filters else ""
+    places = [where] if isinstance(where, str) else list(where or [])
+    places = [w for w in (str(x).strip() for x in places) if w]
+    where_clause = f", where: [{', '.join(_gql_literal(w) for w in places)}]" if places else ""
     repl = {
         "__PAGE__": str(p),
         "__PAGE_SIZE__": str(size),
@@ -344,9 +363,11 @@ def build_graphql_query(*, keyword: str, page: int = 1, listed_at: str = "",
         "__SORT__": _gql_literal(sort or "score"),
         "__TEXT__": _gql_literal(keyword),
         "__FILTER__": flt,
+        "__WHERE__": where_clause,
     }
-    # 單次掃描：替換進去的關鍵字不會再被當成 placeholder 處理
-    return re.sub(r"__[A-Z_]+__", lambda m: repl.get(m.group(), m.group()),
+    # 單次掃描：替換進去的關鍵字不會再被當成 placeholder 處理。
+    # 非貪婪（+?）是必要的：__TEXT____WHERE__ 相鄰時才會拆成兩個 token。
+    return re.sub(r"__[A-Z_]+?__", lambda m: repl.get(m.group(), m.group()),
                   _GRAPHQL_QUERY_TEMPLATE)
 
 
@@ -677,6 +698,28 @@ class JobsDBScraper(BaseScraper):
         logger.warning("[jobsdb] 地區 %r 不在字典，推導 slug=%r（未驗證，可能導向首頁）", v, slug)
         return slug
 
+    def graphql_where(self, district: str | None) -> str | None:
+        """地區 → GraphQL `where` 用地名；只有字典內（已驗證 40 個）才下推。
+
+        純判斷，不發請求。刻意要求 slug 在 `jobsdb_districts.json` 內：
+        字典外地區寧可退回瀏覽網址（舊路徑），也不拿猜出來的地名去試站方。
+        """
+        v = (district or "").strip()
+        if not v:
+            return None
+        parts = [p.strip() for p in v.split(",") if p.strip()]
+        if len(parts) > 1:
+            logger.warning("[jobsdb] 地區僅支援單一值，取第一個 %r（忽略 %s）",
+                           parts[0], parts[1:])
+        first = parts[0]
+        slug = _DIST_BY_ZH.get(first)
+        if not slug and first in _DIST_BY_SLUG:
+            slug = first
+        if not slug:
+            derived = self._derive_slug(first)
+            slug = derived if derived in _DIST_BY_SLUG else None
+        return district_display_name(slug) if slug else None
+
     def resolve_sort(self, value: str | None) -> str | None:
         """將 --sort 選項對應到 JobsDB 網址參數 sortmode。
 
@@ -751,8 +794,10 @@ class JobsDBScraper(BaseScraper):
     ) -> list[JobRecord]:
         """單頁搜尋。只在「已驗證維度」上走 GraphQL，其餘一律用既有流程。
 
-        路由規則見上方「GraphQL 搜尋通道」區塊：指定 --district / --category /
-        --sort、設 JOBSDB_GRAPHQL=0、或本輪通道已熔斷時，直接走 _search_browser()。
+        路由規則見上方「GraphQL 搜尋通道」區塊：指定 --category / --sort、
+        地區不在字典內、設 JOBSDB_GRAPHQL=0、或本輪通道已熔斷時，直接走
+        _search_browser()。--district 自 2026-11-15 起可下推 GraphQL `where`
+        （字典內 40 個地區已實測），不再強制開瀏覽器。
         GraphQL 任何失敗都只熔斷本輪並退回 SSR，不向上拋、不重撞。
         """
         # JobsDB 無獨立「行業」維度（職能分類已涵蓋行業語意），忽略並提示
@@ -760,9 +805,11 @@ class JobsDBScraper(BaseScraper):
             logger.warning(
                 "[jobsdb] --industry 不適用 JobsDB（職能分類已涵蓋行業語意），已忽略")
 
-        if self._use_graphql(district=district, category=category, sort=sort):
+        where = self.graphql_where(district)
+        if self._use_graphql(district=district, category=category, sort=sort,
+                             where=where):
             try:
-                jobs = self._search_graphql(keyword, page)
+                jobs = self._search_graphql(keyword, page, where=where)
                 logger.info("[jobsdb] 第 %d 頁 GraphQL 取得 %d 筆", page, len(jobs))
                 return jobs
             except Exception as e:  # noqa: BLE001 — 通道層任何意外都退回既有流程
@@ -772,34 +819,40 @@ class JobsDBScraper(BaseScraper):
                     type(e).__name__, str(e)[:200])
         return self._search_browser(keyword, page, district, category, sort=sort)
 
-    def _use_graphql(self, *, district, category, sort) -> bool:
+    def _use_graphql(self, *, district, category, sort, where=None) -> bool:
         """判斷本頁能否安全走 GraphQL（純判斷，不發請求）。"""
         if os.environ.get("JOBSDB_GRAPHQL", "1") == "0":
             return False
         if self._gql_broken:
             return False
-        untested = [name for name, val in
-                    (("--district", district), ("--category", category), ("--sort", sort))
-                    if val]
+        # --district 只有在字典內（graphql_where 解析成功）才允許走 GraphQL；
+        # 字典外地區仍走瀏覽網址，避免拿猜出來的地名去試站方。
+        untested = [name for name, val in (("--category", category), ("--sort", sort)) if val]
+        if district and not where:
+            untested.append("--district")
         if untested:
             logger.info(
-                "[jobsdb] 指定 %s（GraphQL 篩選維度未經離線實證），改走既有瀏覽網址",
+                "[jobsdb] 指定 %s（GraphQL 篩選維度未經實證），改走既有瀏覽網址",
                 "、".join(untested))
             return False
+        if where:
+            logger.info("[jobsdb] 地區以 GraphQL where 下推：%r", where)
         return True
 
-    def _search_graphql(self, keyword: str, page: int) -> list[JobRecord]:
+    def _search_graphql(self, keyword: str, page: int,
+                        where: str | None = None) -> list[JobRecord]:
         """單頁 GraphQL 搜尋：1 次 POST → 驗證 → 13 欄轉接。"""
         listed_at = _GRAPHQL_LISTED_AT.get(self._daterange, "")
         query = build_graphql_query(
             keyword=keyword or "", page=page, listed_at=listed_at,
             salary_min=self._salary_min,
+            where=where,
             sort="score",
             visitor_id=str(uuid.uuid4()), session_id=str(uuid.uuid4()),
         )
-        logger.info("[jobsdb] POST /graphql（page=%d, listedAt=%s, salaryMin=%s, pageSize=%d）",
+        logger.info("[jobsdb] POST /graphql（page=%d, listedAt=%s, salaryMin=%s, where=%s, pageSize=%d）",
                     page, listed_at or "-", graphql_salary_min(self._salary_min) or "-",
-                    _GRAPHQL_PAGE_SIZE)
+                    where or "-", _GRAPHQL_PAGE_SIZE)
         return parse_graphql_response(self._post_graphql(query))
 
     def _post_graphql(self, query: str, variables: Optional[dict] = None) -> dict:

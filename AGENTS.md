@@ -68,12 +68,14 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 | 條件 | 通道 | 請求 |
 |---|---|---|
 | 只給 `--keyword`／`--days`／`--salary-min`／`--pages`（或都不給） | `POST https://hk.jobsdb.com/graphql` 的 `jobSearchV7` | 每頁 1 次 POST，`pageSize=30` |
-| 給 `--district`／`--category`／`--sort` | 既有 Playwright SSR 瀏覽網址 | 每頁 1 次 GET（共用 `cf_clearance`） |
+| 給 `--district`（且在 `jobsdb_districts.json` 的 40 個之內） | 同上，地區以 `searchIntent.where:["<英文名>"]` 下推 | 每頁 1 次 POST，**不開瀏覽器** |
+| 給 `--district` 但字典外／給 `--category`／給 `--sort` | 既有 Playwright SSR 瀏覽網址 | 每頁 1 次 GET（共用 `cf_clearance`） |
 | `JOBSDB_GRAPHQL=0` | 既有 Playwright SSR | 同上 |
 | GraphQL 失敗（非 200／Cloudflare HTML／`errors`／形狀不符／網路例外） | **熔斷本輪**並退回 SSR | 後續頁不再打 GraphQL |
 
 - **零憑證**：請求只帶 UA、`Accept`、`Content-Type`、`Origin`、`Referer`；無 Cookie、無 `Authorization`、無 `li_at`。`solVisitorId`／`sessionId` 每次以 `uuid4()` 動態產生（匿名追蹤 ID，不綁帳號）。設計上**不需要登入**。
-- 已驗證維度只有 `text`（原始字串，不做 percent-encode）、`filter.listedAt`、`filter.salaryMin`、`responseConfig.page/pageSize`、`sort:"score"`。地區／職能／`sort:"date"` 沒有離線實證，故不下推。
+- 已驗證維度：`text`（原始字串，不做 percent-encode）、`filter.listedAt`、`filter.salaryMin`、`searchIntent.where`（地區，2026-11-15 實測）、`responseConfig.page/pageSize`、`sort:"score"`。職能與 `sort:"date"` 沒有實證，故不下推。
+- **`--district` 下推 `searchIntent.where`（2026-11-15）**：地名由字典 slug 推導（`tuen-mun` → `Tuen Mun`），不需要額外英文表。實測 `where:["Tuen Mun District"]` 與 `where:["Tuen Mun"]` 回傳完全相同，故採後者。三個地區抽驗：屯門 30/30、沙田 30/30 落在該區；**中環 26/30**（另 4 筆在灣仔／尖沙咀）——查詢固定帶 `distanceKms: 2`，站方會把「附近」納入，這是站方語意而非過濾錯誤。字典外地區一律退回瀏覽網址，不拿猜出的地名去試。
 - **`--salary-min` 下推 `filter.salaryMin`**（2026-11-15）：值為 `"<N>m"`，`m`=monthly（唯一有實證的週期），與 `listedAt` 共用同一個 `filter` 物件。SSR fallback 仍會帶 `salaryrange=<N>-&salarytype=monthly`，但**實測無效**（僅與站方 UI 參數形狀一致、無害），該路徑靠客戶端兜底；其他來源同樣由 `BaseScraper` 客戶端兜底。
 - 資料增益：`salary {min,max,period,currency}` 補上 SSR 常缺的薪金；`listedAt.dateTimeUtc` 精確 UTC 存 `raw["graphql"]["listed_at_utc"]`。`posted_date` 仍輸出相對字串（`2d ago`），因為 `days_since_posted()` 只認相對格式——若改 ISO 會讓 `--days` 濾光。
 - `cjs.salary.hideSalary` 是雇主交給索引但選擇不對求職者顯示的**旗標**：旗標只存 `raw["graphql"]["hide_salary"]`、不進 13 欄主表；**但對應的薪資數值照常填入主表 `salary`，會出現在 CSV／JSON 輸出**（離線快照 157/202 筆）。描述此行為時須區分「旗標」與「薪資數值」，兩者去向不同，不可混為一談。
@@ -82,9 +84,9 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 - **`--detail` 改走 GraphQL `jobDetails`**（2026-11-15）：`get_detail()` 優先打 `jobDetails(id)` 取 `content`（HTML → 純文字），常見路徑（只給 `--keyword`／`--days`／`--pages` + `--detail`）**完全不啟動 Playwright**。失敗熔斷本輪並退回既有 Playwright 詳情流程；`JOBSDB_GRAPHQL=0` 同步停用。搜尋與詳情兩個 operation 的熔斷旗標彼此獨立。
 - 詳情 query 刻意**不選** `products.questionnaire`（申請問卷題目定義），維持「只抓公開廣告」邊界；單一回應過大（413 / Payload Too Large）改用不含 `content` 的精簡 query，只影響該筆、不熔斷整輪。`jobDetails: null` 視為單筆無資料。
 - `BaseScraper.detail_replace_fields` 是 opt-in 白名單（預設空）；只有 `JobsDBScraper` 宣告 `{"description"}`，讓完整 JD 覆蓋列表 abstract，其餘 11 站「list 優先、detail 只補空」政策完全不變。
-- `needsBrowser` 在能力矩陣**維持 `True`**：`--district`／`--category`／`--sort` 的 SSR 路徑與兩個通道的 fallback 仍需要瀏覽器。
+- `needsBrowser` 在能力矩陣**維持 `True`**：`--category`／`--sort`、字典外地區，以及兩個通道的 fallback 仍需要瀏覽器（`--district` 已於 2026-11-15 起可走 GraphQL `where`）。
 - ✅ **2026-11-15 即時驗證**：`jobSearchV7` 單頁 30 筆、`listedAt:"7d"` 生效、30/30 有薪金；`--salary-min 60000` 回傳與基準僅 9 筆重疊的另一組 30 筆，證明站方 `salaryMin` 真的生效（`17000` 那組與基準相同，因該頁全部已達標，不能作為證據）；`--pages 2` → 60 筆零重複、`page=2` 全新 30 筆；`jobDetails` 兩筆 4,391／4,766 字純文字 JD、零 HTML 標籤；`JOBSDB_GRAPHQL=0` 的 SSR fallback 可正常載入（取得 `cf clearance`、無 Cloudflare 阻擋）但 `salaryrange` 不生效。
-- ⚠️ **仍未即時驗證**：中文關鍵字送 `text`、`--district`／`--category`／`--sort` 的 SSR 瀏覽網址、熔斷後的真實退回流程；`31→"30d"` 仍為推導。`JOBSDB_GRAPHQL=0` 是可一鍵回退的安全閥，但會讓 `--salary-min` 嚴重失真（見上）。
+- ⚠️ **仍未即時驗證**：中文關鍵字送 `text`、`--category`／`--sort` 的 SSR 瀏覽網址、熔斷後的真實退回流程、`--district` 在字典外 39 個地區的 `where` 命中率（只抽驗屯門／沙田／中環）；`31→"30d"` 仍為推導。`JOBSDB_GRAPHQL=0` 是可一鍵回退的安全閥，但會讓 `--salary-min` 嚴重失真（見上）。
 
 ## 篩選值前置驗證（`hkjobs/validation.py`）
 
@@ -243,5 +245,5 @@ CSV；日期解析**唯一來源是 `hkjobs.aggregate.parse_date`**，`age_days`
 - 變更 HTML 看板，須同步 `build_dashboard.py`、`tests/test_dashboard.py`、README「聚合儀表板」章節；日期解析只能呼叫 `hkjobs/aggregate.py::parse_date`，不得再養第二套 regex。空狀態須區分「總資料 0 筆」（給可照抄的 `--out` 指令，0 檔 HTML 不得摻入「放寬篩選」字樣，連註解也一樣）與「有資料但被篩選濾光」（維持原句）；console 端 0 檔提醒與大字模式／鍵盤可達性一併守住。
 - Windows cp950 **同時管輸出與輸入**：所有人類輸出、`build_dashboard.py` 與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。輸入面不得讓管道／agent 送中文時產生 lone surrogate 再炸在 `print()`；新增 `input()` 一律改用 `contract.read_input()`，不得直接呼叫 builtin。`start.bat` 必須維持全 ASCII（含 Python 前提、版本與安裝失敗等所有訊息）。
 - 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。**但「該站支援且字典打錯」屬另一情境，須 exit 2 擋下**（見本文件「篩選值前置驗證」）。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 371 個測試。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 393 個測試。
 - 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README；去重數字改動時一併更新 `tools/README.md` 的基準說明。

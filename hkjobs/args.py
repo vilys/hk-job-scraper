@@ -57,6 +57,8 @@ def add_search_arguments(
                    help="地區過濾（可逗號分隔多個，JobsDB 僅取第一個）："
                         "gov_hk 用數字 ID / 中文（如 屯門=188）；"
                         "JobsDB 用中文名或 slug（如 荃灣 | tsuen-wan，見 scrapers/jobsdb_districts.json）；"
+                        "字典內 40 個地區走 GraphQL searchIntent.where（免瀏覽器，"
+                        "查詢帶 distanceKms:2，站方會納入附近地區），字典外才退回瀏覽網址；"
                         "moovup 用 shortCode；"
                         "LinkedIn 用自由文字（如 Hong Kong | Tsuen Wan，預設 Hong Kong）；"
                         "eFC 未指定時預設 Hong Kong（該站 API 不給 location 會回全球職缺，"

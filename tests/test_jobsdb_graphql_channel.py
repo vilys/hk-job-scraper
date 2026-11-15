@@ -263,14 +263,20 @@ class TestSearchRouting(_EnvMixin):
         browser.assert_called_once()
         self.assertFalse(s._gql_broken)
 
-    def test_district_category_sort_go_to_browser(self):
-        for kwargs in ({"district": "荃灣"}, {"category": "資訊及通訊科技"},
-                       {"sort": "post_dt_desc"}):
+    def test_category_sort_go_to_browser(self):
+        for kwargs in ({"category": "資訊及通訊科技"}, {"sort": "post_dt_desc"}):
             with self.subTest(kwargs=kwargs):
                 s, post, browser = self._scraper()
                 self.assertEqual(s.search("ai agent", **kwargs), ["SSR"])
                 post.assert_not_called()
                 browser.assert_called_once()
+
+    def test_unknown_district_goes_to_browser(self):
+        """字典外地區不下推（不拿猜出來的地名去試站方）。"""
+        s, post, browser = self._scraper()
+        self.assertEqual(s.search("ai agent", district="火星"), ["SSR"])
+        post.assert_not_called()
+        browser.assert_called_once()
 
     def test_industry_warning_still_emitted_on_graphql_path(self):
         s, _, _ = self._scraper()
