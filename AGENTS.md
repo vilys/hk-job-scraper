@@ -83,7 +83,8 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 - 詳情 query 刻意**不選** `products.questionnaire`（申請問卷題目定義），維持「只抓公開廣告」邊界；單一回應過大（413 / Payload Too Large）改用不含 `content` 的精簡 query，只影響該筆、不熔斷整輪。`jobDetails: null` 視為單筆無資料。
 - `BaseScraper.detail_replace_fields` 是 opt-in 白名單（預設空）；只有 `JobsDBScraper` 宣告 `{"description"}`，讓完整 JD 覆蓋列表 abstract，其餘 11 站「list 優先、detail 只補空」政策完全不變。
 - `needsBrowser` 在能力矩陣**維持 `True`**：`--district`／`--category`／`--sort` 的 SSR 路徑與兩個通道的 fallback 仍需要瀏覽器。
-- ⚠️ **本通道以 2026-11-14 離線快照開發，尚未對站方發過真實請求**；`31→"30d"` 為推導。即時驗證前，把 `JOBSDB_GRAPHQL=0` 視為可一鍵回退的安全閥。
+- ✅ **2026-11-15 即時單頁驗證（真請求）**：`jobSearchV7` 單頁 30 筆、`listedAt:"7d"` 生效、30/30 有薪金；`--salary-min 60000` 回傳與基準僅 9 筆重疊的另一組 30 筆，證明站方 `salaryMin` 真的生效（`17000` 那組與基準相同，因該頁全部已達標，不能作為證據）；`jobDetails` 兩筆 4,391／4,766 字純文字 JD、零 HTML 標籤，合併後 `salary` 保留、`description` 由截斷預告換成完整 JD、13 欄齊全。全程 6 支 POST、零瀏覽器。
+- ⚠️ **仍未即時驗證**：SSR fallback（`salaryrange`／Playwright 路徑）、多頁翻頁、中文關鍵字送 `text`；`31→"30d"` 仍為推導。`JOBSDB_GRAPHQL=0` 是可一鍵回退的安全閥。
 
 ## 篩選值前置驗證（`hkjobs/validation.py`）
 

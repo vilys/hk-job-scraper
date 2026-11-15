@@ -664,7 +664,7 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 
 `hkjobs --source all` 的人類摘要會自動印出這張表並給建議；`--json` 的 `summary.sources[].coverage` 可程式讀取。
 
-> 註：上表是 **2026-11-11 的 Playwright SSR 歷史實測**，數字保留供對照。2026-11-15 起 JobsDB 預設走 GraphQL 通道，薪金改由 `salary {min,max,period}` 補齊（離線快照 202/202 有薪金）；但該通道**尚未對站方發過真實請求**，且指定 `--district` / `--category` / `--sort` 或通道熔斷時仍會退回 SSR，那時上表數字依然適用。
+> 註：上表是 **2026-11-11 的 Playwright SSR 歷史實測**，數字保留供對照。2026-11-15 起 JobsDB 預設走 GraphQL 通道，薪金改由 `salary {min,max,period}` 補齊（離線快照 202/202 有薪金）；該通道已於 2026-11-15 做過單頁即時驗證（30 筆、30/30 有薪金），但**多頁翻頁與 SSR fallback 未即時驗證**。指定 `--district` / `--category` / `--sort` 或通道熔斷時仍會退回 SSR，那時上表數字依然適用。
 
 > 🤖 機器可讀版本：`hkjobs sources --json`（能力表由 `hkjobs/capabilities.py` 提供，與本表同步維護；各站 `notes` 亦收錄上述限制）。
 
@@ -1458,6 +1458,8 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 
 ⚠️ **未實測聲明**：搜尋與詳情兩條通道皆以離線快照開發與測試（`tests/test_jobsdb_graphql.py` / `test_jobsdb_graphql_channel.py` / `test_jobsdb_graphql_detail.py`），**開發過程沒有對 JobsDB 發過任何真實請求**。`31 → "30d"` 是由「URL 的 31 = Last 30 days」與 SSR 的 `listedAt:"30d"` 推導；`text` 送中文原字串也未經站方驗證。GraphQL 是未公開介面，schema 隨時可能改，故保留 Playwright fallback。
 
+✅ **2026-11-15 補做的即時單頁驗證**（第一次真實請求，共 6 支 POST、零瀏覽器）：`jobSearchV7` 單頁 30 筆、`listedAt:"7d"` 生效、30/30 有薪金；`jobDetails` 兩筆回 4,391／4,766 字純文字 JD（零 HTML 標籤），合併後 `salary` 保留列表值、`description` 由 103 字的截斷預告換成完整 JD、13 欄齊全。**仍未即時驗證**：SSR fallback 路徑、多頁翻頁、中文關鍵字送 `text`。
+
 #### 2026-11-15 新增：GraphQL `jobDetails` 詳情通道
 
 `get_detail()` 現在優先打同一個公開端點的 `jobDetails(id)`，不必逐筆開瀏覽器：
@@ -1491,7 +1493,12 @@ Windows 本機 `core.autocrlf=true`，Git 在取出檔案時會轉成 CRLF；但
 - **無法解析薪金者一律排除**（如 `Negotiable`／`Competitive`），與 `--days` 對「無法判定日期」的處理一致；人類輸出會明確標明，不會靜默混入。
 - 與 `--days` 獨立：兩者可同時下推；某頁被薪金濾空**不會**提早停翻（相關性排序下後面頁仍可能有符合的職位）。
 - `query.salaryMin` 回顯參數；`schemaVersion` 仍為 2、`jobs[]` 13 欄與 CSV 19 欄不變。
-- ⚠️ JobsDB 的 `salaryMin` 以離線快照開發，**尚未對站方發過真實請求**；`JOBSDB_GRAPHQL=0` 可一鍵退回 SSR（SSR 的 `salaryrange` 同樣生效）。
+- **即時實測（2026-11-15，GraphQL 通道）**：`--keyword "ai agent" --days 7 --pages 1` 共 6 支 POST（3×`jobSearchV7`、3×`jobDetails`），全程未啟動瀏覽器。
+  - 基準不設下限 → 30 筆、30/30 有薪金；加 `--salary-min 17000` → 同樣 30 筆且**與基準完全相同**（該頁 30 筆的區間上限本來就全部 ≥ 17,000，故這一組不能證明篩選生效）。
+  - 加 `--salary-min 60000` → 站方回的是**另一組 30 筆**（與基準僅 9 筆重疊、新出現 21 筆），且全部上限 ≥ 60,000 → **站方端 `salaryMin` 確實生效**，非靜默忽略。
+  - 客戶端兜底在該 30 筆上保留 30/30，與站方判定一致。
+  - 兩個邊界樣本值得留意：`$1 – $100,000 per month`（區間極寬）與 `$900,000 – $1,100,000 per year`（年薪，換算月薪 75,000–91,667）在 `salaryMin:"60000m"` 下都會入選——這是「區間交集」語意的自然結果，非 bug。
+- ⚠️ 仍未即時實測的部分：**SSR fallback 的 `salaryrange`**（需走 Playwright 瀏覽器路徑）與**多頁翻頁**；兩者只有離線測試覆蓋。`JOBSDB_GRAPHQL=0` 可一鍵退回 SSR。
 
 ---
 
