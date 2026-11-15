@@ -87,7 +87,8 @@ SOURCES: dict[str, SourceInfo] = {
               "指定 --district/--category/--sort、設 JOBSDB_GRAPHQL=0 或通道熔斷時退回 Playwright SSR，"
               "此時薪金常缺（實測 30 筆中 24 筆無薪金）。--days 站方端仍只吃 1/3/7/14/31，"
               "GraphQL 轉為 listedAt:\"Nd\"（31→30d）；只做日期過濾、保留相關性排序。"
-              "--detail 與上述 SSR 情境仍需 Playwright，故 needsBrowser 維持 True。"
+              "--detail 自 2026-11-15 起也走 GraphQL jobDetails 免瀏覽器（完整 JD HTML 轉純文字）；"
+              "上述 SSR 情境與通道熔斷時才需 Playwright，故 needsBrowser 維持 True。"
               "⚠️ GraphQL 通道以離線快照開發，尚未對站方發過真實請求。",
     ),
     "linkedin": SourceInfo(

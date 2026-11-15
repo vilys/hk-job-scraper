@@ -38,6 +38,10 @@ class BaseScraper(ABC):
     # 只有這類站點能在 --days 且未指定 --sort 時照樣提早停翻；
     # 其餘站點 --days 不再自動改排序（見下方 date_sorted），相關性順序下不可早停。
     list_default_sorted_desc: bool = False
+    # 詳情頁可覆寫 list 層級同名欄位的白名單（opt-in，預設空）。
+    # 既有政策是「list 層級優先、detail 只補空欄位」；只有詳情值確實更完整
+    # 且據點顯式宣告時才覆寫，其餘據點行為完全不變。
+    detail_replace_fields: frozenset[str] = frozenset()
     # 模組是否可預設執行。--source all 只跑 enabled 的站；
     # 已判定不可行（登入牆 / 無香港職缺）或具 IP 封鎖風險的站設 False，
     # 仍可用 --source <name> 單獨指定。
@@ -218,10 +222,18 @@ class BaseScraper(ABC):
                         try:
                             det = self._with_retry(self.get_detail, j.url)
                             if det:
-                                # 合併詳情（保留 list 層級已抓到的欄位）
+                                # 合併詳情：預設保留 list 層級已抓到的欄位、
+                                # detail 只補空；白名單內的欄位在詳情值較完整時覆寫。
                                 for k in JobRecord.FIELDS:
-                                    if not getattr(j, k) and getattr(det, k):
-                                        setattr(j, k, getattr(det, k))
+                                    new_val = getattr(det, k)
+                                    if not new_val:
+                                        continue
+                                    old_val = getattr(j, k)
+                                    if not old_val:
+                                        setattr(j, k, new_val)
+                                    elif (k in self.detail_replace_fields
+                                          and len(str(new_val)) > len(str(old_val))):
+                                        setattr(j, k, new_val)
                                 j.scraped_at = det.scraped_at
                         except Exception as e:  # noqa: BLE001
                             logger.warning("[%s] 詳情失敗 %s：%s", self.source, j.url, e)

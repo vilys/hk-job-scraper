@@ -25,6 +25,11 @@
   自動熔斷並退回既有 Playwright SSR 流程；JOBSDB_GRAPHQL=0 可一鍵停用。
   零憑證（無 Cookie / Authorization），13 欄契約與 schemaVersion=2 皆不變。
   ⚠️ 本通道以離線快照開發，尚未對站方發過真實請求；見 README 技術筆記。
+- GraphQL 詳情通道（2026-11-15，見下方「jobDetails 詳情通道」區塊）：
+  get_detail() 優先打 jobDetails(id) 取完整 JD（content 為 HTML，轉純文字），
+  常見路徑（--keyword/--days/--pages + --detail）因此不必啟動 Playwright。
+  失敗熔斷本輪並退回既有 Playwright 詳情流程；JOBSDB_GRAPHQL=0 同步停用。
+  刻意不選 products.questionnaire（申請問卷題目），維持「只抓公開廣告」邊界。
 - GraphQL 轉接（2026-11-15 離線 spike）：record_from_graphql() 把 jobSearchV7
   單筆轉成 13 欄 JobRecord，純函式、零請求。
   來歷旗標（hideSalary）存 raw["graphql"] 供追溯；對應薪資數值仍填主表 salary，
@@ -42,6 +47,7 @@ from typing import Optional
 from urllib.parse import quote, urljoin
 
 import requests
+from bs4 import BeautifulSoup
 
 try:
     from playwright.sync_api import sync_playwright
@@ -329,6 +335,119 @@ def parse_graphql_response(data: dict, *, now: datetime | None = None) -> list[J
     return [record_from_graphql(j, now=now) for j in jobs]
 
 
+# ---- jobDetails 詳情通道（2026-11-15，以朋友 202 份離線回應查證） ----
+# 依據：jobDetails(id) 是網頁前端自己用的公開 operation，請求不需 Cookie /
+# Authorization / sessionId / solVisitorId，只帶一般標頭即可取得完整 JD。
+# ⚠️ 刻意不選 products { questionnaire { questions } }：那是申請問卷的題目定義，
+#    靠近投遞流程、與求職搜尋無關。維持「只抓公開廣告內容」的使用範圍邊界。
+_JOB_DETAILS_QUERY = """query JobDetails($id: ID!) {
+  jobDetails(id: $id) {
+    job {
+      id title abstract content
+      advertiser { id name }
+      location { label }
+      workTypes { label }
+      listedAt { dateTimeUtc }
+      expiresAt { dateTimeUtc }
+      salary { label }
+    }
+  }
+}"""
+
+# 單一回應過大（Cloudflare 413 / Payload Too Large）時改用不含 content 的精簡版，
+# 只影響該筆、不熔斷整輪；description 退回 abstract。
+_JOB_DETAILS_QUERY_LIGHT = """query JobDetails($id: ID!) {
+  jobDetails(id: $id) {
+    job {
+      id title abstract
+      advertiser { id name }
+      location { label }
+      workTypes { label }
+      listedAt { dateTimeUtc }
+      expiresAt { dateTimeUtc }
+      salary { label }
+    }
+  }
+}"""
+
+
+def build_job_details_query(*, light: bool = False) -> str:
+    """純函式：回傳 jobDetails 查詢字串（不發請求、不帶憑證）。"""
+    return _JOB_DETAILS_QUERY_LIGHT if light else _JOB_DETAILS_QUERY
+
+
+def _gql_html_to_text(html: str) -> str:
+    """職位正文 HTML 轉純文字，對齊既有 Playwright inner_text() 的語意。"""
+    if not isinstance(html, str) or not html.strip():
+        return ""
+    text = BeautifulSoup(html, "html.parser").get_text("\n", strip=True)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
+def _is_payload_too_large(error: BaseException) -> bool:
+    """單一回應過大的訊號（不是限流、也不是通道掛掉）。"""
+    msg = str(error).lower()
+    return "413" in msg or "payload too large" in msg
+
+
+def parse_job_details_response(data: dict, *, job_url: str = "",
+                               now: datetime | None = None) -> Optional[JobRecord]:
+    """純函式：jobDetails 回應轉 13 欄 JobRecord（零請求）。
+
+    - 形狀異常／GraphQL errors → 丟 JobsDBGraphQLError，由 get_detail() 熔斷。
+    - `jobDetails: null`（職位下架）→ 回 None，屬單筆無資料，不熔斷。
+    - `content` 是 HTML，轉純文字後放 description；精簡版退回 abstract。
+    """
+    if not isinstance(data, dict):
+        raise JobsDBGraphQLError("詳情回應不是 JSON 物件")
+    if data.get("errors"):
+        detail = json.dumps(data["errors"], ensure_ascii=False)[:200]
+        raise JobsDBGraphQLError(f"詳情 GraphQL errors（可能 schema 改版）：{detail}")
+    payload = data.get("data")
+    details = payload.get("jobDetails") if isinstance(payload, dict) else None
+    if details is None:
+        return None
+    if not isinstance(details, dict):
+        raise JobsDBGraphQLError("詳情回應 jobDetails 形狀不符")
+    job = details.get("job")
+    if job is None:
+        return None
+    if not isinstance(job, dict):
+        raise JobsDBGraphQLError("回應缺少 data.jobDetails.job 物件")
+
+    reference = now or datetime.now(timezone.utc)
+    jid = str(job.get("id") or "").strip()
+    advertiser = job.get("advertiser") if isinstance(job.get("advertiser"), dict) else {}
+    listed = job.get("listedAt") if isinstance(job.get("listedAt"), dict) else {}
+    expired = job.get("expiresAt") if isinstance(job.get("expiresAt"), dict) else {}
+    utc = str(listed.get("dateTimeUtc") or "")
+    content = job.get("content") if isinstance(job.get("content"), str) else ""
+    description = _gql_html_to_text(content) or str(job.get("abstract") or "")
+    salary = _gql_text(job.get("salary"))
+
+    return JobRecord(
+        job_id=f"jobsdb_{jid}" if jid else "jobsdb_",
+        source="jobsdb",
+        title=strip_new_badge(str(job.get("title") or "")),
+        company=_gql_text(advertiser),
+        location=_gql_text(job.get("location")),
+        salary=salary,
+        job_type=_gql_text(job.get("workTypes")),
+        industry="",
+        description=description,
+        requirements="",
+        url=job_url or (f"{BASE}/job/{jid}" if jid else ""),
+        posted_date=_gql_relative_date(utc, reference),
+        scraped_at=reference.isoformat(),
+        raw={"graphql_detail": {
+            "listed_at_utc": utc,
+            "expires_at_utc": str(expired.get("dateTimeUtc") or ""),
+            "content_html_length": len(content),
+            "salary_label": salary,
+        }},
+    )
+
+
 # ---- JobsDB 自有 slug 字典（與 Moovup / 勞工處 完全獨立，見 README 鐵律） ----
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -372,6 +491,9 @@ _DETAIL_SELECTORS = {
 class JobsDBScraper(BaseScraper):
     source = "jobsdb"
     use_browser = True
+    # jobDetails.content 是完整 JD，比列表 abstract 更完整；顯式 opt-in 才覆寫，
+    # 其餘據點仍維持「list 層級優先、detail 只補空」的既有政策。
+    detail_replace_fields = frozenset({"description"})
     list_has_date = True   # 列表頁已含相對刊登日（jobListingDate），--days 不必抓詳情
     list_sorted_desc = True  # sortmode=ListedDate 為新→舊，--days 可提早停翻
 
@@ -384,6 +506,8 @@ class JobsDBScraper(BaseScraper):
         self._daterange: str = ""      # 站方端日期過濾（daterange=N），由 set_days() 注入
         # GraphQL 通道熔斷：本輪一旦判定不可用就直接走 SSR，不重撞（見通道區塊註解）
         self._gql_broken: bool = False
+        # jobDetails 詳情通道獨立熔斷（兩個 operation 各自判斷，不互相牽連）
+        self._gql_detail_broken: bool = False
 
     # ---------- 站方端日期過濾掛載點（base_scraper.scrape_all 呼叫） ----------
     def set_days(self, days: int) -> None:
@@ -609,11 +733,12 @@ class JobsDBScraper(BaseScraper):
                     page, listed_at or "-", _GRAPHQL_PAGE_SIZE)
         return parse_graphql_response(self._post_graphql(query))
 
-    def _post_graphql(self, query: str) -> dict:
-        """送出 jobSearchV7 並回傳 JSON。零憑證：不帶 Cookie / Authorization。
+    def _post_graphql(self, query: str, variables: Optional[dict] = None) -> dict:
+        """送出 GraphQL 查詢（jobSearchV7 / jobDetails）並回傳 JSON。零憑證。
 
         不建立共用 Session、不保留任何狀態；Cloudflare 挑戰頁與非 200
-        一律轉成 JobsDBGraphQLError，由 search() 熔斷。
+        一律轉成 JobsDBGraphQLError，由呼叫端熔斷。variables 只給需要
+        `$id` 的 jobDetails 使用，既有 jobSearchV7 呼叫的 payload 不變。
         """
         headers = dict(self.headers)
         headers.update({
@@ -622,8 +747,11 @@ class JobsDBScraper(BaseScraper):
             "Origin": BASE,
             "Referer": BASE + "/",
         })
+        payload = {"query": query}
+        if variables is not None:
+            payload["variables"] = variables
         response = requests.post(
-            _GRAPHQL_URL, json={"query": query}, headers=headers,
+            _GRAPHQL_URL, json=payload, headers=headers,
             timeout=REQUEST_TIMEOUT,
         )
         text = response.text or ""
@@ -696,6 +824,57 @@ class JobsDBScraper(BaseScraper):
     #    薪資無穩定 data-automation（job-detail-add-expected-salary 是「登入查看」提示，
     #    非實際薪資）→ 留空，不硬湊。
     def get_detail(self, job_url: str) -> Optional[JobRecord]:
+        """詳情頁：優先走 jobDetails GraphQL，失敗熔斷本輪並退回 Playwright。
+
+        常見路徑（--keyword／--days／--pages + --detail）不會啟動瀏覽器。
+        通道級失敗只熔斷本輪、不向上拋；單一回應過大則改用精簡查詢，
+        只影響該筆。搜尋通道與詳情通道的熔斷旗標彼此獨立。
+        """
+        match = re.search(r"/job/(\d+)", job_url or "")
+        jid = match.group(1) if match else ""
+        if self._use_graphql_detail(jid):
+            try:
+                result = parse_job_details_response(
+                    self._post_graphql(build_job_details_query(),
+                                       variables={"id": jid}),
+                    job_url=job_url,
+                )
+                if result is None:
+                    logger.info("[jobsdb] jobDetails 無資料（%s），略過此筆詳情", jid)
+                    return None
+                return result
+            except Exception as e:  # noqa: BLE001 — 通道層任何意外都退回既有流程
+                if _is_payload_too_large(e):
+                    try:
+                        light = parse_job_details_response(
+                            self._post_graphql(build_job_details_query(light=True),
+                                               variables={"id": jid}),
+                            job_url=job_url,
+                        )
+                        if light is not None:
+                            logger.info("[jobsdb] 正文過大，僅取中繼資料（%s）", jid)
+                            return light
+                    except Exception as e2:  # noqa: BLE001
+                        e = e2
+                self._gql_detail_broken = True
+                logger.warning(
+                    "[jobsdb] jobDetails 通道不可用（%s: %s），本輪詳情改走 Playwright",
+                    type(e).__name__, str(e)[:200])
+        return self._get_detail_browser(job_url)
+
+    def _use_graphql_detail(self, jid: str) -> bool:
+        """判斷本筆詳情能否安全走 jobDetails（純判斷，不發請求）。"""
+        if os.environ.get("JOBSDB_GRAPHQL", "1") == "0":
+            return False
+        if self._gql_detail_broken:
+            return False
+        if not jid:
+            logger.info("[jobsdb] 網址無法抽出職位 ID，詳情改走既有瀏覽網址")
+            return False
+        return True
+
+    def _get_detail_browser(self, job_url: str) -> Optional[JobRecord]:
+        """既有 Playwright 詳情流程（原 get_detail 原封不動搬來，作為 fallback）。"""
         self._ensure_browser()
         self._page.goto(job_url, wait_until="domcontentloaded", timeout=30000)
         self._page.wait_for_timeout(2500)
