@@ -43,9 +43,14 @@ class SourceInfo:
     enabled: bool
     needs_browser: bool
     needs_chrome: bool
+    # 站方「一頁」的筆數。這是站方契約，不是 CLI 旋鈕：用來估算
+    # `--pages N` 的結果上限（N × per_page），也是「同一 N 各站產出不同」的原因。
     per_page: int
     keyword_required: bool
     days_mode: str                    # server | list | detail | approx | none
+    # 續頁（第 2 頁起）的筆數；0 表示與 per_page 相同。目前只有 LinkedIn 首頁
+    # 較大（58）而續頁固定 10，若不區分，`--pages` 的「結果上限」會高估兩倍。
+    per_page_after_first: int = 0
     sort_values: tuple[str, ...] = ()
     supports: dict[str, bool] = field(default_factory=dict)
     request_delay: float = 0.0
@@ -78,7 +83,8 @@ SOURCES: dict[str, SourceInfo] = {
     ),
     "jobsdb": SourceInfo(
         name="jobsdb", label="JobsDB", enabled=True,
-        needs_browser=True, needs_chrome=False, per_page=20,
+        # 30 與 GraphQL pageSize、SSR 每頁卡片數一致；這是 --pages 契約的一部分
+        needs_browser=True, needs_chrome=False, per_page=30,
         keyword_required=False, days_mode="server", sort_values=("post_dt_desc",),
         supports={"district": True, "category": True, "industry": False,
                   "detail": True, "fillLocation": False},
@@ -103,7 +109,8 @@ SOURCES: dict[str, SourceInfo] = {
     "linkedin": SourceInfo(
         name="linkedin", label="LinkedIn", enabled=True,
         needs_browser=False, needs_chrome=False, per_page=58,
-        keyword_required=False, days_mode="server", sort_values=("post_dt_desc",),
+        keyword_required=False, days_mode="server",
+        per_page_after_first=10, sort_values=("post_dt_desc",),
         supports={"district": True, "category": False, "industry": False,
                   "detail": True, "fillLocation": False},
         request_delay=delay_for("linkedin"),
@@ -188,3 +195,28 @@ SOURCES: dict[str, SourceInfo] = {
         notes="免瀏覽器純 API；每頁上限 10；--days 送 publishTime 並客戶端再篩（只認 on MM-DD）。",
     ),
 }
+
+
+def page_budget_text(source: str, pages: int) -> str:
+    """人類輸出用：把「頁數」換算成結果上限，並強調 `--pages` 不是筆數。
+
+    每頁筆數由站方決定（`SourceInfo.per_page`），不是 CLI 旋鈕；同一個
+    `--pages` 在 `--source all` 下各站產出量不同，是設計而非 bug。此函式
+    只產生說明字串，不參與任何抓取、過濾或排序決策。
+    """
+    info = SOURCES.get(source)
+    if not info or pages < 1:
+        return ""
+    first = info.per_page
+    after = info.per_page_after_first or first
+    if first < 1:
+        return ""
+    total = first + max(0, pages - 1) * after
+    if after == first:
+        size_text = f"每頁約 {first} 筆"
+    else:
+        size_text = f"首頁約 {first} 筆、續頁約 {after} 筆"
+    return (
+        f"最多 {pages} 頁，{size_text} → 結果上限約 {total} 筆"
+        "（--pages 是頁數，不是筆數；實際常因結果不足或客戶端過濾而更少）"
+    )

@@ -11,7 +11,12 @@ from pathlib import Path
 
 from hkjobs import __version__, aggregate
 from hkjobs.args import add_machine_arguments, add_search_arguments
-from hkjobs.capabilities import GAP_FILL_ACTIONS, SALARY_CONVERSION_BASIS, SOURCES
+from hkjobs.capabilities import (
+    GAP_FILL_ACTIONS,
+    SALARY_CONVERSION_BASIS,
+    SOURCES,
+    page_budget_text,
+)
 from job_model import JobRecord
 from hkjobs.contract import (
     EXIT_ALL_FAILED,
@@ -273,6 +278,10 @@ def cmd_options(args: argparse.Namespace) -> int:
 
 def _run_one(source: str, args: argparse.Namespace) -> SourceResult:
     logger.info("==== 開始爬取來源：%s ====", source)
+    # 執行前把「頁數 → 結果上限」講明白：--pages 不是筆數，各站每頁大小不同。
+    budget = page_budget_text(source, int(getattr(args, "pages", 0) or 0))
+    if budget:
+        logger.info("[%s] %s", source, budget)
     scraper = None
     try:
         scraper = SCRAPERS[source]()

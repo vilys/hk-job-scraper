@@ -54,6 +54,8 @@ hkjobs search --source jobsdb --keyword data --days 7 --pages 1 --json | jq '.su
 - 人類輸出的薪金欄顯示規則（**只影響表格**，不改 `jobs[]` 欄位、`CSV` 內容或 `schemaVersion`）：換算值標「約」置前、站方原文以 `(原…)` 括號保留在後、單位詞（`原時薪`／`原日薪`／`原年薪`）提到括號最前，故 36 格欄寬截斷後**單位詞仍可見**（舊寫法 `(原 $60 - $65 …` 會把「時薪」切掉）。原文重複的全形單位括號在顯示層去掉一次，`salary` 原文在 CSV／JSON 完整不變。
 - `--out` 目標檔已存在時**拒絕覆蓋並回 exit 2**（在發任何請求之前），需 `--force`；`--json --out` 維持既有可覆寫行為。
 - `--pages 0` 回 exit 2（用法錯誤），不再是「0 筆結果 / exit 5」。
+- **`--pages N` 是頁數，不是筆數**（2026-11-15 定案）：每頁筆數是站方契約（`hkjobs sources --json` 的 `perPage`，10–58 不等；LinkedIn 首頁 58、續頁 10），同一個 N 在 `--source all` 下各站產出量不同，**屬預期行為**。結果上限為各頁筆數之和（一般站是 `N × perPage`；LinkedIn 首頁 58 + 續頁 10×(N-1)），會隨結果不足一頁、`--days`／`--salary-min` 客戶端過濾而更少。`--limit` 只影響人類清單，不影響抓取量。執行前日誌會印出該站的「最多 N 頁，每頁約 M 筆 → 上限約 X 筆」。
+- **JobsDB `pageSize=30` 是上述契約的一部分**（GraphQL 與 SSR 一致）：不得為減少請求數改成 100 讓 `--pages` 的產出量靜默放大三倍；若真要改，必須把 transport 頁切成 30 筆的「邏輯頁」（或另開明確的筆數參數）。`tests/test_pages_semantics.py` 有護欄測試（預設 30、`per_page` 與 transport 一致、上限 100 仍保留）。
 - 勞工處 `gov_hk` 列表頁沒有公司名也沒有刊登日，兩者都需 `--detail`；公司欄全空時人類輸出會提示。
 - **`--days` 只做日期過濾，不改排序**（2026-11-11 起）；`query.sort` 為 `null` 表示保留站方相關性排序。要日期排序請明確指定 `--sort post_dt_desc`。
 - JobsDB 站方 `daterange` 只吃 1/3/7/14/31；`--days 10` 會送 `daterange=14`，**客戶端再篩回 10 天**，人類輸出會明確提示，不會靜默放寬。GraphQL 通道改用 `filter.listedAt:"Nd"` 下推（同一組離散值；`31→"30d"`）。
@@ -245,5 +247,5 @@ CSV；日期解析**唯一來源是 `hkjobs.aggregate.parse_date`**，`age_days`
 - 變更 HTML 看板，須同步 `build_dashboard.py`、`tests/test_dashboard.py`、README「聚合儀表板」章節；日期解析只能呼叫 `hkjobs/aggregate.py::parse_date`，不得再養第二套 regex。空狀態須區分「總資料 0 筆」（給可照抄的 `--out` 指令，0 檔 HTML 不得摻入「放寬篩選」字樣，連註解也一樣）與「有資料但被篩選濾光」（維持原句）；console 端 0 檔提醒與大字模式／鍵盤可達性一併守住。
 - Windows cp950 **同時管輸出與輸入**：所有人類輸出、`build_dashboard.py` 與 `tools/*.py` 的 `--help` 不得因非 cp950 字元 crash；新文字先確認可編碼（`≈`／emoji 不行，`→` `×` `÷` `—` 可以），或在入口呼叫 `contract.configure_io()`。輸入面不得讓管道／agent 送中文時產生 lone surrogate 再炸在 `print()`；新增 `input()` 一律改用 `contract.read_input()`，不得直接呼叫 builtin。`start.bat` 必須維持全 ASCII（含 Python 前提、版本與安裝失敗等所有訊息）。
 - 各站功能彼此隔離；不支援的參數一律警告後忽略，不得報錯中斷或影響他站。**但「該站支援且字典打錯」屬另一情境，須 exit 2 擋下**（見本文件「篩選值前置驗證」）。
-- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 393 個測試。
+- 執行 `python -m unittest discover -s tests`（零網路）必須全綠；目前 405 個測試。
 - 變更聚合層（正規化／去重／排序／完整度）須同步 `hkjobs/aggregate.py`、`hkjobs/contract.py` 的 `SCHEMA_VERSION`、本文件對照表與 README；去重數字改動時一併更新 `tools/README.md` 的基準說明。

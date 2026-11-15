@@ -37,7 +37,12 @@ def add_search_arguments(
                    help="搜尋關鍵字（預設空 = 不限定關鍵字，僅依地區/類別瀏覽；"
                         "gov_hk 支援，moovup 建議仍給關鍵字）")
     p.add_argument("--pages", type=int, default=3,
-                   help="最大翻頁數（預設 3；探測請用 1，0 為用法錯誤）")
+                   help="最多翻 N 頁（預設 3；探測請用 1，0 為用法錯誤）。"
+                        "注意：這是頁數，不是筆數。一頁幾筆由站方決定"
+                        "（見 hkjobs sources 的「每頁」欄，10-58 筆不等），"
+                        "故同一個 N 在 --source all 下各站產出量不同，屬預期行為；"
+                        "結果上限為 N 乘該站每頁筆數，實際常更少。"
+                        "要限制列出筆數請用 --limit（只影響人類清單，不影響抓取）。")
     if include_output_flags:
         p.add_argument("--output", default="json",
                        choices=["json", "csv", "both"], help="輸出格式")

@@ -262,7 +262,7 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 > 也不要一次開多個終端同時跑同一個站。被站方封鎖一次，往往要用「天」來等。
 
 > 🔧 **只想驗證程式邏輯、不想發任何請求？** 跑 `python -m unittest discover -s tests`，
-> 393 個測試、約 11 秒、零網路請求。
+> 405 個測試、約 11 秒、零網路請求。
 
 > 🔒 **文件中的公網 IP 一律遮罩**（如 `1.64.x.x`、`182.239.x.x`），只保留 ASN、電信商、
 > `mobile`／`proxy` 等技術特徵。這些欄位足以說明「換了業者仍被擋」的推論，
@@ -352,7 +352,7 @@ python -m hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps
 - **JobsDB 據點已實戰驗證**：
   - **2026-11-15 起有兩條通道**：一般關鍵字搜尋走 `POST /graphql` 的 `jobSearchV7`（免 Playwright、補齊 SSR 常缺的薪金）；`--district` 自 2026-11-15 起也走同一條通道（`searchIntent.where`）。指定 `--category` / `--sort`、地區不在字典內、設 `JOBSDB_GRAPHQL=0` 或通道熔斷時，退回既有 Playwright SSR。詳見下方「🧭 技術筆記（JobsDB）」。
   - SSR 通道：React SSR + Cloudflare，先訪首頁取得 `cf_clearance` Cookie 並**共用同一 session**；職位列表是伺服器渲染進 `/jobs?keywords=K&page=N` 的 HTML（卡片用 `data-automation='normalJob'`），每頁只需 1 次 GET。（這是 2026-09 的主要路線，現為 fallback。）
-  - **支援關鍵字搜尋 + `?page=N` 翻頁**（每頁約 20–30 筆；GraphQL 通道固定 `pageSize=30` 維持相同語意）。
+  - **支援關鍵字搜尋 + `?page=N` 翻頁**（SSR 每頁約 20–30 筆；GraphQL 通道固定 `pageSize=30`，與 SSR 對齊）。**這個 30 是 `--pages` 契約的一部分，不是效率旋鈕**：若日後改用 `pageSize=100` 減少請求數，必須在客戶端按 30 筆切「邏輯頁」，否則 `--pages 3` 會從 90 筆靜默變成 300 筆。
   - **支援職能（工作種類）+ 地區篩選**：`--category`（職能，中文/英文/slug，如 `資訊及通訊科技`）與 `--district`（地區，中文/slug，如 `荃灣`）已接上。地區自 2026-11-15 起在字典內（40 個）走 GraphQL `searchIntent.where`，不必開瀏覽器；字典外與職能篩選仍透過 `/jobs-in-<職能>/in-<地區>` 瀏覽網址（見下方「🗺️ 按地區篩選（JobsDB）」）。
   - **支援近期篩選 `--days N`**：列表頁已含相對刊登日（如 `7d ago`），直接由列表過濾，不必抓 30 筆詳情/頁（與 gov.hk 不同）。
   - **支援排序 `--sort`**：JobsDB 網站 UI 僅提供「相關性（預設）」與「刊登日期（Date）」兩種排序。對應實作：`--sort post_dt_desc` → 網址加 `?sortmode=ListedDate`（新→舊，已實測 1h→2h→3h 遞增）；其餘選項（`post_dt_asc` / `salary_*` / `yr_exp_*` / `edu_lvl_*`）為 gov_hk 專有，JobsDB 無對應 UI，傳入會警告並回退預設。⚠️ **2026-11-11 起 `--days` 不再自動套 `post_dt_desc`**（舊行為會讓 `analyst` 搜尋被剛刊登的 Dealer／會計淹沒）；想按日期排請明確指定（見下方「🧭 技術筆記（JobsDB）」）。
@@ -605,7 +605,7 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 |------|------|------|------|
 | `--source` | 否 | `moovup` | 爬蟲來源：`moovup` \| `gov_hk` \| `jobsdb` \| `linkedin` \| `indeed`（停用） \| `recruit` \| `jobmarket` \| `foundit` \| `efc` \| `liepin` \| `zhipin`（受限） \| `offertoday` \| `all`（全部**已啟用**據點各跑 `--pages` 頁；`enabled=False` 的 indeed / liepin / zhipin 會自動略過並提示，仍可個別指定）。各站支援差異見下方「📊 各站功能支援矩陣」。 |
 | `--keyword` | 否 | 空 | 搜尋關鍵字（繁體中文或英文皆可；**留空 = 不限定關鍵字，僅依地區/類別瀏覽，gov_hk 支援**；JobsDB 留空則搜全站） |
-| `--pages` | 否 | `3` | 最大翻頁數。各站每頁筆數不同（Moovup 12、勞工處 ~20、JobsDB ~20–30、LinkedIn 首頁 ~58／續頁 10…），詳見矩陣「每頁筆數」列。 |
+| `--pages` | 否 | `3` | **最多翻 N 頁，不是 N 筆**。一頁幾筆由站方決定（Moovup 12、勞工處 20、JobsDB 30、LinkedIn 首頁 58／續頁 10…，見矩陣「每頁筆數」列與 `hkjobs sources` 的「每頁」欄），故同一個 N 在 `--source all` 下各站產出量不同，屬預期行為。結果上限為各頁筆數之和（多數站是「N × 每頁筆數」；LinkedIn 首頁 58、續頁 10，故 3 頁 = 78 筆、不是 174），實際常更少（結果不足一頁，或被 `--days`／`--salary-min` 客戶端過濾）。要限制**列出**筆數用 `--limit`（只影響人類清單，不影響抓取量）。 |
 | `--output` | 否 | `json` | 輸出格式：`json` \| `csv` \| `both` |
 | `--detail` | 否 | 關 | 同時抓取每筆職位的詳情（職責 / 要求 / 發佈時間 / **刊登日期**）；**JobsDB 自 2026-11-15 起走 GraphQL `jobDetails`，可取得完整 JD（HTML 轉純文字），常見路徑免瀏覽器**；失敗熔斷退回 Playwright 詳情頁 |
 | `--outfile` | 否 | 自動命名 | 自訂輸出檔名（不含副檔名），預設 `output/<source>_<keyword>` |
@@ -634,7 +634,7 @@ hkjobs search --source all --keyword 文員 --pages 1 --fill-gaps --yes
 | 近期 `--days` | ❌ 不適用 | ✅ **站方端 `criteria.postedDtFr/To`**（2026-09-09 新增，格式 DD/MM/YYYY：列表無日期，舊流程須逐筆抓詳情取 `#postedDt`，改為站方端後 20 筆僅 2 支請求） | ✅ 列表含日期 + **站方端 `daterange=N`**（2026-09-10 新增，實測站方總數 2,241 → 467 筆；⚠️ 只吃 `1/3/7/14/31` 五個離散值，其餘數字站方不理會，本爬蟲自動向上取整） | ✅ 列表含**絕對日期**（`<time datetime="YYYY-MM-DD">`）；`--days` 另**下推站方端 `f_TPR=r<N×86400>`**（2026-09-09 新增，實測 80 筆全數落於 7 天內） | ⛔ **2026-09-11 據點停用，本列僅供復活時參考**：內嵌職位陣列瞬時（~9s，不點擊）+ **站方端 `fromage=N`**（2026-09-09 加入，⚠️ **從未實測驗證**——該站次日即遭封鎖、最終證實為強制登入牆，見 Indeed 章節）⚠️ 2026-09-08 修正：改用 `formattedRelativeTime`，站方只給下限（`30+ days ago`）時用 `createDate`；舊碼用 `pubDate`（feed 原始刊登日，實測 947–2811 天前）且以大寫 `jobKey` 配對（那是追蹤物件）→ 日期張冠李戴，已修 | ✅ 列表含日期（`YYYY-MM-DD`，瞬時） | ✅ 列表含日期（`04 Sep 2026`，瞬時） | ✅ 列表含相對日期（瞬時） | ✅ API `postedDate` ISO 瞬時（⚠️ 2026-09-09 實測 `postedDate` / `datePosted` / `daysSincePosted` 三種參數名皆無效，站方端無日期過濾；因列表已含 ISO 日期、客戶端零成本篩選，影響極小） | ⚠️ 客戶端（`refreshTime` **刷新日**近似，非刊登日：實測 40 筆中 1天→6 / 3天→22 / 7天→33 / 14天→38） | ❌ 不適用 | ⚠️ 送 `publishTime` + 客戶端再篩（僅 `on MM-DD` 可算天數） |
 | 薪金下限 `--salary-min` | ⚠️ 僅客戶端（列表無薪金，需 `--detail`；解析不出者排除） | ⚠️ 僅客戶端（列表已有薪金） | ✅ **站方端 `salaryMin:"<N>m"`**（GraphQL）；⚠️ SSR fallback 的 `salaryrange` 實測無效 → 只剩客戶端篩 | ⚠️ 僅客戶端（列表無薪金 → 幾乎全排除） | ⛔ 停用 | ⚠️ 僅客戶端 | ⚠️ 僅客戶端（列表無薪金 → 幾乎全排除） | ⚠️ 僅客戶端（列表無薪金 → 幾乎全排除） | ⚠️ 僅客戶端（多為 Competitive → 幾乎全排除） | ⛔ 停用 | ⛔ 停用 | ⚠️ 僅客戶端 |
 | 詳情 `--detail` | ✅ 支援 | ✅ 支援 | ✅ **2026-11-15 起優先走 GraphQL `jobDetails`**：完整 JD（HTML→純文字）、`salary.label`、精確刊登／截止日，常見路徑免瀏覽器；失敗熔斷退回 Playwright 詳情頁（2026-09-08 實測修正的 selector：`advertiser-name`／`job-detail-location`／`job-detail-classifications`／`job-detail-work-type`／`jobAdDetails`；薪資無穩定欄位故留空） | ✅ 免登入 API | ✅ 已實測修正（2026-09-08）：描述原只抓到 17 字（`(.*?)</div>` 撞上巢狀 div）→ 改 DOM `inner_text` + 巢狀配對，實測 934–2476 字；另加點擊重試與 🐢 熔斷（連續 2 筆失敗即停止），16 筆由 **9 分鐘 / 剩 1 筆** → **~1 分鐘 / 完整** | ✅ JSON-LD（~0.2s/筆）——2026-09-08 起地區另有更省的 `--fill-location`（`/jobseeker/JobDetail.aspx?jobOrder=<id>&ajax=Y`，約 35KB，純 requests） | ✅ CurrentJob 頁（完整描述；地區列表階段已有） | ✅ JSON-LD（requests 直達 ~0.5s/筆） | ✅ JSON-LD（完整描述 / baseSalary / skills） | ❌ 不適用（詳情受驗證碼保護） | ❌ 不適用（詳情受安全驗證保護） | ✅ 已實測：完整描述（HTML→純文字）+ 行業 `industryDesc`（列表無此欄） |
-| 每頁筆數 | 12（GraphQL） | ~20 | ~20–30 | 首頁 ~58／續頁 10（guest 端點） | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 40（pageSize=40；實測 42 張卡、剔除 2 筆外地後 40 張全在香港） | 0（港澳台專區無職缺） | 10（站方上限） |
+| 每頁筆數 | 12（GraphQL） | 20 | **30（GraphQL `pageSize` 與 SSR 一致；`--pages` 的一頁就是 30）** | 首頁 58／續頁 10（guest 端點；**同一 `--pages` 的前後頁大小不同**） | ~16 | 25 | 20 | 20（SEO SSR） | 50（pageSize 可調，API 實測 100 也吃） | 40（pageSize=40；實測 42 張卡、剔除 2 筆外地後 40 張全在香港） | 0（港澳台專區無職缺） | 10（站方上限） |
 | 瀏覽器 Playwright | ✅ 需 | ❌ 不需 | ✅ 需 | ❌ 不需 | ✅ 需（⚠️ **必須 `channel="chrome"`**——2026-09-08 實測內建 Chromium 指紋被 CF 擋：標題 `Just a moment...` + `Additional Verification Required`，輪詢 45s 也不過；改用本機 Chrome 後立即正常。無本機 Chrome 時自動退回並警告。⚠️⚠️ **2026-09-09：另須「UA 不覆寫」**，否則 Client Hints 版本不一致仍會被擋；⛔ **2026-09-11：據點停用（0 筆）**——真人手動開也只見登入牆，非單純封鎖（詳見 Indeed 章節）） | ✅ 需（`__doPostBack` 翻頁） | ❌ 不需（純 requests） | ✅ 需（⚠️ **必須 `channel="chrome"`**，內建 Chromium 被 WAF 403；詳情頁則 requests 直達） | ❌ 不需（純 JSON API） | ✅ 需（`channel="chrome"`；**必須讓頁面自己的 JS 發請求**——直接 requests 或瀏覽器內 fetch 打 API 皆回 `flag=0/-1400`；連 6–7 支請求觸發 IP 驗證碼） | ✅ 需（`channel="chrome"`；⛔ 2026-09-11 複查：首頁改為可開，但港澳台專區 0 張 + 登入牆） | ❌ 不需（🚀 冷 requests 直打 API，無 cookie 亦可） |
 | 深翻頁穩定度 | ✅ cursor | ✅ quickview | ✅ page | ✅ 雙軌（2026-09-09）：首頁 `/jobs/search/` + 續頁 guest 端點，`start` 從已累積筆數接續；實測 4 頁 80 筆，`li_at` 更穩 | ⚠️ `start=N`；cf_clearance 沿用，`--days` 已無需點擊、`--detail` 改 JS 點擊提速 | ✅ Next 鈕 `__doPostBack`，~1.7s/頁 | ✅ `Page=N`，實測無重複 | ✅ 路徑後綴 `-2`/`-3`…（SSR） | ✅ `page=N`（API 穩定） | ❌ 僅第 1 頁（`currentPage` **未實測驗證**——偵察時觸發驗證碼而停手） | ❌ 僅第 1 頁（港澳台專區本身 0 張） | ✅ `page=N`（靠 `hasMore` 判斷；`total` 是推薦池規模，不可信） |
 
@@ -1221,7 +1221,7 @@ log 仍可能只印「未攔截到搜尋 API 回應」（跳轉時序不定，UR
 > 部分全部搬進沙盤**，讓我們不必為了確認一行邏輯而多打一支請求。
 
 ```bash
-python -m unittest discover -s tests -v      # 393 個測試，約 11 秒，零網路請求
+python -m unittest discover -s tests -v      # 405 個測試，約 11 秒，零網路請求
 ```
 
 框架選用**標準庫 `unittest`**（非 pytest）：零安裝、零依賴變更，clone 下來即可跑。
